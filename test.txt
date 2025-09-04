@@ -1,0 +1,13 @@
+extern
+bool
+program
+123
+if
+x
+true
+1a
+whilehola
+a1a
+==
+whiletrue
+while true
