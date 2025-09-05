@@ -3,9 +3,11 @@ TARGET = scanner
 
 # Archivos fuente
 LEXER = scanner.l
+PARSER = parser.y
 
 # Herramientas
 LEX = flex
+YACC = bison
 CC = gcc
 
 # Flags de compilación
@@ -13,15 +15,21 @@ CFLAGS = -Wall -g
 
 # Archivos generados
 LEX_C = lex.yy.c
+PARSER_C = parser.tab.c
+PARSER_H = parser.tab.h
 
 # Regla principal
-$(TARGET): $(LEX_C)
-	$(CC) $(CFLAGS) -o $(TARGET) $(LEX_C) -lfl
+$(TARGET): $(PARSER_C) $(LEX_C)
+	$(CC) $(CFLAGS) -o $(TARGET) $(PARSER_C) $(LEX_C) -lfl
+
+# Generar parser.tab.c y parser.tab.h desde parser.y
+$(PARSER_C) $(PARSER_H): $(PARSER)
+	$(YACC) -d $(PARSER)
 
 # Generar lex.yy.c desde scanner.l
-$(LEX_C): $(LEXER)
+$(LEX_C): $(LEXER) $(PARSER_H)
 	$(LEX) $(LEXER)
 
 # Limpiar archivos generados
 clean:
-	rm -f $(TARGET) $(LEX_C)
+	rm -f $(TARGET) $(LEX_C) $(PARSER_C) $(PARSER_H)
