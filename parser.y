@@ -22,9 +22,38 @@
 %right UMINUS
 
 %%
+    program: PROGRAM BO var_decls method_decls BC 
+        ;
+
+    var_decls: /* vacío */
+        | var_decls var_decl 
+        ;
 
     var_decl: type ID EQ expr SCOLON
             ;
+
+    function_type: INTEGER
+                | BOOL
+                | VOID
+                ;
+
+    block: BO var_decls statements BC 
+        ;
+
+    statements: /* vacío */
+            | statement statements
+            ;
+
+    statement: ID EQ expr SCOLON
+            | method_call SCOLON
+            | IF PO expr PC THEN block
+            | IF PO expr PC THEN block ELSE block
+            | WHILE PO expr PC block
+            | RETURN SCOLON
+            | RETURN expr SCOLON
+            | block
+            ;
+            /*| SCOLON ? */
 
     type: INTEGER
         | BOOL
@@ -66,7 +95,6 @@
     bool_lit: TRUE 
             | FALSE
             ;
-    
 %%
 
 int main(){
