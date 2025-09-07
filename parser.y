@@ -32,8 +32,11 @@
     var_decl: type ID EQ expr SCOLON
             ;
 
-    function_type: INTEGER
-                | BOOL
+    type: INTEGER
+        | BOOL
+        ;
+
+    function_type: type
                 | VOID
                 ;
 
@@ -55,9 +58,21 @@
             ;
             /*| SCOLON ? */
 
-    type: INTEGER
-        | BOOL
-        ;
+    method_decls: /* vacio */
+                | method_decls method_decl
+                ;
+
+    method_decl: function_type ID PO params_decls PC block
+               | function_type ID PO params_decls PC EXTERN SCOLON
+               ;
+
+    params_decls: /* vacío */
+                | param_decls_list 
+                ;
+
+    param_decls_list : type ID
+                     | type ID COMMA param_decls_list
+                     ;
 
     params_call: /* vacío */
                 | param_list
@@ -69,6 +84,7 @@
 
 
     method_call: ID PO params_call PC
+               ;
 
     expr: ID
         | method_call
@@ -97,6 +113,25 @@
             ;
 %%
 
-int main(){
-    yyparse();
+int main(int argc, char** argv) {
+    if (argc > 1) {
+        FILE* file = fopen(argv[1], "r");
+        if (!file) {
+            printf("Error: No se puede abrir el archivo\n");
+            return 1;
+        }
+        yyin = file;
+    }
+    
+    int result = yyparse();
+    
+    if (result != 0) {
+        printf("Error en el parsing\n");
+    }
+    
+    if (argc > 1) {
+        fclose(yyin);
+    }
+    
+    return 0;
 }
