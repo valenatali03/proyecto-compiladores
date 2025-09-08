@@ -18,38 +18,38 @@ WHITE_SPACE                     [ \t\r\n]+
 "//".*                          {}           
 "/*"([^*]|(\*+[^*/]))*"\*/"     {}
 {WHITE_SPACE}                   {}
-"extern"                        {printf("Palabra reservada %s\n", yytext); return EXTERN;}
-"bool"                          {printf("Palabra reservada %s\n", yytext); return BOOL;}
-"program"                       {printf("Palabra reservada %s\n", yytext); return PROGRAM;}
-"else"                          {printf("Palabra reservada %s\n", yytext); return ELSE;}
-"then"                          {printf("Palabra reservada %s\n", yytext); return THEN;}
-"false"                         {printf("Palabra reservada %s\n", yytext); return FALSE;}
-"if"                            {printf("Palabra reservada %s\n", yytext); return IF;}
-"integer"                       {printf("Palabra reservada %s\n", yytext); return INTEGER;}
-"return"                        {printf("Palabra reservada %s\n", yytext); return RETURN;}
-"true"                          {printf("Palabra reservada %s\n", yytext); return TRUE;}
-"void"                          {printf("Palabra reservada %s\n", yytext); return VOID;}
-"while"                         {printf("Palabra reservada %s\n", yytext); return WHILE;}
-"{"                             {printf("Llave abierta %s\n", yytext); return BO;}
-"}"                             {printf("Llave cerrada %s\n", yytext); return BC;}
-"("                             {printf("Parentesis abierto %s\n", yytext); return PO;}
-")"                             {printf("Parentesis cerrado %s\n", yytext); return PC;}
-";"                             {printf("Semicolon %s\n", yytext); return SCOLON;}
-","                             {printf("Coma %s\n", yytext); return COMMA;}
-"+"                             {printf("Operador %s\n", yytext); return ADD;}
-"*"                             {printf("Operador %s\n", yytext); return MULT;}
-"/"                             {printf("Operador %s\n", yytext); return DIV;}
-"-"                             {printf("Operador %s\n", yytext); return MINUS;}
-"%"                             {printf("Operador %s\n", yytext); return MOD;}
-"=="                            {printf("Operador %s\n", yytext); return COMP;}
-"&&"                            {printf("Operador %s\n", yytext); return AND;}
-"||"                            {printf("Operador %s\n", yytext); return OR;}
-"<"                             {printf("Operador %s\n", yytext); return LT;}
-">"                             {printf("Operador %s\n", yytext); return GT;}
-"="                             {printf("Operador %s\n", yytext); return EQ;}
-"!"                             {printf("Operador %s\n", yytext); return NOT;}
-{INTEGER_LITERAL}               {printf("Literal %s\n", yytext); return INT_LIT;}
-{ID}                            {printf("Identificador %s\n", yytext); return ID;}
+"extern"                        {printf("Palabra reservada %s\n", yytext); return T_EXTERN;}
+"bool"                          {printf("Palabra reservada %s\n", yytext); return T_BOOL;}
+"program"                       {printf("Palabra reservada %s\n", yytext); return T_PROGRAM;}
+"else"                          {printf("Palabra reservada %s\n", yytext); return T_ELSE;}
+"then"                          {printf("Palabra reservada %s\n", yytext); return T_THEN;}
+"false"                         {printf("Palabra reservada %s\n", yytext); return T_FALSE;}
+"if"                            {printf("Palabra reservada %s\n", yytext); return T_IF;}
+"integer"                       {printf("Palabra reservada %s\n", yytext); return T_INTEGER;}
+"return"                        {printf("Palabra reservada %s\n", yytext); return T_RETURN;}
+"true"                          {printf("Palabra reservada %s\n", yytext); return T_TRUE;}
+"void"                          {printf("Palabra reservada %s\n", yytext); return T_VOID;}
+"while"                         {printf("Palabra reservada %s\n", yytext); return T_WHILE;}
+"{"                             {printf("Llave abierta %s\n", yytext); return T_BO;}
+"}"                             {printf("Llave cerrada %s\n", yytext); return T_BC;}
+"("                             {printf("Parentesis abierto %s\n", yytext); return T_PO;}
+")"                             {printf("Parentesis cerrado %s\n", yytext); return T_PC;}
+";"                             {printf("Semicolon %s\n", yytext); return T_SCOLON;}
+","                             {printf("Coma %s\n", yytext); return T_COMMA;}
+"+"                             {printf("Operador %s\n", yytext); return T_ADD;}
+"*"                             {printf("Operador %s\n", yytext); return T_MULT;}
+"/"                             {printf("Operador %s\n", yytext); return T_DIV;}
+"-"                             {printf("Operador %s\n", yytext); return T_MINUS;}
+"%"                             {printf("Operador %s\n", yytext); return T_MOD;}
+"=="                            {printf("Operador %s\n", yytext); return T_COMP;}
+"&&"                            {printf("Operador %s\n", yytext); return T_AND;}
+"||"                            {printf("Operador %s\n", yytext); return T_OR;}
+"<"                             {printf("Operador %s\n", yytext); return T_LT;}
+">"                             {printf("Operador %s\n", yytext); return T_GT;}
+"="                             {printf("Operador %s\n", yytext); return T_EQ;}
+"!"                             {printf("Operador %s\n", yytext); return T_NOT;}
+{INTEGER_LITERAL}               {printf("Literal %s\n", yytext); return T_INT_LIT;}
+{ID}                            {printf("Identificador %s\n", yytext); return T_ID;}
 .                               {printf("Error: caracter no reconocido '%s'\n", yytext);}
 
 %%

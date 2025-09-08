@@ -8,22 +8,22 @@
     extern int yycolumn;
 %}
 
-%token EXTERN BOOL PROGRAM ELSE THEN FALSE IF INTEGER RETURN TRUE VOID WHILE
-%token BO BC PO PC SCOLON COMMA 
-%token ID INT_LIT
-%token ADD MULT DIV MINUS MOD COMP AND OR LT GT EQ NOT
+%token T_EXTERN T_BOOL T_PROGRAM T_ELSE T_THEN T_FALSE T_IF T_INTEGER T_RETURN T_TRUE T_VOID T_WHILE
+%token T_BO T_BC T_PO T_PC T_SCOLON T_COMMA 
+%token T_ID T_INT_LIT
+%token T_ADD T_MULT T_DIV T_MINUS T_MOD T_COMP T_AND T_OR T_LT T_GT T_EQ T_NOT
 
-%left OR
-%left AND
-%left GT LT COMP
-%left ADD MINUS
-%left MULT DIV MOD
-%right NOT
+%left T_OR
+%left T_AND
+%left T_GT T_LT T_COMP
+%left T_ADD T_MINUS
+%left T_MULT T_DIV T_MOD
+%right T_NOT
 %right UMINUS
 
 %%
-    program: PROGRAM BO decls BC 
-            | PROGRAM BO BC
+    program: T_PROGRAM T_BO decls T_BC 
+            | T_PROGRAM T_BO T_BC
         ;
     
     decls: decl
@@ -38,81 +38,81 @@
         | var_decls var_decl 
         ;
 
-    var_decl: type ID EQ expr SCOLON
+    var_decl: type T_ID T_EQ expr T_SCOLON
             ;
 
-    type: INTEGER
-        | BOOL
-        | VOID
+    type: T_INTEGER
+        | T_BOOL
+        | T_VOID
         ;
 
 
-    block: BO var_decls statements BC 
-        | BO statements BC
-        | BO var_decls BC
-        | BO BC
+    block: T_BO var_decls statements T_BC 
+        | T_BO statements T_BC
+        | T_BO var_decls T_BC
+        | T_BO T_BC
         ;
 
     statements: statement
             | statements statement
             ;
 
-    statement: ID EQ expr SCOLON
-            | method_call SCOLON
-            | IF PO expr PC THEN block
-            | IF PO expr PC THEN block ELSE block
-            | WHILE PO expr PC block
-            | RETURN SCOLON
-            | RETURN expr SCOLON
+    statement: T_ID T_EQ expr T_SCOLON
+            | method_call T_SCOLON
+            | T_IF T_PO expr T_PC T_THEN block
+            | T_IF T_PO expr T_PC T_THEN block T_ELSE block
+            | T_WHILE T_PO expr T_PC block
+            | T_RETURN T_SCOLON
+            | T_RETURN expr T_SCOLON
             | block
-            | SCOLON 
+            | T_SCOLON 
             ;
 
-    method_decl: type ID PO params_decls PC block
-            | type ID PO PC block
-            | type ID PO params_decls PC EXTERN SCOLON
-            | type ID PO PC EXTERN SCOLON
+    method_decl: type T_ID T_PO params_decls T_PC block
+            | type T_ID T_PO T_PC block
+            | type T_ID T_PO params_decls T_PC T_EXTERN T_SCOLON
+            | type T_ID T_PO T_PC T_EXTERN T_SCOLON
            ;
 
 
-    params_decls : type ID
-                     | params_decls COMMA type ID  
+    params_decls : type T_ID
+                     | params_decls T_COMMA type T_ID  
                      ;
 
 
     param_list: expr
-                | param_list COMMA expr
+                | param_list T_COMMA expr
                 ;
 
 
-    method_call: ID PO param_list PC
-                | ID PO PC
+    method_call: T_ID T_PO param_list T_PC
+                | T_ID T_PO T_PC
                ;
 
-    expr: ID
+    expr: T_ID
         | method_call
         | literal
-        | expr OR expr
-        | expr AND expr
-        | expr GT expr
-        | expr LT expr
-        | expr COMP expr
-        | expr ADD expr
-        | expr MINUS expr
-        | expr MULT expr
-        | expr DIV expr
-        | expr MOD expr
-        | MINUS expr %prec UMINUS
-        | NOT expr
-        | PO expr PC
+        | expr T_OR expr
+        | expr T_AND expr
+        | expr T_GT expr
+        | expr T_LT expr
+        | expr T_COMP expr
+        | expr T_ADD expr
+        | expr T_MINUS expr
+        | expr T_MULT expr
+        | expr T_DIV expr
+        | expr T_MOD expr
+        | T_MINUS expr %prec UMINUS
+        | T_NOT expr
+        | T_PO expr T_PC
         ;
 
-    literal: INT_LIT 
+    literal: T_INT_LIT 
             | bool_lit
             ;
 
-    bool_lit: TRUE 
-            | FALSE
+    bool_lit: T_TRUE 
+            | T_FALSE
             ;
 %%
 
