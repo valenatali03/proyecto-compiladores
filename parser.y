@@ -22,10 +22,19 @@
 %right UMINUS
 
 %%
-    program: PROGRAM BO var_decls method_decls BC 
+    program: PROGRAM BO decls BC 
+            | PROGRAM BO BC
+        ;
+    
+    decls: decl
+        | decls decl
         ;
 
-    var_decls: /* vacío */
+    decl: var_decl
+        | method_decl
+        ;
+
+    var_decls: var_decl
         | var_decls var_decl 
         ;
 
@@ -34,17 +43,18 @@
 
     type: INTEGER
         | BOOL
+        | VOID
         ;
 
-    function_type: type
-                | VOID
-                ;
 
     block: BO var_decls statements BC 
+        | BO statements BC
+        | BO var_decls BC
+        | BO BC
         ;
 
-    statements: /* vacío */
-            | statement statements
+    statements: statement
+            | statements statement
             ;
 
     statement: ID EQ expr SCOLON
@@ -55,35 +65,28 @@
             | RETURN SCOLON
             | RETURN expr SCOLON
             | block
+            | SCOLON 
             ;
-            /*| SCOLON ? */
 
-    method_decls: /* vacio */
-                | method_decls method_decl
-                ;
+    method_decl: type ID PO params_decls PC block
+            | type ID PO PC block
+            | type ID PO params_decls PC EXTERN SCOLON
+            | type ID PO PC EXTERN SCOLON
+           ;
 
-    method_decl: function_type ID PO params_decls PC block
-               | function_type ID PO params_decls PC EXTERN SCOLON
-               ;
 
-    params_decls: /* vacío */
-                | param_decls_list 
-                ;
-
-    param_decls_list : type ID
-                     | type ID COMMA param_decls_list
+    params_decls : type ID
+                     | params_decls COMMA type ID  
                      ;
 
-    params_call: /* vacío */
-                | param_list
-                ;
 
     param_list: expr
                 | param_list COMMA expr
                 ;
 
 
-    method_call: ID PO params_call PC
+    method_call: ID PO param_list PC
+                | ID PO PC
                ;
 
     expr: ID
