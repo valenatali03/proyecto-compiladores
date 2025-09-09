@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 #include "parser.tab.h"
 int yycolumn = 1;
@@ -19,16 +20,16 @@ WHITE_SPACE                     [ \t\r\n]+
 "/*"([^*]|(\*+[^*/]))*"\*/"     {}
 {WHITE_SPACE}                   {}
 "extern"                        {printf("Palabra reservada %s\n", yytext); return T_EXTERN;}
-"bool"                          {printf("Palabra reservada %s\n", yytext); return T_BOOL;}
+"bool"                          {printf("Palabra reservada %s\n", yytext); yylval.tipo = BOOL; return T_BOOL;}
 "program"                       {printf("Palabra reservada %s\n", yytext); return T_PROGRAM;}
 "else"                          {printf("Palabra reservada %s\n", yytext); return T_ELSE;}
 "then"                          {printf("Palabra reservada %s\n", yytext); return T_THEN;}
-"false"                         {printf("Palabra reservada %s\n", yytext); return T_FALSE;}
+"false"                         {printf("Palabra reservada %s\n", yytext); yylval.b = false; return T_FALSE;}
 "if"                            {printf("Palabra reservada %s\n", yytext); return T_IF;}
-"integer"                       {printf("Palabra reservada %s\n", yytext); return T_INTEGER;}
+"integer"                       {printf("Palabra reservada %s\n", yytext); yylval.tipo = ENTERO; return T_INTEGER;}
 "return"                        {printf("Palabra reservada %s\n", yytext); return T_RETURN;}
-"true"                          {printf("Palabra reservada %s\n", yytext); return T_TRUE;}
-"void"                          {printf("Palabra reservada %s\n", yytext); return T_VOID;}
+"true"                          {printf("Palabra reservada %s\n", yytext); yylval.b = true; return T_TRUE;}
+"void"                          {printf("Palabra reservada %s\n", yytext); yylval.tipo = VACIO; return T_VOID;}
 "while"                         {printf("Palabra reservada %s\n", yytext); return T_WHILE;}
 "{"                             {printf("Llave abierta %s\n", yytext); return T_BO;}
 "}"                             {printf("Llave cerrada %s\n", yytext); return T_BC;}
@@ -48,8 +49,8 @@ WHITE_SPACE                     [ \t\r\n]+
 ">"                             {printf("Operador %s\n", yytext); return T_GT;}
 "="                             {printf("Operador %s\n", yytext); return T_EQ;}
 "!"                             {printf("Operador %s\n", yytext); return T_NOT;}
-{INTEGER_LITERAL}               {printf("Literal %s\n", yytext); return T_INT_LIT;}
-{ID}                            {printf("Identificador %s\n", yytext); return T_ID;}
+{INTEGER_LITERAL}               {printf("Literal %s\n", yytext); yylval.num = atoi(yytext); return T_INT_LIT;}
+{ID}                            {printf("Identificador %s\n", yytext); yylval.id = strdup(yytext); return T_ID;}
 .                               {printf("Error: caracter no reconocido '%s'\n", yytext);}
 
 %%

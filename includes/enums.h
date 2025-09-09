@@ -21,8 +21,10 @@ typedef enum
     SENTENCIAS,
     RETURN,
     DECLARACIONES,
-    FUNCION,
-    CALL
+    FUNCION_DECL,
+    FUNCION_CALL,
+    IF,
+    WHILE
 } Tipo_Info;
 
 #endif

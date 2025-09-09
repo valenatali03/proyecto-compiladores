@@ -2,6 +2,7 @@
 #define INFO_H
 
 #include "enums.h"
+#include "params.h"
 
 /**
  * Información asociada a un identificador en el árbol.
@@ -35,12 +36,19 @@ typedef struct Info_Literal
 /**
  * Información asociada a una función.
  */
-typedef struct Info_Funcion
+typedef struct Info_FuncionDecl
 {
     char *nombre;
     void *valor;
     Tipo tipo;
-} Info_Funcion;
+    Parametro_Decl *params;
+} Info_FuncionDecl;
+
+typedef struct Info_FuncionCall
+{
+    char *nombre;
+    Parametro_Call *params;
+} Info_FuncionCall;
 
 /**
  * Unión que agrupa la información posible en un nodo del árbol.
@@ -50,7 +58,8 @@ typedef struct Info_Union
     Info_ID id;
     Info_Operador operador;
     Info_Literal literal;
-    Info_Funcion funcion;
+    Info_FuncionDecl funcion_decl;
+    Info_FuncionCall funcion_call;
 } Info_Union;
 
 #endif

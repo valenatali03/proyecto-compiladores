@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "../includes/ast.h"
 
-Arbol *crear_arbol_operador(char *op, void *valor, int linea, int colum, Arbol *izq, Arbol *der)
+Arbol *crear_arbol_operador(char *op, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der)
 {
     Arbol *arbol = malloc(sizeof(Arbol));
     arbol->info = malloc(sizeof(Info_Union));
@@ -12,10 +12,11 @@ Arbol *crear_arbol_operador(char *op, void *valor, int linea, int colum, Arbol *
     arbol->linea = linea;
     arbol->colum = colum;
     arbol->info->operador.nombre = strdup(op);
-    arbol->info->operador.valor = valor;
-    arbol->info->operador.tipo = VACIO;
+    arbol->info->operador.valor = NULL;
+    arbol->info->operador.tipo = tipo;
     arbol->izq = izq;
     arbol->der = der;
+    arbol->medio = NULL;
 
     return arbol;
 }
@@ -32,6 +33,7 @@ Arbol *crear_arbol_id(char *id, int linea, int colum, Arbol *izq, Arbol *der)
     arbol->info->id.tipo = VACIO;
     arbol->izq = izq;
     arbol->der = der;
+    arbol->medio = NULL;
 
     return arbol;
 }
@@ -47,22 +49,41 @@ Arbol *crear_arbol_literal(void *valor, Tipo tipo, int linea, int colum, Arbol *
     arbol->info->literal.tipo = tipo;
     arbol->izq = izq;
     arbol->der = der;
+    arbol->medio = NULL;
 
     return arbol;
 }
 
-Arbol *crear_arbol_funcion(char *nombre, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der)
+Arbol *crear_arbol_funcion_decl(char *nombre, Tipo tipo, Parametro_Decl *params, int linea, int colum, Arbol *izq, Arbol *der)
 {
     Arbol *arbol = malloc(sizeof(Arbol));
     arbol->info = malloc(sizeof(Info_Union));
-    arbol->tipo_info = FUNCION;
+    arbol->tipo_info = FUNCION_DECL;
     arbol->linea = linea;
     arbol->colum = colum;
-    arbol->info->funcion.valor = NULL;
-    arbol->info->funcion.nombre = strdup(nombre);
-    arbol->info->funcion.tipo = tipo;
+    arbol->info->funcion_decl.valor = NULL;
+    arbol->info->funcion_decl.nombre = strdup(nombre);
+    arbol->info->funcion_decl.tipo = tipo;
+    arbol->info->funcion_decl.params = params;
     arbol->izq = izq;
     arbol->der = der;
+    arbol->medio = NULL;
+
+    return arbol;
+}
+
+Arbol *crear_arbol_funcion_call(char *nombre, Parametro_Call *params, int linea, int colum, Arbol *izq, Arbol *der)
+{
+    Arbol *arbol = malloc(sizeof(Arbol));
+    arbol->info = malloc(sizeof(Info_Union));
+    arbol->tipo_info = FUNCION_CALL;
+    arbol->linea = linea;
+    arbol->colum = colum;
+    arbol->info->funcion_call.nombre = strdup(nombre);
+    arbol->info->funcion_call.params = params;
+    arbol->izq = izq;
+    arbol->der = der;
+    arbol->medio = NULL;
 
     return arbol;
 }
@@ -76,6 +97,7 @@ Arbol *crear_arbol_nodo(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol 
     arbol->colum = colum;
     arbol->izq = izq;
     arbol->der = der;
+    arbol->medio = NULL;
 
     return arbol;
 }
@@ -155,9 +177,9 @@ void imprimir_vertical(Arbol *arbol, char *prefijo, int es_ultimo)
     {
         printf("SENTENCIAS\n");
     }
-    else if (arbol->tipo_info == FUNCION)
+    else if (arbol->tipo_info == FUNCION_DECL)
     {
-        printf("FUNCION %s\n", arbol->info->funcion.nombre);
+        printf("FUNCION %s\n", arbol->info->funcion_decl.nombre);
     }
     else if (arbol->tipo_info == RETURN)
     {

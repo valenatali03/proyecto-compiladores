@@ -12,6 +12,7 @@ typedef struct Arbol
     int linea;
     int colum;
     struct Arbol *izq;
+    struct Arbol *medio;
     struct Arbol *der;
 } Arbol;
 
@@ -26,7 +27,7 @@ typedef struct Arbol
  * @param der    Hijo derecho
  * @return       Puntero al nuevo nodo operador
  */
-Arbol *crear_arbol_operador(char *op, void *valor, int linea, int colum, Arbol *izq, Arbol *der);
+Arbol *crear_arbol_operador(char *op, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der);
 
 /**
  * Crea un nodo identificador del AST.
@@ -58,13 +59,16 @@ Arbol *crear_arbol_literal(void *valor, Tipo tipo, int linea, int colum, Arbol *
  *
  * @param nombre Nombre de la función
  * @param tipo   Tipo de retorno de la función
+ * @param parametros Parametros de la función
  * @param linea  Línea del código fuente
  * @param colum  Columna del código fuente
  * @param izq    Hijo izquierdo
  * @param der    Hijo derecho
  * @return       Puntero al nuevo nodo función
  */
-Arbol *crear_arbol_funcion(char *nombre, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der);
+Arbol *crear_arbol_funcion_decl(char *nombre, Tipo tipo, Parametro_Decl *params, int linea, int colum, Arbol *izq, Arbol *der);
+
+Arbol *crear_arbol_funcion_call(char *nombre, Parametro_Call *params, int linea, int colum, Arbol *izq, Arbol *der);
 
 /**
  * Crea un nodo genérico del AST.
