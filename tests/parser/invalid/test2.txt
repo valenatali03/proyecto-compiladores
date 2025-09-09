@@ -1,0 +1,14 @@
+program
+	{
+		bool z = true;
+
+		integer inc(integer x)
+			{
+				bool is_true(bool z)
+				 {
+				 	return z;
+				 }
+				 
+				return x + 1;
+			}	
+	}

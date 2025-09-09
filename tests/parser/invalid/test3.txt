@@ -1,0 +1,20 @@
+program
+	{
+		bool z = true;
+
+		integer a = 7;
+
+		integer double(integer y)
+		 {
+			return 2 * y;
+		 }
+
+		integer inc(integer x)
+			{	 
+				double(x)
+
+				integer z = 1;
+
+				return x + z;
+			}	
+	}

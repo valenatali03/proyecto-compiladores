@@ -1,0 +1,11 @@
+program
+	{
+		integer x = 5;
+
+		integer inc(integer x)
+			{
+				return x + 1;
+			}
+
+		bool z = true;	
+	}

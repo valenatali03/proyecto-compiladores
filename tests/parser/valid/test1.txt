@@ -1,0 +1,55 @@
+program
+	{
+		integer x = -(-5);
+
+		bool y = !!false;
+
+		integer inc(integer x)
+			{
+			return x + 1;
+			}
+		
+		/*
+		* Duplica el valor de z
+		*
+		*/
+		integer double(integer z)
+			{
+				return z * 2;
+			}
+
+		void print_bool(bool i) extern ;	
+
+		bool is_true(bool z)
+					{
+						bool y = z;
+
+						if (true) then
+							{
+								print_bool(z);
+							} 
+						else
+							{
+								print_bool(!z);
+							}
+
+						return y == z;
+					}	
+
+		// No hacer nada
+		void nothing()
+			{
+
+			}
+
+		integer main()
+			{
+				bool z = false; // z = false
+
+				integer a = 3;
+
+				integer c = --7;
+
+				integer b = double(inc(a));
+			}
+	}
