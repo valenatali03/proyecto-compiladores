@@ -1,0 +1,22 @@
+program {
+	integer x = 3;
+
+	integer double(integer x)
+	{
+		return 2 * x;
+	}
+
+	integer main()
+	{
+		bool z = whiletrue;
+
+		integer variable_1 = 5;
+
+		integer x /* declaracion de x */ = 7;
+
+		WHILE (true)
+			{
+				
+			}
+	}
+}
