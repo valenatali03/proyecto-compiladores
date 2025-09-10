@@ -4,6 +4,34 @@
 #include <stdbool.h>
 #include "../includes/ast.h"
 
+static void imprimir_parametros_decl(Parametro_Decl *params, char *prefijo)
+{
+    int i = 1;
+    while (params)
+    {
+        printf("%s    ├── ParamDecl %d: %s (tipo %s)\n", prefijo, i,
+               params->info->nombre, tipo_str[params->info->tipo]);
+        params = params->next;
+        i++;
+    }
+}
+
+static void imprimir_parametros_call(Parametro_Call *params, char *prefijo)
+{
+    int i = 1;
+    while (params)
+    {
+        printf("%s    ├── ParamCall %d:\n", prefijo, i);
+        /* imprimir el AST de la expresión del parámetro */
+        char nuevo_prefijo[1024];
+        strcpy(nuevo_prefijo, prefijo);
+        strcat(nuevo_prefijo, "    │   ");
+        imprimir_vertical(params->expr, nuevo_prefijo, 1);
+        params = params->next;
+        i++;
+    }
+}
+
 Arbol *crear_arbol_operador(char *op, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der)
 {
     Arbol *arbol = malloc(sizeof(Arbol));
@@ -151,60 +179,61 @@ void imprimir_vertical(Arbol *arbol, char *prefijo, int es_ultimo)
     if (arbol == NULL)
         return;
 
-    // imprimir prefijo y rama
     printf("%s", prefijo);
-
     if (es_ultimo)
-    {
         printf("└── ");
-    }
     else
-    {
         printf("├── ");
-    }
 
-    // imprimir el nodo según su tipo
-    if (arbol->tipo_info == ID)
+    // Imprimir el nodo según su tipo
+    switch (arbol->tipo_info)
     {
+    case ID:
         printf("ID(%s)\n", arbol->info->id.nombre);
-    }
-    else if (arbol->tipo_info == OPERADOR)
-    {
+        break;
+    case OPERADOR:
         printf("Op(%s)\n", arbol->info->operador.nombre);
-    }
-    else if (arbol->tipo_info == LITERAL)
-    {
+        break;
+    case LITERAL:
         if (arbol->info->literal.tipo == ENTERO)
             printf("Lit(%d)\n", *(int *)arbol->info->literal.valor);
         else if (arbol->info->literal.tipo == BOOL)
             printf("Lit(%s)\n", (*(int *)arbol->info->literal.valor) ? "true" : "false");
-    }
-    else if (arbol->tipo_info == DECLARACION_VARIABLE)
-    {
+        else
+            printf("Lit(?)\n");
+        break;
+    case DECLARACION_VARIABLE:
         printf("DECLARACION\n");
-    }
-    else if (arbol->tipo_info == DECLARACIONES_VARIABLES)
-    {
+        break;
+    case DECLARACIONES_VARIABLES:
         printf("DECLARACIONES\n");
-    }
-    else if (arbol->tipo_info == SENTENCIAS)
-    {
+        break;
+    case SENTENCIAS:
         printf("SENTENCIAS\n");
-    }
-    else if (arbol->tipo_info == FUNCION_DECL)
-    {
-        printf("FUNCION %s\n", arbol->info->funcion_decl.nombre);
-    }
-    else if (arbol->tipo_info == RETURN)
-    {
+        break;
+    case FUNCION_DECL:
+        printf("FUNCION_DECL %s (tipo %s)\n",
+               arbol->info->funcion_decl.nombre,
+               tipo_str[arbol->info->funcion_decl.tipo]);
+        /* imprimir parámetros */
+        imprimir_parametros_decl(arbol->info->funcion_decl.params, prefijo);
+        break;
+    case FUNCION_CALL:
+        printf("FUNCION_CALL %s\n", arbol->info->funcion_call.nombre);
+        imprimir_parametros_call(arbol->info->funcion_call.params, prefijo);
+        break;
+    case RETURN:
         printf("RETURN_INFO\n");
-    }
-    else if (arbol->tipo_info == ASIGNACION)
-    {
+        break;
+    case ASIGNACION:
         printf("ASIGNACION\n");
+        break;
+    default:
+        printf("Nodo tipo %s\n", tipo_info_str[arbol->tipo_info]);
+        break;
     }
 
-    // nuevo prefijo para los hijos
+    // construir prefijo para los hijos
     char nuevo_prefijo[1024];
     strcpy(nuevo_prefijo, prefijo);
     if (es_ultimo)
@@ -212,15 +241,22 @@ void imprimir_vertical(Arbol *arbol, char *prefijo, int es_ultimo)
     else
         strcat(nuevo_prefijo, "│   ");
 
-    // contar hijos (izq + der) para saber cuál es el último
+    // contar hijos
     int hijos = 0;
     if (arbol->izq)
+        hijos++;
+    if (arbol->medio)
         hijos++;
     if (arbol->der)
         hijos++;
 
+    // recorrer hijos (izq, medio, der)
     if (arbol->izq)
-        imprimir_vertical(arbol->izq, nuevo_prefijo, (hijos == 1 && !arbol->der));
+        imprimir_vertical(arbol->izq, nuevo_prefijo,
+                          (hijos == 1 && !arbol->medio && !arbol->der));
+    if (arbol->medio)
+        imprimir_vertical(arbol->medio, nuevo_prefijo,
+                          (hijos == 1 && !arbol->der));
     if (arbol->der)
         imprimir_vertical(arbol->der, nuevo_prefijo, 1);
 }

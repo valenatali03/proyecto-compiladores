@@ -29,4 +29,7 @@ typedef enum
     WHILE
 } Tipo_Info;
 
+extern const char *tipo_str[];
+extern const char *tipo_info_str[];
+
 #endif

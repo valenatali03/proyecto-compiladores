@@ -1,5 +1,5 @@
-#ifndef AST
-#define AST
+#ifndef AST_H
+#define AST_H
 #include "info.h"
 
 /**
