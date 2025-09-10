@@ -1,6 +1,8 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
+#include "enums.h"
+
 typedef struct Info_ID Info_ID;
 typedef struct Arbol Arbol;
 

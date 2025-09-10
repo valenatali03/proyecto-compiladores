@@ -40,23 +40,27 @@
 %right T_NOT
 %right UMINUS
 
-%type <ast> expr literal bool_lit method_call
+%type <ast> expr literal bool_lit method_call method_decl method_decls statement statements block var_decl var_decls program
 %type <params_call> param_list 
 %type <params_decl> params_decls
 %type <tipo> type
 
 %%
-    program: T_PROGRAM T_BO var_decls method_decls T_BC 
-           | T_PROGRAM T_BO var_decls T_BC 
-           | T_PROGRAM T_BO method_decls T_BC 
-           | T_PROGRAM T_BO T_BC
+    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4);}
+           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL);}
+           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL);}
+           | T_PROGRAM T_BO T_BC                        {$$ = NULL;}
            ;
     
-    var_decls: var_decl
-             | var_decls var_decl 
+    var_decls: var_decl     {$$ = crear_arbol_nodo(DECLARACIONES_VARIABLES, yylineno, yycolumn, $1, NULL);}
+             | var_decls var_decl {$$ = crear_arbol_nodo(DECLARACIONES_VARIABLES, yylineno, yycolumn, $1, $2);}
              ;
 
-    var_decl: type T_ID T_EQ expr T_SCOLON
+    var_decl: type T_ID T_EQ expr T_SCOLON  {
+                                                Arbol* id_arbol = crear_arbol_id($2, yylineno, yycolumn, NULL, NULL);
+                                                id_arbol->info->id.tipo = $1;
+                                                $$ = crear_arbol_nodo(DECLARACION_VARIABLE, yylineno, yycolumn, id_arbol, $4);
+                                            }
             ;
 
     type: T_INTEGER
@@ -65,52 +69,55 @@
         ;
 
 
-    block: T_BO var_decls statements T_BC 
-         | T_BO statements T_BC
-         | T_BO var_decls T_BC
-         | T_BO T_BC
+    block: T_BO var_decls statements T_BC {$$ = crear_arbol_nodo(BLOQUE, yylineno, yycolumn, $2, $3);}
+         | T_BO statements T_BC {$$ = crear_arbol_nodo(BLOQUE, yylineno, yycolumn, $2, NULL);}
+         | T_BO var_decls T_BC  {$$ = NULL;}
+         | T_BO T_BC            {$$ = NULL;}
          ;
 
-    statements: statement
-              | statements statement
+    statements: statement   {$$ = crear_arbol_nodo(SENTENCIAS, yylineno, yycolumn, $1, NULL);}
+              | statements statement {$$ = crear_arbol_nodo(SENTENCIAS, yylineno, yycolumn, $1, $2);}
               ;
 
-    statement: T_ID T_EQ expr T_SCOLON
-             | method_call T_SCOLON
-             | T_IF T_PO expr T_PC T_THEN block
-             | T_IF T_PO expr T_PC T_THEN block T_ELSE block
-             | T_WHILE T_PO expr T_PC block
-             | T_RETURN T_SCOLON
-             | T_RETURN expr T_SCOLON
-             | block
-             | T_SCOLON 
+    statement: T_ID T_EQ expr T_SCOLON  {
+                                            Arbol* id_arbol = crear_arbol_id($1, yylineno, yycolumn, NULL, NULL);
+                                            $$ = crear_arbol_nodo(ASIGNACION, yylineno, yycolumn, id_arbol, $3);
+                                        }
+             | method_call T_SCOLON     {$$ = $1;}
+             | T_IF T_PO expr T_PC T_THEN block     {$$ = crear_arbol_if(IF, yylineno, yycolumn, $6, $3, NULL);}
+             | T_IF T_PO expr T_PC T_THEN block T_ELSE block    {$$ = crear_arbol_if(IF, yylineno, yycolumn, $6, $3, $8);}
+             | T_WHILE T_PO expr T_PC block     {$$ = crear_arbol_nodo(WHILE, yylineno, yycolumn, $3, $5);}
+             | T_RETURN T_SCOLON                {$$ = crear_arbol_nodo(RETURN, yylineno, yycolumn, NULL, NULL);}
+             | T_RETURN expr T_SCOLON           {$$ = crear_arbol_nodo(RETURN, yylineno, yycolumn, $2, NULL);}
+             | block                            {$$ = $1;}
+             | T_SCOLON                         {$$ = NULL;}
              ;
 
-    method_decls: method_decl
-                | method_decls method_decl
+    method_decls: method_decl               {$$ = crear_arbol_nodo(DECLARACIONES_FUNCIONES, yylineno, yycolumn, $1, NULL);}
+                | method_decls method_decl  {$$ = crear_arbol_nodo(DECLARACIONES_FUNCIONES, yylineno, yycolumn, $1, $2);}
                 ;
 
-    method_decl: type T_ID T_PO params_decls T_PC block
-               | type T_ID T_PO T_PC block
-               | type T_ID T_PO params_decls T_PC T_EXTERN T_SCOLON
-               | type T_ID T_PO T_PC T_EXTERN T_SCOLON
+    method_decl: type T_ID T_PO params_decls T_PC block {$$ = crear_arbol_funcion_decl($2, $1, $4, yylineno, yycolumn, $6, NULL);}
+               | type T_ID T_PO T_PC block              {$$ = crear_arbol_funcion_decl($2, $1, NULL, yylineno, yycolumn, $5, NULL);}
+               | type T_ID T_PO params_decls T_PC T_EXTERN T_SCOLON {$$ = crear_arbol_funcion_decl($2, $1, $4, yylineno, yycolumn, NULL, NULL);}
+               | type T_ID T_PO T_PC T_EXTERN T_SCOLON  {$$ = crear_arbol_funcion_decl($2, $1, NULL, yylineno, yycolumn, NULL, NULL);}
                ;
 
 
     params_decls: type T_ID                         {Info_ID *id = malloc(sizeof(Info_ID));
                                                      id->nombre = strdup($2);
                                                      id->tipo = $1;
-                                                     $$ = agregar_param($$, id, FUNCION_DECL);
+                                                     $$ = agregar_param(NULL, id, FUNCION_DECL);
                                                     }
                 | params_decls T_COMMA type T_ID    {Info_ID *id = malloc(sizeof(Info_ID));
                                                      id->nombre = strdup($4);
                                                      id->tipo = $3;
-                                                     $$ = agregar_param($1, id, FUNCION_CALL);
+                                                     $$ = agregar_param($1, id, FUNCION_DECL);
                                                     }
                 ;
 
 
-    param_list: expr                    {$$ = agregar_param($$, $1, FUNCION_CALL);}
+    param_list: expr                    {$$ = agregar_param(NULL, $1, FUNCION_CALL);}
               | param_list T_COMMA expr {$$ = agregar_param($1, $3, FUNCION_CALL);}
               ;
 

@@ -88,6 +88,20 @@ Arbol *crear_arbol_funcion_call(char *nombre, Parametro_Call *params, int linea,
     return arbol;
 }
 
+Arbol *crear_arbol_if(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol *medio, Arbol *der)
+{
+    Arbol *arbol = malloc(sizeof(Arbol));
+    arbol->info = malloc(sizeof(Info_Union));
+    arbol->tipo_info = tipo;
+    arbol->linea = linea;
+    arbol->colum = colum;
+    arbol->izq = izq;
+    arbol->der = der;
+    arbol->medio = medio;
+
+    return arbol;
+}
+
 Arbol *crear_arbol_nodo(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol *der)
 {
     Arbol *arbol = malloc(sizeof(Arbol));
@@ -165,11 +179,11 @@ void imprimir_vertical(Arbol *arbol, char *prefijo, int es_ultimo)
         else if (arbol->info->literal.tipo == BOOL)
             printf("Lit(%s)\n", (*(int *)arbol->info->literal.valor) ? "true" : "false");
     }
-    else if (arbol->tipo_info == DECLARACION)
+    else if (arbol->tipo_info == DECLARACION_VARIABLE)
     {
         printf("DECLARACION\n");
     }
-    else if (arbol->tipo_info == DECLARACIONES)
+    else if (arbol->tipo_info == DECLARACIONES_VARIABLES)
     {
         printf("DECLARACIONES\n");
     }

@@ -55,7 +55,7 @@ Arbol *crear_arbol_id(char *id, int linea, int colum, Arbol *izq, Arbol *der);
 Arbol *crear_arbol_literal(void *valor, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der);
 
 /**
- * Crea un nodo función del AST.
+ * Crea un nodo de declaración de función del AST.
  *
  * @param nombre Nombre de la función
  * @param tipo   Tipo de retorno de la función
@@ -68,7 +68,20 @@ Arbol *crear_arbol_literal(void *valor, Tipo tipo, int linea, int colum, Arbol *
  */
 Arbol *crear_arbol_funcion_decl(char *nombre, Tipo tipo, Parametro_Decl *params, int linea, int colum, Arbol *izq, Arbol *der);
 
+/**
+ * Crea un nodo de llamada de función del AST.
+ *
+ * @param nombre Nombre de la función
+ * @param parametros Parametros de la función
+ * @param linea  Línea del código fuente
+ * @param colum  Columna del código fuente
+ * @param izq    Hijo izquierdo
+ * @param der    Hijo derecho
+ * @return       Puntero al nuevo nodo función
+ */
 Arbol *crear_arbol_funcion_call(char *nombre, Parametro_Call *params, int linea, int colum, Arbol *izq, Arbol *der);
+
+Arbol *crear_arbol_if(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol *medio, Arbol *der);
 
 /**
  * Crea un nodo genérico del AST.
