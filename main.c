@@ -10,10 +10,8 @@ extern FILE *yyin;
 // Archivo de salida global
 FILE *out;
 
-bool debug_mode = false;
-
 void imprimir_uso(const char *prog) {
-    fprintf(stderr, "Uso: %s [-o salida] [-target etapa] [-debug] archivo.ctds\n", prog);
+    fprintf(stderr, "Uso: %s [-target etapa] archivo.ctds\n", prog);
     exit(1);
 }
 
@@ -26,18 +24,12 @@ int main(int argc, char *argv[]) {
     char *output = NULL;
     char *filename = NULL;
 
-    
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-o") == 0) {
-            if (++i >= argc) imprimir_uso(argv[0]);
-            output = argv[i];
-        } else if (strcmp(argv[i], "-target") == 0) {
+        if (strcmp(argv[i], "-target") == 0) {
             if (++i >= argc) imprimir_uso(argv[0]);
             target = argv[i];
-        } else if (strcmp(argv[i], "-debug") == 0) {
-            debug_mode = true;
         } else {
-            // Código fuente del programa a compilar),
+            // Código fuente del programa a compilar
             filename = argv[i];
         }
     }
@@ -67,7 +59,9 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(target, "parse") == 0) {
             strcat(output, ".sint");
         } else {
-            strcat(output, ".out");
+            fprintf(stderr, "Target desconocido: %s\n", target);
+            fclose(yyin);
+            return 1;
         }
     }
 
@@ -81,26 +75,13 @@ int main(int argc, char *argv[]) {
 
     // Ejecución según target
     if (strcmp(target, "scan") == 0) {
-        if (debug_mode) printf("[DEBUG] Ejecutando lexer...\n");
         while (yylex() != 0) {}
-        if (debug_mode) printf("[DEBUG] Lexer finalizado\n");
     } else if (strcmp(target, "parse") == 0) {
-        if (debug_mode) printf("[DEBUG] Ejecutando parser...\n");
         yyparse();
-        if (debug_mode) printf("[DEBUG] Parser finalizado\n");
-    } else {
-        fprintf(stderr, "Target desconocido: %s\n", target);
-        fclose(yyin);
-        fclose(out);
-        return 1;
     }
 
     fclose(yyin);
     fclose(out);
-
-    if (debug_mode) {
-        printf("[DEBUG] Archivo de salida generado: %s\n", output);
-    }
 
     return 0;
 }
