@@ -40,6 +40,7 @@ void cerrarNivel(Nivel *tabla)
     auxAnt = auxUlt->antNivel;
     auxUlt->antNivel = NULL;
     auxAnt->sigNivel = NULL;
+    CANT_NIVELES--;
 }
 
 void agregarSimbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
