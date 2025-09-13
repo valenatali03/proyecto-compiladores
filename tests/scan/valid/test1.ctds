@@ -1,22 +1,21 @@
-program {
-	integer x = 3;
-
-	integer double(integer x)
-	{
-		return 2 * x;
-	}
-
-	integer main()
-	{
-		bool z = whiletrue;
-
-		integer variable_1 = 5;
-
-		integer x /* declaracion de x */ = 7;
-
-		WHILE (true)
-			{
-				
-			}
-	}
-}
+extern 
+bool 
+program 
+else 
+then 
+false 
+if 
+integer 
+return 
+true 
+void 
+while
+// comentario de una línea
+/* comentario
+de
+varias
+líneas */
+whiletrue
+WHILE
+variable_1
+123abc

@@ -11,7 +11,7 @@ program
 
 		integer inc(integer x)
 			{	 
-				double(x)
+				double(x);
 
 				integer z = 1;
 
