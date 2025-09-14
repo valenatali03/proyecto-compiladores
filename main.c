@@ -8,8 +8,8 @@ extern int yyparse(void);
 extern FILE *yyin;
 
 // Archivos de salida globales
-FILE *out_lex = NULL;   // Para tokens
-FILE *out_sint = NULL;  // Para parser
+FILE *out_lex = NULL;   // Para analizador léxico
+FILE *out_sint = NULL;  // Para analizador sintáctico
 
 void imprimir_uso(const char *prog) {
     fprintf(stderr, "Uso: %s [-target etapa] archivo.ctds\n", prog);
@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
             if (++i >= argc) imprimir_uso(argv[0]);
             target = argv[i];
         } else {
-            filename = argv[i];
+            filename = argv[i]; // Archivo de entrada
         }
     }
 
@@ -60,8 +60,8 @@ int main(int argc, char *argv[]) {
         if (!out_lex) { perror("No se puede crear archivo .lex"); fclose(yyin); return 1; }
     } else if (strcmp(target, "parse") == 0) {
         char fname1[300], fname2[300];
-        snprintf(fname1, sizeof(fname1), "%s.lex", base);
-        snprintf(fname2, sizeof(fname2), "%s.sint", base);
+        snprintf(fname1, sizeof(fname1), "%s.lex", base); // Archivo de salida de análisis léxico
+        snprintf(fname2, sizeof(fname2), "%s.sint", base); // Archivo de salida de análisis sintáctico
         out_lex = fopen(fname1, "w");
         out_sint = fopen(fname2, "w");
         if (!out_lex || !out_sint) {
@@ -82,11 +82,11 @@ int main(int argc, char *argv[]) {
         while (yylex() != 0) {}
     } else if (strcmp(target, "parse") == 0) {
         int res = yyparse();  // Ejecuta el parser
-    if (res == 0) {
-        fprintf(out_sint, "Análisis sintáctico exitoso\n");
-    } else {
-        fprintf(out_sint, "Se detectaron errores de sintaxis\n");
-    }
+        if (res == 0) {
+            fprintf(out_sint, "Análisis sintáctico exitoso\n");
+        } else {
+            fprintf(out_sint, "Se detectaron errores de sintaxis\n");
+        }
     }
 
     // Cerrar archivos

@@ -19,3 +19,9 @@ whiletrue
 WHILE
 variable_1
 123abc
+, ;
+( )
+{ }
++ - * / %
+=
+&& == || < > !
