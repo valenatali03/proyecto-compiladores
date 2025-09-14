@@ -6,7 +6,7 @@
     extern FILE *yyin;
     extern int yylineno;
     extern int yycolumn;
-    extern FILE *out;
+    extern FILE *out_sint;
 %}
 
 %token T_EXTERN T_BOOL T_PROGRAM T_ELSE T_THEN T_FALSE T_IF T_INTEGER T_RETURN T_TRUE T_VOID T_WHILE
@@ -116,5 +116,5 @@
 %%
 
 void yyerror(const char *s) {
-    fprintf(out,"Linea %d Col %d\n└──Error de sintaxis.\n", yylineno, yycolumn);
+    fprintf(out_sint,"Linea %d Col %d\n└──Error de sintaxis.\n", yylineno, yycolumn);
 }

@@ -7,8 +7,9 @@ extern int yylex(void);
 extern int yyparse(void);
 extern FILE *yyin;
 
-// Archivo de salida global
-FILE *out;
+// Archivos de salida globales
+FILE *out_lex = NULL;   // Para tokens
+FILE *out_sint = NULL;  // Para parser
 
 void imprimir_uso(const char *prog) {
     fprintf(stderr, "Uso: %s [-target etapa] archivo.ctds\n", prog);
@@ -21,7 +22,6 @@ int main(int argc, char *argv[]) {
     }
 
     char *target = "parse"; // Por defecto ejecuta hasta la etapa parse
-    char *output = NULL;
     char *filename = NULL;
 
     for (int i = 1; i < argc; i++) {
@@ -29,7 +29,6 @@ int main(int argc, char *argv[]) {
             if (++i >= argc) imprimir_uso(argv[0]);
             target = argv[i];
         } else {
-            // Código fuente del programa a compilar
             filename = argv[i];
         }
     }
@@ -46,29 +45,34 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Definir nombre de salida por defecto
-    if (!output) {
-        char *dot = strrchr(filename, '.');
-        size_t len = dot - filename;
-        output = malloc(len + 10);
-        strncpy(output, filename, len);
-        output[len] = '\0';
+    // Base del nombre de salida
+    char *dot = strrchr(filename, '.');
+    size_t len = dot - filename;
+    char base[256];
+    strncpy(base, filename, len);
+    base[len] = '\0';
 
-        if (strcmp(target, "scan") == 0) {
-            strcat(output, ".lex");
-        } else if (strcmp(target, "parse") == 0) {
-            strcat(output, ".sint");
-        } else {
-            fprintf(stderr, "Target desconocido: %s\n", target);
+    // Abrir archivos de salida según target
+    if (strcmp(target, "scan") == 0) {
+        char fname[300];
+        snprintf(fname, sizeof(fname), "%s.lex", base);
+        out_lex = fopen(fname, "w");
+        if (!out_lex) { perror("No se puede crear archivo .lex"); fclose(yyin); return 1; }
+    } else if (strcmp(target, "parse") == 0) {
+        char fname1[300], fname2[300];
+        snprintf(fname1, sizeof(fname1), "%s.lex", base);
+        snprintf(fname2, sizeof(fname2), "%s.sint", base);
+        out_lex = fopen(fname1, "w");
+        out_sint = fopen(fname2, "w");
+        if (!out_lex || !out_sint) {
+            perror("No se pueden crear archivos de salida");
             fclose(yyin);
+            if (out_lex) fclose(out_lex);
+            if (out_sint) fclose(out_sint);
             return 1;
         }
-    }
-
-    // Abrir archivo de salida global
-    out = fopen(output, "w");
-    if (!out) {
-        perror("No se puede crear archivo de salida");
+    } else {
+        fprintf(stderr, "Target desconocido: %s\n", target);
         fclose(yyin);
         return 1;
     }
@@ -77,11 +81,18 @@ int main(int argc, char *argv[]) {
     if (strcmp(target, "scan") == 0) {
         while (yylex() != 0) {}
     } else if (strcmp(target, "parse") == 0) {
-        yyparse();
+        int res = yyparse();  // Ejecuta el parser
+    if (res == 0) {
+        fprintf(out_sint, "Análisis sintáctico exitoso\n");
+    } else {
+        fprintf(out_sint, "Se detectaron errores de sintaxis\n");
+    }
     }
 
+    // Cerrar archivos
     fclose(yyin);
-    fclose(out);
+    if (out_lex) fclose(out_lex);
+    if (out_sint) fclose(out_sint);
 
     return 0;
 }
