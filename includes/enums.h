@@ -13,7 +13,8 @@ typedef enum
 typedef enum
 {
     ID,
-    OPERADOR,
+    OPERADOR_BINARIO,
+    OPERADOR_UNARIO,
     LITERAL,
     DECLARACION_VARIABLE,
     ASIGNACION,

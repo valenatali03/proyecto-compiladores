@@ -129,18 +129,18 @@
     expr: T_ID              {$$ = crear_arbol_id($1, yylineno, yycolumn, NULL, NULL);}
         | method_call       {$$ = $1;}
         | literal           {$$ = $1;}
-        | expr T_OR expr    {$$ = crear_arbol_operador("||", BOOL, yylineno, yycolumn, $1, $3);}
-        | expr T_AND expr   {$$ = crear_arbol_operador("&&", BOOL, yylineno, yycolumn, $1, $3);}
-        | expr T_GT expr    {$$ = crear_arbol_operador(">", ENTERO, yylineno, yycolumn, $1, $3);}
-        | expr T_LT expr    {$$ = crear_arbol_operador("<", ENTERO, yylineno, yycolumn, $1, $3);}
-        | expr T_COMP expr  {$$ = crear_arbol_operador("==", VACIO, yylineno, yycolumn, $1, $3);}
-        | expr T_ADD expr   {$$ = crear_arbol_operador("+", ENTERO, yylineno, yycolumn, $1, $3);}
-        | expr T_MINUS expr {$$ = crear_arbol_operador("-", ENTERO, yylineno, yycolumn, $1, $3);}
-        | expr T_MULT expr  {$$ = crear_arbol_operador("*", ENTERO, yylineno, yycolumn, $1, $3);}
-        | expr T_DIV expr   {$$ = crear_arbol_operador("/", ENTERO, yylineno, yycolumn, $1, $3);}
-        | expr T_MOD expr   {$$ = crear_arbol_operador("%", ENTERO, yylineno, yycolumn, $1, $3);}
-        | T_MINUS expr %prec UMINUS {$$ = crear_arbol_operador("-", ENTERO, yylineno, yycolumn, $2, NULL);}
-        | T_NOT expr        {$$ = crear_arbol_operador("!", BOOL, yylineno, yycolumn, $2, NULL);}
+        | expr T_OR expr    {$$ = crear_arbol_operador("||", OPERADOR_BINARIO, BOOL, yylineno, yycolumn, $1, $3);}
+        | expr T_AND expr   {$$ = crear_arbol_operador("&&", OPERADOR_BINARIO, BOOL, yylineno, yycolumn, $1, $3);}
+        | expr T_GT expr    {$$ = crear_arbol_operador(">", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
+        | expr T_LT expr    {$$ = crear_arbol_operador("<", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
+        | expr T_COMP expr  {$$ = crear_arbol_operador("==", OPERADOR_BINARIO, VACIO, yylineno, yycolumn, $1, $3);}
+        | expr T_ADD expr   {$$ = crear_arbol_operador("+", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
+        | expr T_MINUS expr {$$ = crear_arbol_operador("-", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
+        | expr T_MULT expr  {$$ = crear_arbol_operador("*", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
+        | expr T_DIV expr   {$$ = crear_arbol_operador("/", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
+        | expr T_MOD expr   {$$ = crear_arbol_operador("%", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
+        | T_MINUS expr %prec UMINUS {$$ = crear_arbol_operador("-", OPERADOR_UNARIO, ENTERO, yylineno, yycolumn, $2, NULL);}
+        | T_NOT expr        {$$ = crear_arbol_operador("!", OPERADOR_UNARIO, BOOL, yylineno, yycolumn, $2, NULL);}
         | T_PO expr T_PC    {$$ = $2;}
         ;
 

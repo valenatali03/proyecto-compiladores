@@ -32,11 +32,11 @@ static void imprimir_parametros_call(Parametro_Call *params, char *prefijo)
     }
 }
 
-Arbol *crear_arbol_operador(char *op, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der)
+Arbol *crear_arbol_operador(char *op, Tipo_Info tipo_op, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der)
 {
     Arbol *arbol = malloc(sizeof(Arbol));
     arbol->info = malloc(sizeof(Info_Union));
-    arbol->tipo_info = OPERADOR;
+    arbol->tipo_info = tipo_op;
     arbol->linea = linea;
     arbol->colum = colum;
     arbol->info->operador.nombre = strdup(op);
@@ -155,7 +155,7 @@ void inorder(Arbol *arbol)
     {
         printf("ID: %s\n", arbol->info->id.nombre);
     }
-    else if (arbol->tipo_info == OPERADOR)
+    else if (arbol->tipo_info == OPERADOR_BINARIO || arbol->tipo_info == OPERADOR_UNARIO)
     {
         printf("Operador: %s\n", arbol->info->operador.nombre);
     }
@@ -191,7 +191,7 @@ void imprimir_vertical(Arbol *arbol, char *prefijo, int es_ultimo)
     case ID:
         printf("ID(%s)\n", arbol->info->id.nombre);
         break;
-    case OPERADOR:
+    case OPERADOR_BINARIO || OPERADOR_UNARIO:
         printf("Op(%s)\n", arbol->info->operador.nombre);
         break;
     case LITERAL:
