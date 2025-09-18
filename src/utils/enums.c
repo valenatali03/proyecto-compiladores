@@ -7,7 +7,8 @@ const char *tipo_str[] = {
 
 const char *tipo_info_str[] = {
     [ID] = "ID",
-    [OPERADOR] = "OPERADOR",
+    [OPERADOR_BINARIO] = "OPERADOR_BINARIO",
+    [OPERADOR_UNARIO] = "OPERADOR_UNARIO",
     [LITERAL] = "LITERAL",
     [DECLARACION_VARIABLE] = "DECLARACION_VARIABLE",
     [ASIGNACION] = "ASIGNACION",

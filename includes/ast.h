@@ -27,7 +27,7 @@ typedef struct Arbol
  * @param der    Hijo derecho
  * @return       Puntero al nuevo nodo operador
  */
-Arbol *crear_arbol_operador(char *op, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der);
+Arbol *crear_arbol_operador(char *op, Tipo_Info tipo_op, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der);
 
 /**
  * Crea un nodo identificador del AST.
