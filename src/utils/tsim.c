@@ -4,118 +4,146 @@
 #include <string.h>
 #include "../../includes/enums.h"
 
+int CANT_NIVELES = 0;
+
 Nivel *crearTabla()
 {
     Nivel *tabla = malloc(sizeof(Nivel));
-    tabla->primSim = NULL;
-    tabla->sigNivel = NULL;
-    tabla->antNivel = NULL;
-    CANT_NIVELES++;
+    tabla->head = NULL;
+    tabla->parent = NULL;
     return tabla;
 }
 
 
 Nivel *agregarNivel(Nivel *tabla) {
     Nivel *nivel = malloc(sizeof(Nivel));
-    nivel->primSim = NULL;
-    nivel->sigNivel = NULL;
-    Nivel *aux = tabla;
-    while (aux->sigNivel != NULL) {
-        aux = aux->sigNivel;
-    }
-    nivel->antNivel = aux;
-    aux->sigNivel = nivel;
+
+    nivel->head = NULL;
+
+    nivel->parent = tabla;
+
+    CANT_NIVELES++;
+
     return nivel;
 }
 
 // Desapila el ultimo nivel
-void cerrarNivel(Nivel *tabla)
+Nivel *cerrarNivel(Nivel *tabla)
 {
-    Nivel *auxUlt = tabla;
-    Nivel *auxAnt;
-    while (auxUlt->sigNivel != NULL)
-    {
-        auxUlt = auxUlt->sigNivel;
-    }
-    auxAnt = auxUlt->antNivel;
-    auxUlt->antNivel = NULL;
-    auxAnt->sigNivel = NULL;
     CANT_NIVELES--;
+
+    return tabla->parent;
 }
 
 void agregarSimbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
 {
+
     Simbolo *s = malloc(sizeof(Simbolo));
     s->flag = flag;
     s->info = info;
-    s->sig = NULL;
-    if (nivel->primSim == NULL)
-        nivel->primSim = s;
+    s->next = NULL;
+
+    if (nivel->head == NULL)
+        nivel->head = s;
     else
     {
-        Simbolo *elem = nivel->primSim;
-        while (elem->sig != NULL)
+        Simbolo *aux = nivel->head;
+        while (aux->next != NULL)
         {
-            elem = elem->sig;
+            aux= aux->next;
         }
-        elem->sig = s;
+        aux->next = s;
     }
 }
 
-Simbolo *buscarSimbolo(Nivel *nivel, char *nombre, Tipo_Info flag)
+Info_Union *buscarSimbolo(Nivel *nivel, char *nombre, Tipo_Info flag)
 {
-    Nivel *niv = nivel;
-    while (niv != NULL)
+    Nivel *n = nivel;
+    while (n != NULL)
     {
-        Simbolo *sim = niv->primSim;
-        while (sim != NULL)
+        Simbolo *s = n->head;
+        while (s != NULL)
         {
-            switch (sim->flag)
+            switch (s->flag)
             {
             case ID:
-                if (strcmp(sim->info->id.nombre, nombre) == 0)
+                if (strcmp(s->info->id.nombre, nombre) == 0 && flag == s->flag)
                 {
-                    return sim;
+                    return s->info;
                 }
                 break;
 
             case FUNCION_DECL:
-                if (strcmp(sim->info->funcion_decl.nombre, nombre) == 0)
+                if (strcmp(s->info->funcion_decl.nombre, nombre) == 0 && flag == s->flag)
                 {
-                    return sim;
+                    return s->info;
                 }
                 break;
 
             default:
                 break;
             }
-            sim = sim->sig;
+            s = s->next;
         }
-        niv = niv->antNivel;
+        n = n->parent;
     }
     return NULL;
+}
+
+Info_Union *buscar_en_nivel(Nivel *nivel, char *nombre, Tipo_Info flag)
+{
+    Simbolo *s = nivel->head;
+        while (s != NULL)
+        {
+            switch (s->flag)
+            {
+            case ID:
+                if (strcmp(s->info->id.nombre, nombre) == 0 && flag == s->flag)
+                {
+                    return s->info;
+                }
+                break;
+
+            case FUNCION_DECL:
+                if (strcmp(s->info->funcion_decl.nombre, nombre) == 0 && flag == s->flag)
+                {
+                    return s->info;
+                }
+                break;
+
+            default:
+                break;
+            }
+            s = s->next;
+        }
+    return NULL;
+}
+
+Info_Union *buscarUltimoMetodo(Nivel* nivel) {
+    if (!nivel) return NULL;
+
+    Simbolo* s = nivel->head;
+    Info_Union* ultimoMetodo = NULL;
+
+    while (s != NULL) {
+        if (s->flag == FUNCION_DECL) {
+            ultimoMetodo = s->info;
+        }
+        s = s->next;
+    }
+
+    return ultimoMetodo;
 }
 
 
 void printSimbolos(Nivel *nivel)
 {
-  Simbolo *aux = nivel->primSim;
+  Simbolo *aux = nivel->head;
   while (aux != NULL)
   {
     printf("%s ", aux->info->id.nombre);
 
-    int tipo = aux->info->id.tipo;
-    switch (tipo)
-    {
-    case 0:
-      printf("Entero\n");
-      break;
-    case 1:
-      printf("Bool\n");
-      break;
-    }
-
-    aux = aux->sig;
+    aux = aux->next;
   }
 }
 
@@ -126,7 +154,7 @@ void printTabla(Nivel *tabla) {
     {
         printf("Nivel %d\n", i);
         printSimbolos(aux);
-        aux = aux->sigNivel;
+        aux = aux->parent;
         i++;
     }
 }

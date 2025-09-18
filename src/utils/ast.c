@@ -10,7 +10,7 @@ static void imprimir_parametros_decl(Parametro_Decl *params, char *prefijo)
     while (params)
     {
         printf("%s    ├── ParamDecl %d: %s (tipo %s)\n", prefijo, i,
-               params->info->nombre, tipo_str[params->info->tipo]);
+               params->info->id.nombre, tipo_str[params->info->id.tipo]);
         params = params->next;
         i++;
     }

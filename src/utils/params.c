@@ -33,7 +33,7 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param)
 
     case FUNCION_DECL:
         Parametro_Decl *parametros = (Parametro_Decl *)params;
-        Info_ID *info = (Info_ID *)data;
+        Info_Union *info = (Info_Union *)data;
 
         if (parametros == NULL)
         {
@@ -61,4 +61,5 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param)
     default:
         break;
     }
+    return NULL;
 }

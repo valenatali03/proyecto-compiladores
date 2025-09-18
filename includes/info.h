@@ -2,7 +2,9 @@
 #define INFO_H
 
 #include "enums.h"
-#include "params.h"
+
+typedef struct Parametro_Decl Parametro_Decl;
+typedef struct Parametro_Call Parametro_Call;
 
 /**
  * Información asociada a un identificador en el árbol.

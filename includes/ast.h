@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 #include "info.h"
+#include "params.h"
+#include "enums.h"
 
 /**
  * Nodo del árbol de sintaxis abstracta (AST).

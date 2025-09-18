@@ -1,11 +1,13 @@
 %{
-	#include <stdio.h>
+    #include <stdio.h>
     #include <string.h>
-	int yylex(void);
-	extern void yyerror();
+    #include "includes/tsim.h"
+    int yylex(void);
+    extern void yyerror();
     extern FILE *yyin;
     extern int yylineno;
     extern int yycolumn;
+    Nivel *tabla = NULL;
 %}
 
 %code requires {
@@ -13,6 +15,7 @@
     #include <string.h>
     #include <stdbool.h>
     #include "includes/ast.h"
+    #include "includes/semantico.h"
 }
 
 %union{
@@ -46,9 +49,9 @@
 %type <tipo> type
 
 %%
-    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4); imprimir_vertical($$, "", 1);}
-           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); imprimir_vertical($$, "", 1);}
-           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); imprimir_vertical($$, "", 1);}
+    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4); imprimir_vertical($$, "", 1);  tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual);}
+           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); imprimir_vertical($$, "", 1); tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual);}
+           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3); imprimir_vertical($$, "", 1);  tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual);}
            | T_PROGRAM T_BO T_BC                        {$$ = NULL;}
            ;
     
@@ -70,7 +73,7 @@
 
 
     block: T_BO var_decls statements T_BC {$$ = crear_arbol_nodo(BLOQUE, yylineno, yycolumn, $2, $3);}
-         | T_BO statements T_BC {$$ = crear_arbol_nodo(BLOQUE, yylineno, yycolumn, $2, NULL);}
+         | T_BO statements T_BC {$$ = crear_arbol_nodo(BLOQUE, yylineno, yycolumn, NULL, $2);}
          | T_BO var_decls T_BC  {$$ = NULL;}
          | T_BO T_BC            {$$ = NULL;}
          ;
@@ -104,15 +107,15 @@
                ;
 
 
-    params_decls: type T_ID                         {Info_ID *id = malloc(sizeof(Info_ID));
-                                                     id->nombre = strdup($2);
-                                                     id->tipo = $1;
-                                                     $$ = agregar_param(NULL, id, FUNCION_DECL);
+    params_decls: type T_ID                         {Info_Union *param = malloc(sizeof(Info_Union));
+                                                     param->id.nombre = strdup($2);
+                                                     param->id.tipo = $1;
+                                                     $$ = agregar_param(NULL, param, FUNCION_DECL);
                                                     }
-                | params_decls T_COMMA type T_ID    {Info_ID *id = malloc(sizeof(Info_ID));
-                                                     id->nombre = strdup($4);
-                                                     id->tipo = $3;
-                                                     $$ = agregar_param($1, id, FUNCION_DECL);
+                | params_decls T_COMMA type T_ID    {Info_Union *param = malloc(sizeof(Info_Union));
+                                                     param->id.nombre = strdup($4);
+                                                     param->id.tipo = $3;
+                                                     $$ = agregar_param($1, param, FUNCION_DECL);
                                                     }
                 ;
 
@@ -131,9 +134,9 @@
         | literal           {$$ = $1;}
         | expr T_OR expr    {$$ = crear_arbol_operador("||", OPERADOR_BINARIO, BOOL, yylineno, yycolumn, $1, $3);}
         | expr T_AND expr   {$$ = crear_arbol_operador("&&", OPERADOR_BINARIO, BOOL, yylineno, yycolumn, $1, $3);}
-        | expr T_GT expr    {$$ = crear_arbol_operador(">", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
-        | expr T_LT expr    {$$ = crear_arbol_operador("<", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
-        | expr T_COMP expr  {$$ = crear_arbol_operador("==", OPERADOR_BINARIO, VACIO, yylineno, yycolumn, $1, $3);}
+        | expr T_GT expr    {$$ = crear_arbol_operador(">", OPERADOR_BINARIO, BOOL, yylineno, yycolumn, $1, $3);}
+        | expr T_LT expr    {$$ = crear_arbol_operador("<", OPERADOR_BINARIO, BOOL, yylineno, yycolumn, $1, $3);}
+        | expr T_COMP expr  {$$ = crear_arbol_operador("==", OPERADOR_BINARIO, BOOL, yylineno, yycolumn, $1, $3);}
         | expr T_ADD expr   {$$ = crear_arbol_operador("+", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
         | expr T_MINUS expr {$$ = crear_arbol_operador("-", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
         | expr T_MULT expr  {$$ = crear_arbol_operador("*", OPERADOR_BINARIO, ENTERO, yylineno, yycolumn, $1, $3);}
