@@ -81,6 +81,10 @@ void procesar_declaracion_metodo(Arbol *arbol,Nivel *nivelActual) {
 
         if (arbol->izq) {
             nivelActual = procesar_bloque(arbol->izq, nivelActual, params);  
+            if  (buscar_return(arbol->izq) == 0 && arbol->info->funcion_decl.tipo != VACIO) {
+                printf("Error: Un método que debería retornar un valor no lo hace.\n");
+                return;
+            }
         } else { // Método extern
             if (params) {
                 Nivel *temp = agregarNivel(nivelActual);
@@ -437,4 +441,17 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual) {
     }
 
     return 1;
+}
+
+int buscar_return(Arbol *sentencias) {
+    if (sentencias == NULL) {
+        return 0;
+    } else if (sentencias->tipo_info == RETURN) {
+        return 1;
+    } else if (sentencias->tipo_info == IF || (sentencias->izq && sentencias->izq->tipo_info == WHILE) || (sentencias->der && sentencias->der->tipo_info == WHILE)) {
+        return (buscar_return(sentencias->izq) && buscar_return(sentencias->der));
+    } else {
+        return buscar_return(sentencias->izq) || buscar_return(sentencias->der);
+    }
+
 }
