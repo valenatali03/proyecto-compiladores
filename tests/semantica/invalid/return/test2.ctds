@@ -1,0 +1,6 @@
+program
+	{
+		integer foo(){
+			return true;
+		}
+	}

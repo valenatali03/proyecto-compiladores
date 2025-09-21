@@ -1,0 +1,8 @@
+program
+	{
+		void main(){
+			while(2 + true){
+				
+			}
+		}
+	}

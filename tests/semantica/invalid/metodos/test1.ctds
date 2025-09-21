@@ -1,0 +1,6 @@
+program
+	{
+		void main(){
+			foo();
+		}
+	}

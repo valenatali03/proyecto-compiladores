@@ -1,0 +1,4 @@
+program
+	{
+		integer x = true == 1;
+	}

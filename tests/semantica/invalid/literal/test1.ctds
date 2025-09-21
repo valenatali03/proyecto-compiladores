@@ -1,0 +1,4 @@
+program
+	{
+		integer x = 2147483648;
+	}
