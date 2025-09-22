@@ -1,0 +1,36 @@
+#ifndef ENUMS_H
+#define ENUMS_H
+
+// Tipos de datos posibles
+typedef enum
+{
+    VACIO,
+    ENTERO,
+    BOOL
+} Tipo;
+
+// Tipos de nodos en el AST
+typedef enum
+{
+    ID,
+    OPERADOR_BINARIO,
+    OPERADOR_UNARIO,
+    LITERAL,
+    DECLARACION_VARIABLE,
+    ASIGNACION,
+    PROGRAMA,
+    SENTENCIAS,
+    BLOQUE,
+    RETURN,
+    DECLARACIONES_VARIABLES,
+    DECLARACIONES_FUNCIONES,
+    FUNCION_DECL,
+    FUNCION_CALL,
+    IF,
+    WHILE
+} Tipo_Info;
+
+extern const char *tipo_str[];
+extern const char *tipo_info_str[];
+
+#endif

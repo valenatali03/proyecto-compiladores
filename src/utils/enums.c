@@ -1,0 +1,24 @@
+#include "../includes/enums.h"
+
+const char *tipo_str[] = {
+    [VACIO] = "VACIO",
+    [ENTERO] = "ENTERO",
+    [BOOL] = "BOOL"};
+
+const char *tipo_info_str[] = {
+    [ID] = "ID",
+    [OPERADOR_BINARIO] = "OPERADOR_BINARIO",
+    [OPERADOR_UNARIO] = "OPERADOR_UNARIO",
+    [LITERAL] = "LITERAL",
+    [DECLARACION_VARIABLE] = "DECLARACION_VARIABLE",
+    [ASIGNACION] = "ASIGNACION",
+    [PROGRAMA] = "PROGRAMA",
+    [SENTENCIAS] = "SENTENCIAS",
+    [BLOQUE] = "BLOQUE",
+    [RETURN] = "RETURN",
+    [DECLARACIONES_VARIABLES] = "DECLARACIONES_VARIABLES",
+    [DECLARACIONES_FUNCIONES] = "DECLARACIONES_FUNCIONES",
+    [FUNCION_DECL] = "FUNCION_DECL",
+    [FUNCION_CALL] = "FUNCION_CALL",
+    [IF] = "IF",
+    [WHILE] = "WHILE"};

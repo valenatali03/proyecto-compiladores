@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "includes/ast.h"
 
 extern int yylex(void);
-extern int yyparse(void);
+extern int yyparse(Arbol **arbol);
 extern FILE *yyin;
 
 // Archivos de salida globales
@@ -71,6 +72,19 @@ int main(int argc, char *argv[]) {
             if (out_sint) fclose(out_sint);
             return 1;
         }
+    } else if (strcmp(target, "ast") == 0) {
+        char fname1[300], fname2[300];
+        snprintf(fname1, sizeof(fname1), "%s.lex", base); // Archivo de salida de análisis léxico
+        snprintf(fname2, sizeof(fname2), "%s.sint", base); // Archivo de salida de análisis sintáctico
+        out_lex = fopen(fname1, "w");
+        out_sint = fopen(fname2, "w");
+        if (!out_lex || !out_sint) {
+            perror("No se pueden crear archivos de salida");
+            fclose(yyin);
+            if (out_lex) fclose(out_lex);
+            if (out_sint) fclose(out_sint);
+            return 1;
+        }
     } else {
         fprintf(stderr, "Target desconocido: %s\n", target);
         fclose(yyin);
@@ -81,11 +95,20 @@ int main(int argc, char *argv[]) {
     if (strcmp(target, "scan") == 0) {
         while (yylex() != 0) {}
     } else if (strcmp(target, "parse") == 0) {
-        int res = yyparse();  // Ejecuta el parser
+        Arbol *arbol = NULL;
+        int res = yyparse(&arbol);  // Ejecuta el parser
         if (res == 0) {
             fprintf(out_sint, "Análisis sintáctico exitoso\n");
         } else {
             fprintf(out_sint, "Se detectaron errores de sintaxis\n");
+        }
+    } else if (strcmp(target, "ast") == 0) {
+        Arbol *arbol = NULL;
+        int res = yyparse(&arbol);  // Ejecuta el parser
+        if (res == 0) {
+            generar_dot(arbol, "arbol.dot");
+        } else {
+            printf("Error al construir el arbol.\n");;
         }
     }
 
