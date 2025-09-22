@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         imprimir_uso(argv[0]);
     }
 
-    char *target = "parse"; // Por defecto ejecuta hasta la etapa parse
+    char *target = "ast"; // Por defecto ejecuta hasta la etapa ast
     char *filename = NULL;
 
     for (int i = 1; i < argc; i++) {
@@ -106,9 +106,10 @@ int main(int argc, char *argv[]) {
         Arbol *arbol = NULL;
         int res = yyparse(&arbol);  // Ejecuta el parser
         if (res == 0) {
-            generar_dot(arbol, "arbol.dot");
+            fprintf(out_sint, "Análisis sintáctico exitoso\n");
+            exportar_ast_a_dot(arbol, "arbol.dot");
         } else {
-            printf("Error al construir el arbol.\n");;
+            fprintf(out_sint, "Se detectaron errores de sintaxis\n");
         }
     }
 
