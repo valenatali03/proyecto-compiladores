@@ -5,7 +5,7 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param)
 {
     switch (tipo_param)
     {
-    case FUNCION_CALL:
+    case CALL_FUNCION:
         Parametro_Call *lista = (Parametro_Call *)params;
         Arbol *expr = (Arbol *)data;
 
@@ -31,7 +31,7 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param)
 
         break;
 
-    case FUNCION_DECL:
+    case DECL_FUNCION:
         Parametro_Decl *parametros = (Parametro_Decl *)params;
         Info_Union *info = (Info_Union *)data;
 

@@ -14,8 +14,8 @@ Nivel *crearTabla()
     return tabla;
 }
 
-
-Nivel *agregarNivel(Nivel *tabla) {
+Nivel *agregarNivel(Nivel *tabla)
+{
     Nivel *nivel = malloc(sizeof(Nivel));
 
     nivel->head = NULL;
@@ -50,7 +50,7 @@ void agregarSimbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
         Simbolo *aux = nivel->head;
         while (aux->next != NULL)
         {
-            aux= aux->next;
+            aux = aux->next;
         }
         aux->next = s;
     }
@@ -73,7 +73,7 @@ Info_Union *buscarSimbolo(Nivel *nivel, char *nombre, Tipo_Info flag)
                 }
                 break;
 
-            case FUNCION_DECL:
+            case DECL_FUNCION:
                 if (strcmp(s->info->funcion_decl.nombre, nombre) == 0 && flag == s->flag)
                 {
                     return s->info;
@@ -93,40 +93,44 @@ Info_Union *buscarSimbolo(Nivel *nivel, char *nombre, Tipo_Info flag)
 Info_Union *buscar_en_nivel(Nivel *nivel, char *nombre, Tipo_Info flag)
 {
     Simbolo *s = nivel->head;
-        while (s != NULL)
+    while (s != NULL)
+    {
+        switch (s->flag)
         {
-            switch (s->flag)
+        case ID:
+            if (strcmp(s->info->id.nombre, nombre) == 0 && flag == s->flag)
             {
-            case ID:
-                if (strcmp(s->info->id.nombre, nombre) == 0 && flag == s->flag)
-                {
-                    return s->info;
-                }
-                break;
-
-            case FUNCION_DECL:
-                if (strcmp(s->info->funcion_decl.nombre, nombre) == 0 && flag == s->flag)
-                {
-                    return s->info;
-                }
-                break;
-
-            default:
-                break;
+                return s->info;
             }
-            s = s->next;
+            break;
+
+        case DECL_FUNCION:
+            if (strcmp(s->info->funcion_decl.nombre, nombre) == 0 && flag == s->flag)
+            {
+                return s->info;
+            }
+            break;
+
+        default:
+            break;
         }
+        s = s->next;
+    }
     return NULL;
 }
 
-Info_Union *buscarUltimoMetodo(Nivel* nivel) {
-    if (!nivel) return NULL;
+Info_Union *buscarUltimoMetodo(Nivel *nivel)
+{
+    if (!nivel)
+        return NULL;
 
-    Simbolo* s = nivel->head;
-    Info_Union* ultimoMetodo = NULL;
+    Simbolo *s = nivel->head;
+    Info_Union *ultimoMetodo = NULL;
 
-    while (s != NULL) {
-        if (s->flag == FUNCION_DECL) {
+    while (s != NULL)
+    {
+        if (s->flag == DECL_FUNCION)
+        {
             ultimoMetodo = s->info;
         }
         s = s->next;
@@ -135,19 +139,19 @@ Info_Union *buscarUltimoMetodo(Nivel* nivel) {
     return ultimoMetodo;
 }
 
-
 void printSimbolos(Nivel *nivel)
 {
-  Simbolo *aux = nivel->head;
-  while (aux != NULL)
-  {
-    printf("%s ", aux->info->id.nombre);
+    Simbolo *aux = nivel->head;
+    while (aux != NULL)
+    {
+        printf("%s ", aux->info->id.nombre);
 
-    aux = aux->next;
-  }
+        aux = aux->next;
+    }
 }
 
-void printTabla(Nivel *tabla) {
+void printTabla(Nivel *tabla)
+{
     Nivel *aux = tabla;
     int i = 1;
     while (aux != NULL)
@@ -158,5 +162,3 @@ void printTabla(Nivel *tabla) {
         i++;
     }
 }
-
-
