@@ -6,13 +6,13 @@
 
 void analisis_semantico(Arbol *arbol, Nivel *tabla);
 
-void procesar_declaracion_variable(Arbol *arbol,Nivel *tabla);
+void procesar_declaracion_variable(Arbol *arbol, Nivel *tabla);
 
-void declarar_variable(Arbol *arbol,Nivel *tabla);
+void declarar_variable(Arbol *arbol, Nivel *tabla);
 
-void procesar_declaracion_metodo(Arbol *arbol,Nivel *tabla);
+void procesar_declaracion_metodo(Arbol *arbol, Nivel *tabla);
 
-void declarar_metodo(Arbol *arbol,Nivel *tabla);
+void declarar_metodo(Arbol *arbol, Nivel *tabla);
 
 void procesar_params(Parametro_Decl *params, Nivel *nivelActual);
 
@@ -37,5 +37,9 @@ Tipo obtener_tipo(Arbol *arbol, Nivel *tabla);
 void procesar_return(Arbol *arbol, Nivel *nivelActual);
 
 int procesar_metodo(Arbol *arbol, Nivel *nivelActual);
+
+int buscar_return(Arbol *sentencias);
+
+void procesar_main(char *nombre, Parametro_Decl *params);
 
 #endif

@@ -37,11 +37,12 @@
 
 %left T_OR
 %left T_AND
-%left T_GT T_LT T_COMP
+%left T_COMP
 %left T_ADD T_MINUS
 %left T_MULT T_DIV T_MOD
 %right T_NOT
 %right UMINUS
+%nonassoc T_GT T_LT
 
 %type <ast> expr literal bool_lit method_call method_decl method_decls statement statements block var_decl var_decls program
 %type <params_call> param_list 

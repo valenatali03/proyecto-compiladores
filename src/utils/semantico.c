@@ -3,6 +3,8 @@
 #include <string.h>
 
 extern Nivel *tabla;
+int is_main = 0;
+int main_has_params = 0;
 
 void analisis_semantico(Arbol *arbol, Nivel *nivelActual)
 {
@@ -17,6 +19,16 @@ void analisis_semantico(Arbol *arbol, Nivel *nivelActual)
     if (arbol->der)
     {
         procesar_declaracion_metodo(arbol->der, nivelActual);
+    }
+
+    if (!is_main)
+    {
+        printf("Error: No se definio funcion main\n");
+    }
+
+    if (main_has_params)
+    {
+        printf("Error: Funcion main no puede tener parametros \n");
     }
 }
 
@@ -127,6 +139,8 @@ void declarar_metodo(Arbol *arbol, Nivel *nivelActual)
 {
 
     char *nombre = arbol->info->funcion_decl.nombre;
+
+    procesar_main(nombre, arbol->info->funcion_decl.params);
 
     if (buscar_en_nivel(nivelActual, nombre, arbol->tipo_info))
     {
@@ -567,5 +581,18 @@ int buscar_return(Arbol *sentencias)
     else
     {
         return buscar_return(sentencias->izq) || buscar_return(sentencias->der);
+    }
+}
+
+void procesar_main(char *nombre, Parametro_Decl *params)
+{
+    if (strcmp(nombre, "main") == 0)
+    {
+        is_main = 1;
+    }
+
+    if (params)
+    {
+        main_has_params = 1;
     }
 }
