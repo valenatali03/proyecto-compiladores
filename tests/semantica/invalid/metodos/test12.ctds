@@ -1,12 +1,12 @@
 program 
     {
+		integer x = 0;
+		
 		integer foo(){
-			return 2;
+			x = 0;
 		}
 
 		void main(){
-			integer x = foo();
-
-			x = 2;
+			foo();
 		}
     }

@@ -1,0 +1,14 @@
+program 
+    {
+		void main(){
+			if(true) then {
+				if(true) then {
+					return;
+				} else {
+					if(true) then {
+						return;
+					}
+				}
+			}
+		}
+    }

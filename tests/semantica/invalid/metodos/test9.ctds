@@ -4,4 +4,8 @@ program
 		integer inc(integer z){
 			z = false;
 		}
+
+        void main(){
+			
+		}
     }
