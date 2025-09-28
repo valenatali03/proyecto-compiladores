@@ -1,4 +1,12 @@
 program 
 	{
-		
+        integer x = 0;
+
+		integer inc(integer x, integer x) {
+            return x;
+        }
+
+        void main(){
+            
+        }
     }

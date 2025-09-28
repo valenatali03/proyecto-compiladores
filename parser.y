@@ -112,18 +112,18 @@
     params_decls: type T_ID                         {Info_Union *param = malloc(sizeof(Info_Union));
                                                      param->id.nombre = strdup($2);
                                                      param->id.tipo = $1;
-                                                     $$ = agregar_param(NULL, param, FUNCION_DECL);
+                                                     $$ = agregar_param(NULL, param, FUNCION_DECL, yylineno, yycolumn);
                                                     }
                 | params_decls T_COMMA type T_ID    {Info_Union *param = malloc(sizeof(Info_Union));
                                                      param->id.nombre = strdup($4);
                                                      param->id.tipo = $3;
-                                                     $$ = agregar_param($1, param, FUNCION_DECL);
+                                                     $$ = agregar_param($1, param, FUNCION_DECL, yylineno, yycolumn);
                                                     }
                 ;
 
 
-    param_list: expr                    {$$ = agregar_param(NULL, $1, FUNCION_CALL);}
-              | param_list T_COMMA expr {$$ = agregar_param($1, $3, FUNCION_CALL);}
+    param_list: expr                    {$$ = agregar_param(NULL, $1, FUNCION_CALL, yylineno, yycolumn);}
+              | param_list T_COMMA expr {$$ = agregar_param($1, $3, FUNCION_CALL, yylineno, yycolumn);}
               ;
 
 

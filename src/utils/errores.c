@@ -19,63 +19,71 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
 
     switch (codigo)
     {
-    case VAR_NO_DECLARADA: {
+    case VAR_NO_DECLARADA:
+    {
         const char *nombre = va_arg(args, const char *);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: variable '%s' no declarada",
                  linea, colum, nombre);
         break;
     }
-    case VAR_YA_DECLARADA: {
+    case VAR_YA_DECLARADA:
+    {
         const char *nombre = va_arg(args, const char *);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: variable '%s' ya declarada",
                  linea, colum, nombre);
         break;
     }
-case VAR_VACIO: {
+    case VAR_VACIO:
+    {
         const char *nombre = va_arg(args, const char *);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: variable '%s' declarada VOID",
                  linea, colum, nombre);
         break;
     }
-    case FUN_NO_DECLARADA: {
+    case FUN_NO_DECLARADA:
+    {
         const char *nombre = va_arg(args, const char *);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: función '%s' no declarada",
                  linea, colum, nombre);
         break;
     }
-    case FUN_YA_DECLARADA: {
+    case FUN_YA_DECLARADA:
+    {
         const char *nombre = va_arg(args, const char *);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: función '%s' ya declarada",
                  linea, colum, nombre);
         break;
     }
-     case TIPO_INCOMPATIBLE: {
+    case TIPO_INCOMPATIBLE:
+    {
         Tipo esperado = va_arg(args, Tipo);
         Tipo recibido = va_arg(args, Tipo);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: tipo incompatible, se esperaba '%s' pero se recibió '%s'",
-                 linea, colum, tipo_a_string(esperado), tipo_a_string(recibido));
+                 linea, colum, tipo_str[esperado], tipo_str[recibido]);
         break;
     }
-    case CANT_PARAMETROS: {
+    case CANT_PARAMETROS:
+    {
         const char *funcion = va_arg(args, const char *);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: llamada a función '%s' con cantidad de parámetros incorrectos",
                  linea, colum, funcion);
         break;
     }
-    case TIPO_PARAMETRO: {
-        const char* funcion = va_arg(args, const char*);
+    case TIPO_PARAMETRO:
+    {
+        const char *funcion = va_arg(args, const char *);
         Tipo esperado = va_arg(args, Tipo);
         Tipo recibido = va_arg(args, Tipo);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: en función '%s', tipo de parámetro incompatible: se esperaba '%s' pero se recibió '%s'",
-                 linea, colum, funcion, tipo_a_string(esperado), tipo_a_string(recibido));
+                 linea, colum, funcion, tipo_str[esperado], tipo_str[recibido]);
         break;
     }
     default:
@@ -94,14 +102,5 @@ void mostrarErrores(void)
     for (int i = 0; i < cantErrores; i++)
     {
         printf("%s\n", errores[i].mensaje);
-    }
-}
-
-const char* tipo_a_string(Tipo t) {
-    switch(t) {
-        case VACIO:  return "VACIO";
-        case ENTERO: return "ENTERO";
-        case BOOL:   return "BOOL";
-        default:     return "DESCONOCIDO";
     }
 }

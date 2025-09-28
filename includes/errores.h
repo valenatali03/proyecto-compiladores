@@ -19,7 +19,8 @@ typedef enum
     TIPO_PARAMETRO
 } CodigoError;
 
-typedef struct {
+typedef struct
+{
     CodigoError codigo;
     char mensaje[MAX_MSG];
 } Error;
@@ -31,7 +32,5 @@ extern int cantErrores;
 // Funciones
 void reportarError(CodigoError codigo, int linea, int colum, ...);
 void mostrarErrores(void);
-// Convierte Tipo a cadena
-const char* tipo_a_string(Tipo t);
 
 #endif
