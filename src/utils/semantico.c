@@ -6,6 +6,8 @@
 extern Nivel *tabla;
 int is_main = 0;
 int main_has_params = 0;
+int main_params_line = 0;
+int main_params_colum = 0;
 
 void analisis_semantico(Arbol *arbol, Nivel *nivelActual)
 {
@@ -24,12 +26,14 @@ void analisis_semantico(Arbol *arbol, Nivel *nivelActual)
 
     if (!is_main)
     {
-        printf("Error: No se definio funcion main\n");
+        reportarError(MAIN_NO_DECLARADO, arbol->linea, arbol->colum);
+        // printf("Error: No se definio funcion main\n");
     }
 
     if (main_has_params)
     {
-        printf("Error: Funcion main no puede tener parametros \n");
+        reportarError(MAIN_CON_PARAMS, main_params_line, main_params_colum);
+        // printf("Error: Funcion main no puede tener parametros \n");
     }
 }
 
@@ -109,9 +113,11 @@ void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
         if (arbol->izq)
         {
             nivelActual = procesar_bloque(arbol->izq, nivelActual, params);
+            char *nombre = arbol->info->funcion_decl.nombre;
             if (buscar_return(arbol->izq) == 0 && arbol->info->funcion_decl.tipo != VACIO)
             {
-                printf("Error: Un método que debería retornar un valor no lo hace.\n");
+                reportarError(FUN_SIN_RETURN, arbol->linea, arbol->colum, nombre);
+                // printf("Error: Un método que debería retornar un valor no lo hace.\n");
                 return;
             }
         }

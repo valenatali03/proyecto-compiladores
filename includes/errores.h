@@ -16,7 +16,10 @@ typedef enum
     FUN_YA_DECLARADA,
     TIPO_INCOMPATIBLE,
     CANT_PARAMETROS,
-    TIPO_PARAMETRO
+    TIPO_PARAMETRO,
+    FUN_SIN_RETURN,
+    MAIN_NO_DECLARADO,
+    MAIN_CON_PARAMS
 } CodigoError;
 
 typedef struct

@@ -59,6 +59,14 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
                  linea, colum, nombre);
         break;
     }
+    case FUN_SIN_RETURN:
+    {
+        const char *nombre = va_arg(args, const char *);
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: función '%s' debe retornar valor y no lo hace",
+                 linea, colum, nombre);
+        break;
+    }
     case TIPO_INCOMPATIBLE:
     {
         Tipo esperado = va_arg(args, Tipo);
@@ -84,6 +92,20 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: en función '%s', tipo de parámetro incompatible: se esperaba '%s' pero se recibió '%s'",
                  linea, colum, funcion, tipo_str[esperado], tipo_str[recibido]);
+        break;
+    }
+    case MAIN_NO_DECLARADO:
+    {
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: Main no declarado",
+                 linea, colum);
+        break;
+    }
+    case MAIN_CON_PARAMS:
+    {
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: Main declarado con parametros",
+                 linea, colum);
         break;
     }
     default:
