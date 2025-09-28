@@ -16,6 +16,7 @@
     #include <stdbool.h>
     #include "includes/ast.h"
     #include "includes/semantico.h"
+    #include "includes/errores.h"
 }
 
 %union{
@@ -50,9 +51,9 @@
 %type <tipo> type
 
 %%
-    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4); imprimir_vertical($$, "", 1);  tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual);}
-           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); imprimir_vertical($$, "", 1); tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual);}
-           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3); imprimir_vertical($$, "", 1);  tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual);}
+    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4); imprimir_vertical($$, "", 1);  tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
+           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); imprimir_vertical($$, "", 1); tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
+           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3); imprimir_vertical($$, "", 1);  tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
            | T_PROGRAM T_BO T_BC                        {$$ = NULL;}
            ;
     

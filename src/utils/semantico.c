@@ -1,6 +1,7 @@
 #include "../../includes/semantico.h"
 #include <stdio.h>
 #include <string.h>
+#include "../../includes/errores.h"
 
 extern Nivel *tabla;
 int is_main = 0;
@@ -56,17 +57,19 @@ void procesar_declaracion_variable(Arbol *arbol, Nivel *nivelActual)
 void declarar_variable(Arbol *arbol, Nivel *nivelActual)
 {
 
+    char *nombre = arbol->izq->info->id.nombre;
+
     if (arbol->izq->info->id.tipo == VACIO)
     {
-        printf("Variable declarada VACIO.\n");
+        reportarError(VAR_VACIO, arbol->linea, arbol->colum, nombre);
+        //printf("Variable declarada VACIO.\n");
         return;
     }
 
-    char *nombre = arbol->izq->info->id.nombre;
-
     if (buscar_en_nivel(nivelActual, nombre, arbol->izq->tipo_info))
     {
-        printf("Variable %s ya declarada.\n", nombre);
+        reportarError(VAR_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
+        //printf("Variable %s ya declarada.\n", nombre);
         return;
     }
 
@@ -78,7 +81,8 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
         Tipo tId = arbol->izq->info->id.tipo;
         if (tId != tExpr)
         {
-            printf("Los tipos NO coinciden en la declaracion.\n");
+            reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, tId, tExpr);
+            //printf("Los tipos NO coinciden en la declaracion.\n");
             return;
         }
     }
@@ -144,7 +148,8 @@ void declarar_metodo(Arbol *arbol, Nivel *nivelActual)
 
     if (buscar_en_nivel(nivelActual, nombre, arbol->tipo_info))
     {
-        printf("Metodo %s ya declarado.\n", nombre);
+        reportarError(FUN_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
+        //printf("Metodo %s ya declarado.\n", nombre);
     }
     else
     {
@@ -162,13 +167,14 @@ void procesar_params(Parametro_Decl *params, Nivel *nivelActual)
 
         if (t == VACIO)
         {
-            printf("Parametro no puede ser tipo VACIO\n");
+            reportarError(VAR_VACIO, 4, 3, nombre);
             return;
         }
 
         if (buscar_en_nivel(nivelActual, nombre, ID))
         {
-            printf("Variable %s ya declarada.\n", nombre);
+            reportarError(VAR_YA_DECLARADA, 4, 3, nombre); // Arreglar linea y columna
+            //printf("Variable %s ya declarada.\n", nombre);
             return;
         }
 
@@ -236,7 +242,8 @@ int procesar_if(Arbol *arbol, Nivel *nivelActual)
 
     if (t != BOOL)
     {
-        printf("Error de tipo en condición de IF\n");
+        reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, BOOL, t);
+        //printf("Error de tipo en condición de IF\n");
         return 0;
     }
 
@@ -265,7 +272,8 @@ int procesar_while(Arbol *arbol, Nivel *nivelActual)
 
     if (t != BOOL)
     {
-        printf("Error de tipo en condición de WHILE\n");
+        reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, BOOL, t);
+        //printf("Error de tipo en condición de WHILE\n");
         return 0;
     }
 
@@ -318,7 +326,8 @@ int procesar_asignacion(Arbol *arbol, Nivel *nivelActual)
 
     if (!simbolo)
     {
-        printf("Asignacion no valida %s no declarada.\n", nombre);
+        reportarError(VAR_NO_DECLARADA, arbol->linea, arbol->colum, nombre);
+        //printf("Asignacion no valida %s no declarada.\n", nombre);
         return 0;
     }
 
@@ -334,7 +343,8 @@ int procesar_asignacion(Arbol *arbol, Nivel *nivelActual)
 
     if (tId != tExpr)
     {
-        printf("Error de tipo en asignacion: %s es de tipo %d pero se asigna tipo %d.\n", nombre, tId, tExpr);
+        reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, tId, tExpr);
+        //printf("Error de tipo en asignacion: %s es de tipo %d pero se asigna tipo %d.\n", nombre, tId, tExpr);
         return 0;
     }
 
@@ -357,7 +367,8 @@ int procesar_expresion(Arbol *arbol, Nivel *nivelActual)
 
         if (!simbolo)
         {
-            printf("Variable no declarada.\n");
+            reportarError(VAR_NO_DECLARADA, arbol->linea, arbol->colum, nombre);
+            //printf("Variable no declarada.\n");
             return 0;
         }
         arbol->info = simbolo;
@@ -514,7 +525,8 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
 
     if (!metodo)
     {
-        printf("Llamada de método no declarado.\n");
+        reportarError(FUN_NO_DECLARADA, arbol->linea, arbol->colum, arbol->info->funcion_call.nombre);
+        //printf("Llamada de método no declarado.\n");
         return 0;
     }
 
@@ -528,7 +540,8 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
 
     if ((!params_decl && params_call) || (params_decl && !params_call))
     {
-        printf("Error: cantidad de parámetros incorrecta en llamada.\n");
+        reportarError(CANT_PARAMETROS, arbol->linea, arbol->colum, arbol->info->funcion_call.nombre);
+        //printf("Error: cantidad de parámetros incorrecta en llamada.\n");
         return 0;
     }
 
@@ -546,7 +559,8 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
 
         if (t1 != t2)
         {
-            printf("Los tipos de parametros no coinciden.\n");
+            reportarError(TIPO_PARAMETRO, arbol->linea, arbol->colum, arbol->info->funcion_call.nombre, t1, t2);
+            //printf("Los tipos de parametros no coinciden.\n");
             return 0;
         }
 
@@ -557,7 +571,8 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
     // Si uno de los dos no terminó al mismo tiempo, error
     if (params_decl || params_call)
     {
-        printf("Cantidad de parámetros no coincide\n");
+        reportarError(CANT_PARAMETROS, arbol->linea, arbol->colum, arbol->info->funcion_call.nombre);
+        //printf("Cantidad de parámetros no coincide\n");
         return 0;
     }
 
@@ -586,13 +601,14 @@ int buscar_return(Arbol *sentencias)
 
 void procesar_main(char *nombre, Parametro_Decl *params)
 {
+    if (strcmp(nombre, "main") == 0 && params)
+    {
+        is_main = 1;
+        main_has_params = 1;
+    }
+
     if (strcmp(nombre, "main") == 0)
     {
         is_main = 1;
-    }
-
-    if (params)
-    {
-        main_has_params = 1;
     }
 }

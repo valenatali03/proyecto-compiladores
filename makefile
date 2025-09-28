@@ -9,7 +9,7 @@ BUILD = build
 # Archivos fuente
 LEXER = scanner.l
 PARSER = parser.y
-SRCS = $(SRC)/ast.c $(SRC)/params.c $(SRC)/enums.c $(SRC)/tsim.c $(SRC)/semantico.c
+SRCS = $(SRC)/ast.c $(SRC)/params.c $(SRC)/enums.c $(SRC)/tsim.c $(SRC)/semantico.c $(SRC)/errores.c
 
 # Herramientas
 LEX = flex
