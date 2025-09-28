@@ -43,6 +43,8 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param, int linea, i
             parametros = malloc(sizeof(Parametro_Decl));
             parametros->info = info;
             parametros->next = NULL;
+            parametros->linea = linea;
+            parametros->colum = colum;
             return parametros;
         }
 

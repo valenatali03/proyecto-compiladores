@@ -611,6 +611,8 @@ void procesar_main(char *nombre, Parametro_Decl *params)
     {
         is_main = 1;
         main_has_params = 1;
+        main_params_line = params->linea;
+        main_params_colum = params->colum;
     }
 
     if (strcmp(nombre, "main") == 0)
