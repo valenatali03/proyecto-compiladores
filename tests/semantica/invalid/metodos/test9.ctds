@@ -3,6 +3,7 @@ program
         bool z = true;
 		integer inc(integer z){
 			z = false;
+            return z;
 		}
 
         void main(){

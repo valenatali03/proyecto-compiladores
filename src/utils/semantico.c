@@ -248,7 +248,7 @@ int procesar_if(Arbol *arbol, Nivel *nivelActual)
 
     if (t != BOOL)
     {
-        reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, BOOL, t);
+        reportarError(TIPO_INCOMPATIBLE, arbol->medio->linea, arbol->medio->colum, BOOL, t);
         // printf("Error de tipo en condición de IF\n");
         return 0;
     }
