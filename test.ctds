@@ -1,6 +1,3 @@
 program 
 	{
-        void main(integer x){
-            return;
-        }
     }

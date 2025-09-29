@@ -1,0 +1,15 @@
+program 
+	{
+        integer x = 2;
+        integer y = 2;
+
+        integer foo(integer x, integer y){
+            return x + y;
+        }
+
+        void main(){
+            integer x = foo(x, y);
+
+            return;
+        }
+    }

@@ -1,0 +1,10 @@
+program 
+	{
+        bool foo() {
+            return true == true;
+        }
+
+        bool main(){
+            return true && foo() || !false;
+        }
+    }
