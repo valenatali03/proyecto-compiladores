@@ -76,6 +76,16 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
                  linea, colum, tipo_str[esperado], tipo_str[recibido]);
         break;
     }
+    case RETURN_TIPO_INCOMPATIBLE:
+    {
+        const char *funcion = va_arg(args, const char *);
+        Tipo esperado = va_arg(args, Tipo);
+        Tipo recibido = va_arg(args, Tipo);
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: función '%s' el tipo de retorno esperado es '%s' pero se recibió '%s'",
+                 linea, colum, funcion, tipo_str[esperado], tipo_str[recibido]);
+        break;
+    }
     case CANT_PARAMETROS:
     {
         const char *funcion = va_arg(args, const char *);
@@ -105,6 +115,32 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
     {
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: Main declarado con parametros",
+                 linea, colum);
+        break;
+    }
+    case OP_BINARIO:
+    {
+        const char *operador = va_arg(args, const char *);
+        Tipo arg1 = va_arg(args, Tipo);
+        Tipo arg2 = va_arg(args, Tipo);
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: Operador '%s' no se puede aplicar a operandos de tipo '%s' y '%s'",
+                 linea, colum, operador, tipo_str[arg1], tipo_str[arg2]);
+        break;
+    }
+    case OP_UNARIO:
+    {
+        const char *operador = va_arg(args, const char *);
+        Tipo arg = va_arg(args, Tipo);
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: Operador '%s' no se puede aplicar a operando de tipo '%s'",
+                 linea, colum, operador, tipo_str[arg]);
+        break;
+    }
+    case NUM_FUERA_RANGO:
+    {
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: El número se encuentra fuera de rango",
                  linea, colum);
         break;
     }

@@ -67,7 +67,7 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
     {
         reportarError(VAR_VACIO, arbol->linea, arbol->colum, nombre);
         // printf("Variable declarada VACIO.\n");
-        return;
+        //return;
     }
 
     if (buscar_en_nivel(nivelActual, nombre, arbol->izq->tipo_info))
@@ -87,15 +87,12 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
         {
             reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, tId, tExpr);
             // printf("Los tipos NO coinciden en la declaracion.\n");
-            return;
         }
     }
     else
     {
-        printf("Error en la expresion a usar como valor en declaracion\n");
-        return;
+        //return;
     }
-
     agregarSimbolo(nivelActual, arbol->izq->info, arbol->izq->tipo_info);
 }
 
@@ -174,14 +171,12 @@ void procesar_params(Parametro_Decl *params, Nivel *nivelActual)
         if (t == VACIO)
         {
             reportarError(VAR_VACIO, params->linea, params->colum, nombre);
-            return;
         }
 
         if (buscar_en_nivel(nivelActual, nombre, ID))
         {
             reportarError(VAR_YA_DECLARADA, params->linea, params->colum, nombre); // Arreglar linea y columna
             // printf("Variable %s ya declarada.\n", nombre);
-            return;
         }
 
         agregarSimbolo(nivelActual, params->info, ID);
@@ -238,19 +233,15 @@ int procesar_if(Arbol *arbol, Nivel *nivelActual)
     if (!arbol)
         return 0;
 
-    if (!procesar_expresion(arbol->medio, nivelActual))
+    if (procesar_expresion(arbol->medio, nivelActual))
     {
-        printf("Error de expresion en condicion de IF\n");
-        return 0;
-    }
+        Tipo t = obtener_tipo(arbol->medio, nivelActual);
 
-    Tipo t = obtener_tipo(arbol->medio, nivelActual);
-
-    if (t != BOOL)
-    {
-        reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, BOOL, t);
-        // printf("Error de tipo en condición de IF\n");
-        return 0;
+        if (t != BOOL)
+        {
+            reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, BOOL, t);
+            // printf("Error de tipo en condición de IF\n");
+        }
     }
 
     procesar_bloque(arbol->izq, nivelActual, NULL);
@@ -268,19 +259,16 @@ int procesar_while(Arbol *arbol, Nivel *nivelActual)
     if (!arbol)
         return 0;
 
-    if (!procesar_expresion(arbol->izq, nivelActual))
+    if (procesar_expresion(arbol->izq, nivelActual))
     {
-        printf("Error de expresion en condicion de WHILE\n");
-        return 0;
-    }
+        Tipo t = obtener_tipo(arbol->izq, nivelActual);
 
-    Tipo t = obtener_tipo(arbol->izq, nivelActual);
-
-    if (t != BOOL)
-    {
-        reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, BOOL, t);
-        // printf("Error de tipo en condición de WHILE\n");
-        return 0;
+        if (t != BOOL)
+        {
+            reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, BOOL, t);
+            // printf("Error de tipo en condición de WHILE\n");
+            return 0;
+        }
     }
 
     procesar_bloque(arbol->der, nivelActual, NULL);
@@ -339,7 +327,6 @@ int procesar_asignacion(Arbol *arbol, Nivel *nivelActual)
 
     if (!procesar_expresion(arbol->der, nivelActual))
     {
-        printf("Error de tipo en expresion de asignacion.\n");
         return 0;
     }
 
@@ -392,7 +379,7 @@ int procesar_expresion(Arbol *arbol, Nivel *nivelActual)
             int valor = *(int *)arbol->info->literal.valor;
             if (valor > 2147483647 || valor < -2147483647)
             {
-                printf("Número fuera de rango.\n");
+                reportarError(NUM_FUERA_RANGO, arbol->linea, arbol->colum);
                 return 0;
             }
         }
@@ -427,15 +414,36 @@ int procesar_operador(Arbol *arbol, Nivel *nivelActual)
 
         if (strcmp(op, "==") == 0)
         {
-            return t1 == t2;
+            if (!(t1 == t2))
+            {
+                reportarError(OP_BINARIO, arbol->linea, arbol->colum, op, t1, t2);
+                return 0;
+            } else
+            {
+                return 1;
+            }
         }
         else if (strcmp(op, ">") == 0 || strcmp(op, "<") == 0)
         {
-            return t1 == ENTERO && t2 == ENTERO;
+            if (!(t1 == ENTERO && t2 == ENTERO))
+            {
+                reportarError(OP_BINARIO, arbol->linea, arbol->colum, op, t1, t2);
+                return 0;
+            } else
+            {
+                return 1;
+            }
         }
         else
         {
-            return t1 == t2 && t1 == arbol->info->operador.tipo;
+            if (!(t1 == t2 && t1 == arbol->info->operador.tipo))
+            {
+                reportarError(OP_BINARIO, arbol->linea, arbol->colum, op, t1, t2);
+                return 0;
+            } else
+            {
+                return 1;
+            }
         }
         break;
 
@@ -445,7 +453,14 @@ int procesar_operador(Arbol *arbol, Nivel *nivelActual)
 
         Tipo t = obtener_tipo(arbol->izq, nivelActual);
 
-        return t == arbol->info->operador.tipo;
+        if  (!(t == arbol->info->operador.tipo))
+        {
+            reportarError(OP_UNARIO, arbol->linea, arbol->colum, arbol->info->operador.nombre, t);
+            return 0;
+        } else
+        {
+            return 1;
+        }
         break;
     default:
         return 0;
@@ -497,15 +512,8 @@ void procesar_return(Arbol *arbol, Nivel *nivelActual)
 
     if (arbol->izq)
     { // return expr ;
-        if (t == VACIO)
-        {
-            printf("Un metodo VACIO no debe retornar expresión.\n");
-            return;
-        }
-
         if (!procesar_expresion(arbol->izq, nivelActual))
         {
-            printf("Error en la expresion del return\n");
             return;
         }
 
@@ -513,14 +521,16 @@ void procesar_return(Arbol *arbol, Nivel *nivelActual)
 
         if (t != tipoExpr)
         {
-            printf("Error de tipo RETURN\n");
+            reportarError(RETURN_TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, metodo->funcion_decl.nombre, t, tipoExpr);
+            return;
         }
     }
     else
     { // return ;
         if (t != VACIO)
         {
-            printf("Error de tipo RETURN\n");
+            reportarError(RETURN_TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, metodo->funcion_decl.nombre, t, VACIO);
+            return;
         }
     }
 }
@@ -557,7 +567,6 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
 
         if (!procesar_expresion(params_call->expr, nivelActual))
         {
-            printf("Error en la expresion utilizada en la llamada de metodo\n");
             return 0;
         }
 
@@ -567,7 +576,6 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
         {
             reportarError(TIPO_PARAMETRO, arbol->linea, arbol->colum, arbol->info->funcion_call.nombre, t1, t2);
             // printf("Los tipos de parametros no coinciden.\n");
-            return 0;
         }
 
         params_decl = params_decl->next;
