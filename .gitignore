@@ -1,5 +1,9 @@
 lex.yy.c
-scanner
+c-tds
 parser.tab.c
 parser.tab.h
+*.lex
+*.sint
 build/*
+*.png
+*.dot

@@ -1,0 +1,27 @@
+extern 
+bool 
+program 
+else 
+then 
+false 
+if 
+integer 
+return 
+true 
+void 
+while
+// comentario de una línea
+/* comentario
+de
+varias
+líneas */
+whiletrue
+WHILE
+variable_1
+123abc
+, ;
+( )
+{ }
++ - * / %
+=
+&& == || < > !

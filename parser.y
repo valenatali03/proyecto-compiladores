@@ -7,7 +7,7 @@
     extern FILE *yyin;
     extern int yylineno;
     extern int yycolumn;
-    Nivel *tabla = NULL;
+    extern FILE *out_sint;
 %}
 
 %code requires {
@@ -18,6 +18,8 @@
     #include "includes/semantico.h"
     #include "includes/errores.h"
 }
+
+%parse-param { Arbol **arbol }
 
 %union{
     int num;
@@ -164,25 +166,6 @@
             ;
 %%
 
-int main(int argc, char** argv) {
-    if (argc > 1) {
-        FILE* file = fopen(argv[1], "r");
-        if (!file) {
-            printf("Error: No se puede abrir el archivo\n");
-            return 1;
-        }
-        yyin = file;
-    }
-    
-    int result = yyparse();
-    
-    if (result != 0) {
-        printf("Error en el parsing\n");
-    }
-    
-    if (argc > 1) {
-        fclose(yyin);
-    }
-    
-    return 0;
+void yyerror(const char *s) {
+    fprintf(out_sint,"Linea %d Col %d\n└──Error de sintaxis.\n", yylineno, yycolumn);
 }

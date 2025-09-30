@@ -4,34 +4,6 @@
 #include <stdbool.h>
 #include "../includes/ast.h"
 
-static void imprimir_parametros_decl(Parametro_Decl *params, char *prefijo)
-{
-    int i = 1;
-    while (params)
-    {
-        printf("%s    ├── ParamDecl %d: %s (tipo %s)\n", prefijo, i,
-               params->info->id.nombre, tipo_str[params->info->id.tipo]);
-        params = params->next;
-        i++;
-    }
-}
-
-static void imprimir_parametros_call(Parametro_Call *params, char *prefijo)
-{
-    int i = 1;
-    while (params)
-    {
-        printf("%s    ├── ParamCall %d:\n", prefijo, i);
-        /* imprimir el AST de la expresión del parámetro */
-        char nuevo_prefijo[1024];
-        strcpy(nuevo_prefijo, prefijo);
-        strcat(nuevo_prefijo, "    │   ");
-        imprimir_vertical(params->expr, nuevo_prefijo, 1);
-        params = params->next;
-        i++;
-    }
-}
-
 Arbol *crear_arbol_operador(char *op, Tipo_Info tipo_op, Tipo tipo, int linea, int colum, Arbol *izq, Arbol *der)
 {
     Arbol *arbol = malloc(sizeof(Arbol));
@@ -86,7 +58,7 @@ Arbol *crear_arbol_funcion_decl(char *nombre, Tipo tipo, Parametro_Decl *params,
 {
     Arbol *arbol = malloc(sizeof(Arbol));
     arbol->info = malloc(sizeof(Info_Union));
-    arbol->tipo_info = FUNCION_DECL;
+    arbol->tipo_info = DECL_FUNCION;
     arbol->linea = linea;
     arbol->colum = colum;
     arbol->info->funcion_decl.valor = NULL;
@@ -104,7 +76,7 @@ Arbol *crear_arbol_funcion_call(char *nombre, Parametro_Call *params, int linea,
 {
     Arbol *arbol = malloc(sizeof(Arbol));
     arbol->info = malloc(sizeof(Info_Union));
-    arbol->tipo_info = FUNCION_CALL;
+    arbol->tipo_info = CALL_FUNCION;
     arbol->linea = linea;
     arbol->colum = colum;
     arbol->info->funcion_call.nombre = strdup(nombre);
@@ -144,119 +116,114 @@ Arbol *crear_arbol_nodo(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol 
     return arbol;
 }
 
-void inorder(Arbol *arbol)
+void imprimir_nodo_dot(Arbol *arbol, FILE *f)
 {
-    if (arbol == NULL)
+    if (!arbol)
         return;
 
-    inorder(arbol->izq);
+    char etiqueta[256];
+    char color[20];
 
-    if (arbol->tipo_info == ID)
-    {
-        printf("ID: %s\n", arbol->info->id.nombre);
-    }
-    else if (arbol->tipo_info == OPERADOR_BINARIO || arbol->tipo_info == OPERADOR_UNARIO)
-    {
-        printf("Operador: %s\n", arbol->info->operador.nombre);
-    }
-    else if (arbol->tipo_info == LITERAL)
-    {
-        if (arbol->info->literal.tipo == ENTERO)
-        {
-            printf("Literal: %d\n", *(int *)arbol->info->literal.valor);
-        }
-        else if (arbol->info->literal.tipo == BOOL)
-        {
-            printf("Literal: %s\n", (*(int *)arbol->info->literal.valor) ? "true" : "false");
-        }
-    }
-
-    inorder(arbol->der);
-}
-
-void imprimir_vertical(Arbol *arbol, char *prefijo, int es_ultimo)
-{
-    if (arbol == NULL)
-        return;
-
-    printf("%s", prefijo);
-    if (es_ultimo)
-        printf("└── ");
-    else
-        printf("├── ");
-
-    // Imprimir el nodo según su tipo
+    // Definir etiqueta y color según el tipo de nodo
     switch (arbol->tipo_info)
     {
-    case ID:
-        printf("ID(%s)\n", arbol->info->id.nombre);
-        break;
-    case OPERADOR_BINARIO || OPERADOR_UNARIO:
-        printf("Op(%s)\n", arbol->info->operador.nombre);
-        break;
-    case LITERAL:
-        if (arbol->info->literal.tipo == ENTERO)
-            printf("Lit(%d)\n", *(int *)arbol->info->literal.valor);
-        else if (arbol->info->literal.tipo == BOOL)
-            printf("Lit(%s)\n", (*(int *)arbol->info->literal.valor) ? "true" : "false");
-        else
-            printf("Lit(?)\n");
-        break;
     case DECLARACION_VARIABLE:
-        printf("DECLARACION\n");
+        snprintf(etiqueta, sizeof(etiqueta), "Decl Variable");
+        strcpy(color, "grey");
         break;
-    case DECLARACIONES_VARIABLES:
-        printf("DECLARACIONES\n");
+    case IF:
+        snprintf(etiqueta, sizeof(etiqueta), "IF");
+        strcpy(color, "grey");
         break;
-    case SENTENCIAS:
-        printf("SENTENCIAS\n");
+    case WHILE:
+        snprintf(etiqueta, sizeof(etiqueta), "WHILE");
+        strcpy(color, "grey");
         break;
-    case FUNCION_DECL:
-        printf("FUNCION_DECL %s (tipo %s)\n",
-               arbol->info->funcion_decl.nombre,
-               tipo_str[arbol->info->funcion_decl.tipo]);
-        /* imprimir parámetros */
-        imprimir_parametros_decl(arbol->info->funcion_decl.params, prefijo);
+    case DECL_FUNCION:
+        snprintf(etiqueta, sizeof(etiqueta), "FuncDecl(%s)", arbol->info->funcion_decl.nombre);
+        strcpy(color, "grey");
         break;
-    case FUNCION_CALL:
-        printf("FUNCION_CALL %s\n", arbol->info->funcion_call.nombre);
-        imprimir_parametros_call(arbol->info->funcion_call.params, prefijo);
+    case CALL_FUNCION:
+        snprintf(etiqueta, sizeof(etiqueta), "FuncCall(%s)", arbol->info->funcion_call.nombre);
+        strcpy(color, "grey");
         break;
-    case RETURN:
-        printf("RETURN_INFO\n");
+    case OPERADOR_BINARIO:
+        snprintf(etiqueta, sizeof(etiqueta), "%s", arbol->info->operador.nombre);
+        strcpy(color, "white");
         break;
-    case ASIGNACION:
-        printf("ASIGNACION\n");
+    case OPERADOR_UNARIO:
+        snprintf(etiqueta, sizeof(etiqueta), "%s", arbol->info->operador.nombre);
+        strcpy(color, "white");
         break;
     default:
-        printf("Nodo tipo %s\n", tipo_info_str[arbol->tipo_info]);
+        snprintf(etiqueta, sizeof(etiqueta), "%s", tipo_info_str[arbol->tipo_info]);
+        strcpy(color, "white");
         break;
     }
 
-    // construir prefijo para los hijos
-    char nuevo_prefijo[1024];
-    strcpy(nuevo_prefijo, prefijo);
-    if (es_ultimo)
-        strcat(nuevo_prefijo, "    ");
-    else
-        strcat(nuevo_prefijo, "│   ");
+    // Imprimir el nodo con color
+    fprintf(f, "    n%p [label=\"%s\", style=filled, fillcolor=%s, fontcolor=black];\n",
+            (void *)arbol, etiqueta, color);
 
-    // contar hijos
-    int hijos = 0;
+    // Conectar hijos
     if (arbol->izq)
-        hijos++;
+    {
+        fprintf(f, "    n%p -> n%p;\n", (void *)arbol, (void *)arbol->izq);
+        imprimir_nodo_dot(arbol->izq, f);
+    }
     if (arbol->medio)
-        hijos++;
+    {
+        fprintf(f, "    n%p -> n%p;\n", (void *)arbol, (void *)arbol->medio);
+        imprimir_nodo_dot(arbol->medio, f);
+    }
     if (arbol->der)
-        hijos++;
+    {
+        fprintf(f, "    n%p -> n%p;\n", (void *)arbol, (void *)arbol->der);
+        imprimir_nodo_dot(arbol->der, f);
+    }
 
-    // recorrer hijos (izq, medio, der)
-    if (arbol->izq)
-        imprimir_vertical(arbol->izq, nuevo_prefijo,
-                          (hijos == 1 && !arbol->medio && !arbol->der));
-    if (arbol->medio)
-        imprimir_vertical(arbol->medio, nuevo_prefijo,
-                          (hijos == 1 && !arbol->der));
-    if (arbol->der)
-        imprimir_vertical(arbol->der, nuevo_prefijo, 1);
+    // Parámetros DECL_FUNCION
+    if (arbol->tipo_info == DECL_FUNCION && arbol->info->funcion_decl.params)
+    {
+        Parametro_Decl *p = arbol->info->funcion_decl.params;
+        while (p)
+        {
+            fprintf(f, "    n%p [label=\"Param(%s : %s)\", style=filled, fillcolor=grey];\n",
+                    (void *)p,
+                    p->info->id.nombre,
+                    tipo_str[p->info->id.tipo]);
+            fprintf(f, "    n%p -> n%p;\n", (void *)arbol, (void *)p);
+            p = p->next;
+        }
+    }
+
+    // Parámetros CALL_FUNCION
+    if (arbol->tipo_info == CALL_FUNCION && arbol->info->funcion_call.params)
+    {
+        Parametro_Call *p = arbol->info->funcion_call.params;
+        while (p)
+        {
+            if (p->expr)
+            {
+                fprintf(f, "    n%p -> n%p;\n", (void *)arbol, (void *)p->expr);
+                imprimir_nodo_dot(p->expr, f);
+            }
+            p = p->next;
+        }
+    }
+}
+
+void exportar_ast_a_dot(Arbol *raiz, const char *nombre_archivo)
+{
+    FILE *f = fopen(nombre_archivo, "w");
+    if (!f)
+    {
+        perror("No se pudo abrir archivo DOT");
+        return;
+    }
+    fprintf(f, "digraph AST {\n");
+    fprintf(f, "    node [shape=ellipse, fontname=\"Courier\", fontsize=12];\n");
+    imprimir_nodo_dot(raiz, f);
+    fprintf(f, "}\n");
+    fclose(f);
 }

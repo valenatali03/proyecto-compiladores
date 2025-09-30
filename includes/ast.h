@@ -3,6 +3,7 @@
 #include "info.h"
 #include "params.h"
 #include "enums.h"
+#include <stdio.h>
 
 /**
  * Nodo del árbol de sintaxis abstracta (AST).
@@ -83,6 +84,17 @@ Arbol *crear_arbol_funcion_decl(char *nombre, Tipo tipo, Parametro_Decl *params,
  */
 Arbol *crear_arbol_funcion_call(char *nombre, Parametro_Call *params, int linea, int colum, Arbol *izq, Arbol *der);
 
+/**
+ * Crea un nodo IF del AST.
+ *
+ * @param tipo   Tipo de nodo
+ * @param linea  Línea del código fuente
+ * @param colum  Columna del código fuente
+ * @param medio  Subárbol que representa la condición del IF
+ * @param izq    Subárbol correspondiente a la rama "then"
+ * @param der    Subárbol correspondiente a la rama "else"
+ * @return       Puntero al nuevo nodo IF
+ */
 Arbol *crear_arbol_if(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol *medio, Arbol *der);
 
 /**
@@ -98,19 +110,23 @@ Arbol *crear_arbol_if(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol *m
 Arbol *crear_arbol_nodo(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol *der);
 
 /**
- * Recorre el árbol en orden e imprime los nodos.
+ * Función recursiva que imprime un nodo del AST en formato DOT
  *
- * @param arbol Raíz del árbol a recorrer
+ * @param arbol Puntero al nodo del AST a imprimir
+ * @param f     Archivo DOT abierto donde se escribirá la información
  */
-void inorder(Arbol *arbol);
+void imprimir_nodo_dot(Arbol *arbol, FILE *f);
 
 /**
- * Imprime el árbol en forma vertical (formato de árbol).
+ * Genera un archivo DOT a partir de un AST completo.
  *
- * @param arbol     Raíz del árbol a imprimir
- * @param prefijo   Prefijo usado para alinear ramas
- * @param es_ultimo Indica si el nodo es el último hijo
+ * @param raiz           Puntero a la raíz del AST
+ * @param nombre_archivo Nombre del archivo DOT a generar
+ *
+ * La función abre el archivo, escribe la cabecera del grafo,
+ * recorre todos los nodos del AST mediante `imprimir_nodo_dot`,
+ * y finalmente cierra el archivo DOT.
  */
-void imprimir_vertical(Arbol *arbol, char *prefijo, int es_ultimo);
+void exportar_ast_a_dot(Arbol *raiz, const char *nombre_archivo);
 
 #endif

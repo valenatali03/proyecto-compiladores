@@ -1,5 +1,5 @@
 # Nombre del ejecutable
-TARGET = scanner
+TARGET = c-tds
 
 # Directorios
 INCLUDES = includes
@@ -17,7 +17,7 @@ YACC = bison
 CC = gcc
 
 # Flags de compilación
-CFLAGS = -Wall -g -I$(INCLUDES)
+CFLAGS = -Wall -g -Wno-unused-function -I$(INCLUDES)
 
 # Archivos generados por flex/bison
 LEX_C = lex.yy.c
@@ -25,7 +25,8 @@ PARSER_C = parser.tab.c
 PARSER_H = parser.tab.h
 
 # Objetos (en build/)
-OBJS = $(SRCS:$(SRC)/%.c=$(BUILD)/%.o) $(BUILD)/parser.tab.o $(BUILD)/lex.yy.o
+OBJS = $(BUILD)/ast.o $(BUILD)/params.o $(BUILD)/enums.o $(BUILD)/tsim.o \
+       $(BUILD)/parser.tab.o $(BUILD)/lex.yy.o $(BUILD)/main.o
 
 # Regla principal
 $(TARGET): $(OBJS)
@@ -33,6 +34,10 @@ $(TARGET): $(OBJS)
 
 # Compilación de objetos del src/
 $(BUILD)/%.o: $(SRC)/%.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compilación de main.o
+$(BUILD)/main.o: main.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # parser.tab.o
@@ -57,4 +62,5 @@ $(BUILD):
 
 # Limpiar archivos generados
 clean:
-	rm -f $(TARGET) $(LEX_C) $(PARSER_C) $(PARSER_H) $(BUILD)/*.o
+	rm -f $(TARGET) $(LEX_C) $(PARSER_C) $(PARSER_H) $(BUILD)/*.o *.lex *.sint *.png *.dot
+

@@ -101,7 +101,7 @@ void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
     if (arbol == NULL)
         return;
 
-    if (arbol->tipo_info == FUNCION_DECL)
+    if (arbol->tipo_info == DECL_FUNCION)
     {
         declarar_metodo(arbol, nivelActual);
 
@@ -302,7 +302,7 @@ void procesar_statement(Arbol *arbol, Nivel *nivelActual)
     case RETURN:
         procesar_return(arbol, nivelActual);
         break;
-    case FUNCION_CALL:
+    case CALL_FUNCION:
         procesar_metodo(arbol, nivelActual);
         break;
     default:
@@ -386,7 +386,7 @@ int procesar_expresion(Arbol *arbol, Nivel *nivelActual)
         }
         return 1;
         break;
-    case FUNCION_CALL:
+    case CALL_FUNCION:
         return procesar_metodo(arbol, nivelActual);
         break;
     default:
@@ -492,8 +492,8 @@ Tipo obtener_tipo(Arbol *arbol, Nivel *nivelActual)
     case LITERAL:
         return arbol->info->literal.tipo;
         break;
-    case FUNCION_CALL:
-        Info_Union *metodo = buscar_en_nivel(tabla, arbol->info->funcion_call.nombre, FUNCION_DECL);
+    case CALL_FUNCION:
+        Info_Union *metodo = buscar_en_nivel(tabla, arbol->info->funcion_call.nombre, DECL_FUNCION);
         return metodo->funcion_decl.tipo;
         break;
     default:
@@ -542,7 +542,7 @@ void procesar_return(Arbol *arbol, Nivel *nivelActual)
 
 int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
 {
-    Info_Union *metodo = buscar_en_nivel(tabla, arbol->info->funcion_call.nombre, FUNCION_DECL);
+    Info_Union *metodo = buscar_en_nivel(tabla, arbol->info->funcion_call.nombre, DECL_FUNCION);
 
     if (!metodo)
     {
