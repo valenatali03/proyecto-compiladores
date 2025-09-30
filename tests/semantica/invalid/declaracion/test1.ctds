@@ -1,0 +1,9 @@
+program
+	{
+		integer x = 0;
+		bool x = true;
+
+		void main(){
+			
+		}
+	}

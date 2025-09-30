@@ -1,0 +1,11 @@
+program
+	{
+		integer x = 0;
+		
+
+		void main() {
+			integer y = 2;
+
+			x = 2 + y;
+		}
+	}

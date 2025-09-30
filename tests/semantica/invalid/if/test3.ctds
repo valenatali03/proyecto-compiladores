@@ -1,0 +1,14 @@
+program 
+    {
+		integer isTrue() {
+			return 1;
+		}
+
+		integer main() {
+			if (isTrue()) then {
+				return 1;
+			}
+
+			return 1;
+		}
+    }

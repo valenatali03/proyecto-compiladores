@@ -1,0 +1,7 @@
+program
+	{
+		
+		void main(){
+			x = true;
+		}
+	}

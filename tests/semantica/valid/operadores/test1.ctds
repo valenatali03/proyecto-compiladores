@@ -1,0 +1,25 @@
+program 
+	{
+
+		void main(){
+			integer x = 0;
+			bool z = true;
+			integer y = 1;
+
+			x = (-x + x) * x / x % x - x;
+
+			z = !z && z || z;
+
+			if(x == y) then {
+				return;
+			}
+
+			if(x < y) then {
+				return;
+			}
+
+			if(x > y) then {
+				return;
+			}
+		}
+    }

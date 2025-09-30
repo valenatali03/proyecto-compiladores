@@ -1,0 +1,12 @@
+program 
+    {
+		bool foo(){
+			return true;
+		}
+
+		void main(){
+			while(foo()) {
+				return;
+			}
+		}
+    }

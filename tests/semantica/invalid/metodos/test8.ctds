@@ -1,0 +1,10 @@
+program 
+    {
+        integer foo(integer x, integer x){
+            return 2;
+        }
+
+        void main(){
+			
+		}
+    }

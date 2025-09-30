@@ -1,0 +1,8 @@
+program
+	{
+		integer x = true + true;
+
+		void main(){
+			
+		}
+	}

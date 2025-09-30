@@ -1,0 +1,12 @@
+program 
+    {
+		integer x = 0;
+		
+		integer foo(){
+			x = 0;
+		}
+
+		void main(){
+			foo();
+		}
+    }

@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "../includes/params.h"
 
-void *agregar_param(void *params, void *data, Tipo_Info tipo_param)
+void *agregar_param(void *params, void *data, Tipo_Info tipo_param, int linea, int colum)
 {
     switch (tipo_param)
     {
@@ -25,6 +25,9 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param)
 
         Parametro_Call *nuevo = malloc(sizeof(Parametro_Call));
         nuevo->expr = expr;
+        nuevo->next = NULL;
+        nuevo->linea = linea;
+        nuevo->colum = colum;
         aux->next = nuevo;
 
         return lista;
@@ -40,6 +43,8 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param)
             parametros = malloc(sizeof(Parametro_Decl));
             parametros->info = info;
             parametros->next = NULL;
+            parametros->linea = linea;
+            parametros->colum = colum;
             return parametros;
         }
 
@@ -53,6 +58,8 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param)
         Parametro_Decl *nuevo_decl = malloc(sizeof(Parametro_Decl));
         nuevo_decl->info = info;
         nuevo_decl->next = NULL;
+        nuevo_decl->linea = linea;
+        nuevo_decl->colum = colum;
         aux_decl->next = nuevo_decl;
 
         return parametros;

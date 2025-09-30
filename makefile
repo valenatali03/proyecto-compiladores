@@ -9,7 +9,7 @@ BUILD = build
 # Archivos fuente
 LEXER = scanner.l
 PARSER = parser.y
-SRCS = $(SRC)/ast.c $(SRC)/params.c $(SRC)/enums.c $(SRC)/tsim.c main.c
+SRCS = $(SRC)/ast.c $(SRC)/params.c $(SRC)/enums.c $(SRC)/tsim.c $(SRC)/semantico.c $(SRC)/errores.c
 
 # Herramientas
 LEX = flex
@@ -26,6 +26,7 @@ PARSER_H = parser.tab.h
 
 # Objetos (en build/)
 OBJS = $(BUILD)/ast.o $(BUILD)/params.o $(BUILD)/enums.o $(BUILD)/tsim.o \
+       $(BUILD)/semantico.o $(BUILD)/errores.o \
        $(BUILD)/parser.tab.o $(BUILD)/lex.yy.o $(BUILD)/main.o
 
 # Regla principal

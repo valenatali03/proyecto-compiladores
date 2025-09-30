@@ -1,0 +1,13 @@
+program 
+    {
+		integer foo(){
+			while(true){
+				return 4;
+			}
+		}
+
+		void main(){
+			foo();
+		}
+		
+    }

@@ -15,6 +15,8 @@
     #include <string.h>
     #include <stdbool.h>
     #include "includes/ast.h"
+    #include "includes/semantico.h"
+    #include "includes/errores.h"
 }
 
 %parse-param { Arbol **arbol }
@@ -38,11 +40,12 @@
 
 %left T_OR
 %left T_AND
-%left T_GT T_LT T_COMP
+%left T_COMP
 %left T_ADD T_MINUS
 %left T_MULT T_DIV T_MOD
 %right T_NOT
 %right UMINUS
+%nonassoc T_GT T_LT
 
 %type <ast> expr literal bool_lit method_call method_decl method_decls statement statements block var_decl var_decls program
 %type <params_call> param_list 
@@ -50,10 +53,10 @@
 %type <tipo> type
 
 %%
-    program: T_PROGRAM T_BO var_decls method_decls T_BC {*arbol = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4);}
-           | T_PROGRAM T_BO var_decls T_BC              {*arbol = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL);}
-           | T_PROGRAM T_BO method_decls T_BC           {*arbol = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3);}
-           | T_PROGRAM T_BO T_BC                        {*arbol = NULL;}
+    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
+           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
+           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
+           | T_PROGRAM T_BO T_BC                        {$$ = NULL;}
            ;
     
     var_decls: var_decl     {$$ = crear_arbol_nodo(DECLARACIONES_VARIABLES, yylineno, yycolumn, $1, NULL);}
@@ -111,18 +114,18 @@
     params_decls: type T_ID                         {Info_Union *param = malloc(sizeof(Info_Union));
                                                      param->id.nombre = strdup($2);
                                                      param->id.tipo = $1;
-                                                     $$ = agregar_param(NULL, param, DECL_FUNCION);
+                                                     $$ = agregar_param(NULL, param, DECL_FUNCION, yylineno, yycolumn);
                                                     }
                 | params_decls T_COMMA type T_ID    {Info_Union *param = malloc(sizeof(Info_Union));
                                                      param->id.nombre = strdup($4);
                                                      param->id.tipo = $3;
-                                                     $$ = agregar_param($1, param, DECL_FUNCION);
+                                                     $$ = agregar_param($1, param, DECL_FUNCION, yylineno, yycolumn);
                                                     }
                 ;
 
 
-    param_list: expr                    {$$ = agregar_param(NULL, $1, CALL_FUNCION);}
-              | param_list T_COMMA expr {$$ = agregar_param($1, $3, CALL_FUNCION);}
+    param_list: expr                    {$$ = agregar_param(NULL, $1, CALL_FUNCION, yylineno, yycolumn);}
+              | param_list T_COMMA expr {$$ = agregar_param($1, $3, CALL_FUNCION, yylineno, yycolumn);}
               ;
 
 

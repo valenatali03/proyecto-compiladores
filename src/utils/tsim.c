@@ -1,8 +1,8 @@
-#include "../../includes/tsim.h"
+#include "../includes/tsim.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../includes/enums.h"
+#include "../includes/enums.h"
 
 int CANT_NIVELES = 0;
 
@@ -50,6 +50,7 @@ void agregar_simbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
         while (aux->next != NULL)
         {
             aux = aux->next;
+            aux = aux->next;
         }
         aux->next = s;
     }
@@ -57,23 +58,28 @@ void agregar_simbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
 
 Info_Union *buscar_simbolo(Nivel *nivel, char *nombre, Tipo_Info flag)
 {
-    for (Nivel *n = nivel; n != NULL; n = n->parent) {
-        for (Simbolo *s = n->head; s != NULL; s = s->next) {
-            switch (s->flag) {
-                case ID:
-                    if (flag == ID && strcmp(s->info->id.nombre, nombre) == 0) {
-                        return s->info;
-                    }
-                    break;
+    for (Nivel *n = nivel; n != NULL; n = n->parent)
+    {
+        for (Simbolo *s = n->head; s != NULL; s = s->next)
+        {
+            switch (s->flag)
+            {
+            case ID:
+                if (flag == ID && strcmp(s->info->id.nombre, nombre) == 0)
+                {
+                    return s->info;
+                }
+                break;
 
-                case DECL_FUNCION:
-                    if (flag == DECL_FUNCION && strcmp(s->info->funcion_decl.nombre, nombre) == 0) {
-                        return s->info;
-                    }
-                    break;
+            case DECL_FUNCION:
+                if (flag == DECL_FUNCION && strcmp(s->info->funcion_decl.nombre, nombre) == 0)
+                {
+                    return s->info;
+                }
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
     }
@@ -82,22 +88,27 @@ Info_Union *buscar_simbolo(Nivel *nivel, char *nombre, Tipo_Info flag)
 
 Info_Union *buscar_simbolo_en_nivel(Nivel *nivel, char *nombre, Tipo_Info flag)
 {
-    for (Simbolo *s = nivel->head; s != NULL; s = s->next) {
-        switch (s->flag) {
-            case ID:
-                if (flag == ID && strcmp(s->info->id.nombre, nombre) == 0) {
-                    return s->info;
-                }
-                break;
 
-            case DECL_FUNCION:
-                if (flag == DECL_FUNCION && strcmp(s->info->funcion_decl.nombre, nombre) == 0) {
-                    return s->info;
-                }
-                break;
+    for (Simbolo *s = nivel->head; s != NULL; s = s->next)
+    {
+        switch (s->flag)
+        {
+        case ID:
+            if (flag == ID && strcmp(s->info->id.nombre, nombre) == 0)
+            {
+                return s->info;
+            }
+            break;
 
-            default:
-                break;
+        case DECL_FUNCION:
+            if (flag == DECL_FUNCION && strcmp(s->info->funcion_decl.nombre, nombre) == 0)
+            {
+                return s->info;
+            }
+            break;
+
+        default:
+            break;
         }
     }
     return NULL;
@@ -125,18 +136,20 @@ Info_Union *buscar_ultimo_metodo(Nivel *nivel)
 
 void imprimir_simbolos(Nivel *nivel)
 {
-    for (Simbolo *aux = nivel->head; aux != NULL; aux = aux->next) {
-        switch (aux->flag) {
-            case ID:
-                printf("ID : %s ", aux->info->id.nombre);
-                break;
+    for (Simbolo *aux = nivel->head; aux != NULL; aux = aux->next)
+    {
+        switch (aux->flag)
+        {
+        case ID:
+            printf("ID : %s ", aux->info->id.nombre);
+            break;
 
-            case DECL_FUNCION:
-                printf("FUNCIÓN : %s() ", aux->info->funcion_decl.nombre);
-                break;
+        case DECL_FUNCION:
+            printf("FUNCIÓN : %s() ", aux->info->funcion_decl.nombre);
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
     printf("\n");

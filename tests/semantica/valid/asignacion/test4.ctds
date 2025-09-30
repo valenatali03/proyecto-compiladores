@@ -1,0 +1,8 @@
+program 
+    {
+		integer x = 2;
+		
+		void main(){
+			x = -x;
+		}
+    }

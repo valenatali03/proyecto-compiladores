@@ -1,0 +1,14 @@
+program 
+    {
+		integer foo(){
+			if(true) then {
+				return 5;
+			} else {
+			}
+		}
+
+		void main(){
+			foo();
+		}
+		
+    }
