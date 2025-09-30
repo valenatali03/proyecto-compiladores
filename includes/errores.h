@@ -7,25 +7,6 @@
 #define MAX_ERRORES 100
 #define MAX_MSG 250
 
-typedef enum
-{
-    VAR_NO_DECLARADA,
-    VAR_YA_DECLARADA,
-    VAR_VACIO,
-    FUN_NO_DECLARADA,
-    FUN_YA_DECLARADA,
-    TIPO_INCOMPATIBLE,
-    RETURN_TIPO_INCOMPATIBLE,
-    CANT_PARAMETROS,
-    TIPO_PARAMETRO,
-    FUN_SIN_RETURN,
-    MAIN_NO_DECLARADO,
-    MAIN_CON_PARAMS,
-    OP_BINARIO,
-    OP_UNARIO,
-    NUM_FUERA_RANGO
-} CodigoError;
-
 typedef struct
 {
     CodigoError codigo;

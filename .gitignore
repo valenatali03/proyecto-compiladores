@@ -7,3 +7,4 @@ parser.tab.h
 build/*
 *.png
 *.dot
+*.sem
