@@ -3,7 +3,7 @@
 #include <string.h>
 #include "../../includes/errores.h"
 
-extern Nivel *tabla;
+Nivel *tabla = NULL;
 int is_main = 0;
 int main_has_params = 0;
 int main_params_line = 0;
@@ -70,7 +70,7 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
         // return;
     }
 
-    if (buscar_en_nivel(nivelActual, nombre, arbol->izq->tipo_info))
+    if (buscar_simbolo_en_nivel(nivelActual, nombre, arbol->izq->tipo_info))
     {
         reportarError(VAR_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
         // printf("Variable %s ya declarada.\n", nombre);
@@ -93,7 +93,7 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
     {
         // return;
     }
-    agregarSimbolo(nivelActual, arbol->izq->info, arbol->izq->tipo_info);
+    agregar_simbolo(nivelActual, arbol->izq->info, arbol->izq->tipo_info);
 }
 
 void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
@@ -122,9 +122,9 @@ void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
         { // Método extern
             if (params)
             {
-                Nivel *temp = agregarNivel(nivelActual);
+                Nivel *temp = abrir_nivel(nivelActual);
                 procesar_params(params, temp);
-                cerrarNivel(temp);
+                cerrar_nivel(temp);
             }
         }
 
@@ -149,14 +149,14 @@ void declarar_metodo(Arbol *arbol, Nivel *nivelActual)
 
     procesar_main(nombre, arbol->info->funcion_decl.params);
 
-    if (buscar_en_nivel(nivelActual, nombre, arbol->tipo_info))
+    if (buscar_simbolo_en_nivel(nivelActual, nombre, arbol->tipo_info))
     {
         reportarError(FUN_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
         // printf("Metodo %s ya declarado.\n", nombre);
     }
     else
     {
-        agregarSimbolo(nivelActual, arbol->info, arbol->tipo_info);
+        agregar_simbolo(nivelActual, arbol->info, arbol->tipo_info);
     }
 }
 
@@ -173,13 +173,13 @@ void procesar_params(Parametro_Decl *params, Nivel *nivelActual)
             reportarError(VAR_VACIO, params->linea, params->colum, nombre);
         }
 
-        if (buscar_en_nivel(nivelActual, nombre, ID))
+        if (buscar_simbolo_en_nivel(nivelActual, nombre, ID))
         {
             reportarError(VAR_YA_DECLARADA, params->linea, params->colum, nombre); // Arreglar linea y columna
             // printf("Variable %s ya declarada.\n", nombre);
         }
 
-        agregarSimbolo(nivelActual, params->info, ID);
+        agregar_simbolo(nivelActual, params->info, ID);
 
         params = params->next;
     }
@@ -188,7 +188,7 @@ void procesar_params(Parametro_Decl *params, Nivel *nivelActual)
 Nivel *procesar_bloque(Arbol *arbol, Nivel *nivelActual, Parametro_Decl *params)
 {
 
-    Nivel *nuevo = agregarNivel(nivelActual);
+    Nivel *nuevo = abrir_nivel(nivelActual);
 
     if (params)
     {
@@ -208,7 +208,7 @@ Nivel *procesar_bloque(Arbol *arbol, Nivel *nivelActual, Parametro_Decl *params)
         }
     }
 
-    return cerrarNivel(nuevo);
+    return cerrar_nivel(nuevo);
 }
 
 void procesar_statements(Arbol *arbol, Nivel *nivelActual)
@@ -317,7 +317,7 @@ int procesar_asignacion(Arbol *arbol, Nivel *nivelActual)
 
     char *nombre = arbol->izq->info->id.nombre;
 
-    Info_Union *simbolo = buscarSimbolo(nivelActual, nombre, arbol->izq->tipo_info);
+    Info_Union *simbolo = buscar_simbolo(nivelActual, nombre, arbol->izq->tipo_info);
 
     if (!simbolo)
     {
@@ -357,7 +357,7 @@ int procesar_expresion(Arbol *arbol, Nivel *nivelActual)
     case ID:
         char *nombre = arbol->info->id.nombre;
 
-        Info_Union *simbolo = buscarSimbolo(nivelActual, nombre, arbol->tipo_info);
+        Info_Union *simbolo = buscar_simbolo(nivelActual, nombre, arbol->tipo_info);
 
         if (!simbolo)
         {
@@ -493,7 +493,7 @@ Tipo obtener_tipo(Arbol *arbol, Nivel *nivelActual)
         return arbol->info->literal.tipo;
         break;
     case CALL_FUNCION:
-        Info_Union *metodo = buscar_en_nivel(tabla, arbol->info->funcion_call.nombre, DECL_FUNCION);
+        Info_Union *metodo = buscar_simbolo_en_nivel(tabla, arbol->info->funcion_call.nombre, DECL_FUNCION);
         return metodo->funcion_decl.tipo;
         break;
     default:
@@ -508,7 +508,7 @@ void procesar_return(Arbol *arbol, Nivel *nivelActual)
     if (!arbol)
         return;
 
-    Info_Union *metodo = buscarUltimoMetodo(tabla);
+    Info_Union *metodo = buscar_ultimo_metodo(tabla);
 
     if (!metodo)
         return;
@@ -542,7 +542,7 @@ void procesar_return(Arbol *arbol, Nivel *nivelActual)
 
 int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
 {
-    Info_Union *metodo = buscar_en_nivel(tabla, arbol->info->funcion_call.nombre, DECL_FUNCION);
+    Info_Union *metodo = buscar_simbolo_en_nivel(tabla, arbol->info->funcion_call.nombre, DECL_FUNCION);
 
     if (!metodo)
     {

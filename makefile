@@ -26,6 +26,7 @@ PARSER_H = parser.tab.h
 
 # Objetos (en build/)
 OBJS = $(BUILD)/ast.o $(BUILD)/params.o $(BUILD)/enums.o $(BUILD)/tsim.o \
+       $(BUILD)/semantico.o $(BUILD)/errores.o \
        $(BUILD)/parser.tab.o $(BUILD)/lex.yy.o $(BUILD)/main.o
 
 # Regla principal

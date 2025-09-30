@@ -53,9 +53,9 @@
 %type <tipo> type
 
 %%
-    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4); imprimir_vertical($$, "", 1);  tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
-           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); imprimir_vertical($$, "", 1); tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
-           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3); imprimir_vertical($$, "", 1);  tabla = crearTabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
+    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
+           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
+           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
            | T_PROGRAM T_BO T_BC                        {$$ = NULL;}
            ;
     
@@ -114,18 +114,18 @@
     params_decls: type T_ID                         {Info_Union *param = malloc(sizeof(Info_Union));
                                                      param->id.nombre = strdup($2);
                                                      param->id.tipo = $1;
-                                                     $$ = agregar_param(NULL, param, FUNCION_DECL, yylineno, yycolumn);
+                                                     $$ = agregar_param(NULL, param, DECL_FUNCION, yylineno, yycolumn);
                                                     }
                 | params_decls T_COMMA type T_ID    {Info_Union *param = malloc(sizeof(Info_Union));
                                                      param->id.nombre = strdup($4);
                                                      param->id.tipo = $3;
-                                                     $$ = agregar_param($1, param, FUNCION_DECL, yylineno, yycolumn);
+                                                     $$ = agregar_param($1, param, DECL_FUNCION, yylineno, yycolumn);
                                                     }
                 ;
 
 
-    param_list: expr                    {$$ = agregar_param(NULL, $1, FUNCION_CALL, yylineno, yycolumn);}
-              | param_list T_COMMA expr {$$ = agregar_param($1, $3, FUNCION_CALL, yylineno, yycolumn);}
+    param_list: expr                    {$$ = agregar_param(NULL, $1, CALL_FUNCION, yylineno, yycolumn);}
+              | param_list T_COMMA expr {$$ = agregar_param($1, $3, CALL_FUNCION, yylineno, yycolumn);}
               ;
 
 

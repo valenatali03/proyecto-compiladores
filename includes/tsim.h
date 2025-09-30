@@ -29,6 +29,8 @@ typedef struct Nivel
     struct Nivel *parent;
 } Nivel;
 
+extern Nivel *tabla;
+
 /**
  * Crea la tabla de símbolos inicial (nivel raíz).
  *
