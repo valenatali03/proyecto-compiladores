@@ -1,6 +1,7 @@
 #ifndef ERRORES_H
 #define ERRORES_H
 
+#include <stdio.h>
 #include <stdbool.h>
 #include "enums.h"
 
@@ -19,6 +20,7 @@ extern int cantErrores;
 
 // Funciones
 void reportarError(CodigoError codigo, int linea, int colum, ...);
-void mostrarErrores(void);
+
+void reportar_resultado_semantico(FILE *out_sem);
 
 #endif

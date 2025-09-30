@@ -155,10 +155,13 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
     cantErrores++;
 }
 
-void mostrarErrores(void)
-{
-    for (int i = 0; i < cantErrores; i++)
-    {
-        printf("%s\n", errores[i].mensaje);
+void reportar_resultado_semantico(FILE *out_sem) {
+    if (cantErrores == 0) {
+        fprintf(out_sem, "Análisis semántico exitoso\n");
+    } else {
+        for (int i = 0; i < cantErrores; i++) {
+            fprintf(out_sem, "Error: %s\n", tipo_err_str[errores[i].codigo]);
+            fprintf(out_sem, "%s\n", errores[i].mensaje);
+        }
     }
 }
