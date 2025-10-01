@@ -19,4 +19,13 @@ for dir in valid invalid; do
     done
 done
 
+echo "=== Ejecutando Tests Semantica ==="
+for dir in valid invalid; do
+    echo "--- $dir ---"
+    find tests/semantica/$dir -type f -name "*.ctds" | while read file; do
+        echo "Semantica: $file"
+        ./c-tds -target sem "$file"
+    done
+done
+
 echo "=== Fin de tests ==="
