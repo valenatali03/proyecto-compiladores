@@ -27,8 +27,35 @@ typedef enum
     DECL_FUNCION,
     CALL_FUNCION,
     IF,
-    WHILE
+    WHILE,
+    ETIQUETA,
 } Tipo_Info;
+
+typedef enum {
+    ADD,
+    MINUS,
+    MOD,
+    DIV,
+    MOV,
+    MULT,
+    AND,
+    OR,
+    COMP,
+    LT,
+    GT,
+    NOT,
+    CALL,
+    RET,
+    START_FUN,
+    IF_FALSE,
+    END_FUN,
+    END_IF,
+    END_WHILE,
+    JMP,
+    PARAM,
+    TAG,
+    JMPC,
+} Tipo_Operador;
 
 // Tipos de errores
 typedef enum

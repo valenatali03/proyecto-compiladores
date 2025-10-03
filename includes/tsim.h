@@ -54,6 +54,9 @@ Nivel *abrir_nivel(Nivel *tabla);
  */
 Nivel *cerrar_nivel(Nivel *tabla);
 
+/** meter el offset */
+Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag);
+
 /**
  * Agrega un símbolo a un nivel específico.
  *
