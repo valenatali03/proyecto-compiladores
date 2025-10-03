@@ -1,26 +1,32 @@
 #include "../../includes/pre_asm.h"
 #include "string.h"
 
-void generar_codigo(Arbol *arbol, Instrucciones *instrucciones)
-{
-    Instrucciones *decl = NULL;
-    Instrucciones *stmt = NULL;
-    if (arbol->izq != NULL)
-    {
-        decl = construir_declaraciones(arbol->izq);
-    }
-    if (arbol->der != NULL)
-    {
-        stmt = construir_sentencias(arbol->der);
-    }
-    Instrucciones *aux = decl;
-    while (aux->next != NULL)
-    {
+void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen) {
+    if (!origen) return;
+    Instrucciones *aux = destino;
+    while (aux->next != NULL) {
         aux = aux->next;
     }
-    aux->next = stmt;
-    return decl;
+    aux->next = origen;
 }
+
+void generar_codigo(Arbol *arbol, Instrucciones *instrucciones)
+{
+    if (!arbol) return;
+
+    Instrucciones *decl = NULL;
+    Instrucciones *stmt = NULL;
+
+    if (arbol->izq) {
+        decl = construir_declaraciones(arbol->izq);
+        agregar_instrucciones(instrucciones, decl);
+    }
+    if (arbol->der) {
+        stmt = construir_sentencias(arbol->der);
+        agregar_instrucciones(instrucciones, stmt);
+    }
+}
+
 
 Instrucciones *construir_declaraciones(Arbol *arbol)
 {
@@ -89,31 +95,32 @@ Instrucciones *construir_sentencias(Arbol *arbol)
     return stmt;
 }
 
-void construir_return(Arbol *nodo, Instrucciones *instrucciones) {
+void construir_return(Arbol *nodo, Instrucciones *instrucciones)
+{
     Cuadruplo *ret = malloc(sizeof(Cuadruplo));
     ret->op = RET;
 
-    switch (nodo->izq->tipo_info) {
-        case ID:
-        case LITERAL:
-            ret->arg1 = nodo->izq->info;
-            break;
-        case OPERADOR_BINARIO:
-        case OPERADOR_UNARIO:
-            construir_op(nodo->izq, instrucciones);
-            ret->arg1 = buscar_resultado(instrucciones);
-            break;
-        case CALL_FUNCION:
-            construir_funcion_call(nodo->izq, instrucciones);
-            ret->arg1 = buscar_resultado(instrucciones);
-            break;
-        default:
-            break;
+    switch (nodo->izq->tipo_info)
+    {
+    case ID:
+    case LITERAL:
+        ret->arg1 = nodo->izq->info;
+        break;
+    case OPERADOR_BINARIO:
+    case OPERADOR_UNARIO:
+        construir_op(nodo->izq, instrucciones);
+        ret->arg1 = buscar_resultado(instrucciones);
+        break;
+    case CALL_FUNCION:
+        construir_funcion_call(nodo->izq, instrucciones);
+        ret->arg1 = buscar_resultado(instrucciones);
+        break;
+    default:
+        break;
     }
 
     insertar_cuadruplo(ret, instrucciones);
 }
-
 
 void construir_op(Arbol *nodo, Instrucciones *instrucciones)
 {
@@ -240,25 +247,26 @@ void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
     }
 }
 
-void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones) {
-        Cuadruplo *mov = malloc(sizeof(Cuadruplo));
-        mov->op = MOV;
-        mov->resultado = nodo->izq->info;
-        if (nodo->der->tipo_info == LITERAL || nodo->der->tipo_info == ID)
-        {
-            mov->arg1 = nodo->der->info;
-        }
-        else if (nodo->der->tipo_info == CALL_FUNCION)
-        {
-            construir_funcion_call(nodo->der, instrucciones);
-            mov->arg1 = buscar_resultado(instrucciones);
-        }
-        else
-        {
-            construir_op(nodo->der, instrucciones);
-            mov->arg1 = buscar_resultado(instrucciones);
-        }
-        insertar_cuadruplo(mov, instrucciones);
+void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones)
+{
+    Cuadruplo *mov = malloc(sizeof(Cuadruplo));
+    mov->op = MOV;
+    mov->resultado = nodo->izq->info;
+    if (nodo->der->tipo_info == LITERAL || nodo->der->tipo_info == ID)
+    {
+        mov->arg1 = nodo->der->info;
+    }
+    else if (nodo->der->tipo_info == CALL_FUNCION)
+    {
+        construir_funcion_call(nodo->der, instrucciones);
+        mov->arg1 = buscar_resultado(instrucciones);
+    }
+    else
+    {
+        construir_op(nodo->der, instrucciones);
+        mov->arg1 = buscar_resultado(instrucciones);
+    }
+    insertar_cuadruplo(mov, instrucciones);
 }
 
 void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
