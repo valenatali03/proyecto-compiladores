@@ -14,8 +14,8 @@ void generar_codigo(Arbol *arbol, Instrucciones *instrucciones)
 {
     if (!arbol) return;
 
-    Instrucciones *decl = NULL;
-    Instrucciones *stmt = NULL;
+    Instrucciones *decl = crear_lista_instrucciones();
+    Instrucciones *stmt = crear_lista_instrucciones();
 
     if (arbol->izq) {
         decl = construir_declaraciones(arbol->izq);
@@ -33,7 +33,7 @@ Instrucciones *construir_declaraciones(Arbol *arbol)
     if (arbol == NULL)
         return NULL;
 
-    Instrucciones *decl = NULL;
+    Instrucciones *decl = crear_lista_instrucciones();
     switch (arbol->tipo_info)
     {
     case DECL_FUNCION:
@@ -63,7 +63,7 @@ Instrucciones *construir_sentencias(Arbol *arbol)
     if (arbol == NULL)
         return NULL;
 
-    Instrucciones *stmt = NULL;
+    Instrucciones *stmt = crear_lista_instrucciones();
     switch (arbol->tipo_info)
     {
     case CALL_FUNCION:
@@ -183,7 +183,7 @@ Tipo_Operador traducir_op(char *op)
         return DIV;
     if (strcmp(op, "*") == 0)
         return MULT;
-    if (strcmp(op, '%') == 0)
+    if (strcmp(op, "%") == 0)
         return MOD;
     if (strcmp(op, "==") == 0)
         return COMP;
@@ -199,7 +199,7 @@ Tipo_Operador traducir_op(char *op)
         return MOV;
     if (strcmp(op, "!") == 0)
         return NOT;
-    return NULL;
+    return NOP;
 }
 
 void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
@@ -214,7 +214,7 @@ void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
     cuad->arg1 = buscar_resultado(instrucciones);
     cuad->arg2 = NULL;
     // Etiqueta para saltear el bloque verdadero
-    cuad->resultado = crear_simbolo(NULL, ETIQUETA);
+    cuad->resultado = crear_etiqueta(NULL);
     insertar_cuadruplo(cuad, instrucciones);
     generar_codigo(nodo->izq, instrucciones);
     if (nodo->der)
@@ -222,7 +222,7 @@ void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
         // Construyo el cuadruplo para saltar al final si pasé por el bloque verdadero.
         Cuadruplo *end_if = malloc(sizeof(Cuadruplo));
         end_if->op = JMP;
-        end_if->resultado = crear_simbolo(NULL, ETIQUETA);
+        end_if->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(end_if, instrucciones);
         // Construyo el cuadruplo que contiene la etiqueta del else.
         Cuadruplo *els = malloc(sizeof(Cuadruplo));
@@ -275,14 +275,14 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
     {
         Cuadruplo *start_while = malloc(sizeof(Cuadruplo));
         start_while->op = TAG;
-        start_while->resultado = crear_simbolo(NULL, ETIQUETA);
+        start_while->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(start_while, instrucciones);
         construir_op(nodo->izq, instrucciones);
         // Salto condicional para saltear el while.
         Cuadruplo *jumpc = malloc(sizeof(Cuadruplo));
         jumpc->op = JMPC;
         jumpc->arg1 = buscar_resultado(instrucciones);
-        jumpc->resultado = crear_simbolo(NULL, ETIQUETA);
+        jumpc->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(jumpc, instrucciones);
 
         if (nodo->der)
@@ -307,7 +307,7 @@ void construir_funcion_decl(Arbol *arbol, Instrucciones *instrucciones)
     insertar_cuadruplo(start_fun, instrucciones);
     Cuadruplo *tag = malloc(sizeof(Cuadruplo));
     tag->op = TAG;
-    tag->resultado = crear_simbolo(NULL, ETIQUETA);
+    tag->resultado = crear_etiqueta(NULL);
     insertar_cuadruplo(tag, instrucciones);
     generar_codigo(arbol->izq, instrucciones);
     Cuadruplo *end_fun = malloc(sizeof(Cuadruplo));
@@ -336,6 +336,76 @@ void construir_funcion_call(Arbol *arbol, Instrucciones *instrucciones)
     Cuadruplo *call = malloc(sizeof(Cuadruplo));
     call->op = CALL;
     call->arg1 = cant_params(arbol);
-    call->resultado = crear_simbolo(arbol->info, ETIQUETA);
+    call->resultado = crear_etiqueta(arbol->info->funcion_call.nombre);
     insertar_cuadruplo(call, instrucciones);
 }
+
+void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst) {
+    if (!c || !inst) return;
+    Instrucciones *aux = inst;
+    while (aux->next != NULL) {
+        aux = aux->next;
+    }
+    Instrucciones *nuevo = malloc(sizeof(Instrucciones));
+    nuevo->expr = c;
+    nuevo->next = NULL;
+    aux->next = nuevo;
+}
+
+Simbolo *buscar_resultado(Instrucciones *inst) {
+    if (!inst) return NULL;
+    Instrucciones *aux = inst;
+    Simbolo *res = NULL;
+    while (aux != NULL) {
+        if (aux->expr->op != TAG) {
+            res = aux->expr->resultado;
+        }
+        aux = aux->next;
+    }
+    return res;
+}
+
+int cant_params(Arbol *nodo) {
+    int count = 0;
+    Parametro_Call *params = nodo->info->funcion_call.params;
+    while (params) {
+        count++;
+        params = params->next;
+    }
+    return count;
+}
+
+Simbolo *crear_simbolo(Info_Union *info, Tipo_Info tipo) {
+    Simbolo *s = malloc(sizeof(Simbolo));
+    s->flag = tipo;
+    s->info = info;
+    return s;
+}
+
+Simbolo *crear_etiqueta(char* nombre) {
+    char buffer[16];
+    Simbolo *s = malloc(sizeof(Simbolo));
+    Info_Etiqueta *info = malloc(sizeof(Info_Etiqueta));
+    if (nombre == NULL) {
+        sprintf(buffer, "L%d", CANT_TAG++);
+        char *n = strdup(buffer);
+        info->nombre = n;
+    } else {
+        info->nombre = nombre;
+    }
+    s->flag = ETIQUETA;
+    s->info = info;
+    return s;
+}
+
+Instrucciones *crear_lista_instrucciones() {
+    Instrucciones *lista = malloc(sizeof(Instrucciones));
+    lista->expr = NULL;
+    lista->next = NULL;
+    return lista;
+}
+
+
+
+
+

@@ -19,6 +19,7 @@ typedef struct Instrucciones
 
 int CANT_TEMP = 0;
 int CANT_JUMP = 0;
+int CANT_TAG = 0;
 void generar_codigo(Arbol *arbol, Instrucciones *instrucciones);
 void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones);
 void construir_return(Arbol *nodo, Instrucciones *instrucciones);

@@ -55,6 +55,7 @@ typedef enum {
     PARAM,
     TAG,
     JMPC,
+    NOP,
 } Tipo_Operador;
 
 // Tipos de errores
