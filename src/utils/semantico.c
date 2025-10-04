@@ -253,6 +253,8 @@ int procesar_if(Arbol *arbol, Nivel *nivelActual)
 
         return 1;
     }
+
+    return 1;
 }
 
 int procesar_while(Arbol *arbol, Nivel *nivelActual)

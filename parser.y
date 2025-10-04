@@ -53,10 +53,10 @@
 %type <tipo> type
 
 %%
-    program: T_PROGRAM T_BO var_decls method_decls T_BC {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
-           | T_PROGRAM T_BO var_decls T_BC              {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
-           | T_PROGRAM T_BO method_decls T_BC           {$$ = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3); tabla = crear_tabla(); Nivel* nivelActual = tabla; analisis_semantico($$, nivelActual); mostrarErrores();}
-           | T_PROGRAM T_BO T_BC                        {$$ = NULL;}
+    program: T_PROGRAM T_BO var_decls method_decls T_BC {*arbol = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, $4);}
+           | T_PROGRAM T_BO var_decls T_BC              {*arbol = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, $3, NULL);}
+           | T_PROGRAM T_BO method_decls T_BC           {*arbol = crear_arbol_nodo(PROGRAMA, yylineno, yycolumn, NULL, $3);}
+           | T_PROGRAM T_BO T_BC                        {*arbol = NULL;}
            ;
     
     var_decls: var_decl     {$$ = crear_arbol_nodo(DECLARACIONES_VARIABLES, yylineno, yycolumn, $1, NULL);}

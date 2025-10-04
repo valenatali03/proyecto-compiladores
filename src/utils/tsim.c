@@ -50,7 +50,6 @@ void agregar_simbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
         while (aux->next != NULL)
         {
             aux = aux->next;
-            aux = aux->next;
         }
         aux->next = s;
     }

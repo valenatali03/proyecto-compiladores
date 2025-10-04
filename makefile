@@ -63,5 +63,5 @@ $(BUILD):
 
 # Limpiar archivos generados
 clean:
-	rm -f $(TARGET) $(LEX_C) $(PARSER_C) $(PARSER_H) $(BUILD)/*.o *.lex *.sint *.png *.dot
+	rm -f $(TARGET) $(LEX_C) $(PARSER_C) $(PARSER_H) $(BUILD)/*.o *.lex *.sint *.sem *.png *.dot
 
