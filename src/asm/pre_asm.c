@@ -1,52 +1,57 @@
 #include "../../includes/pre_asm.h"
 #include "string.h"
 
-void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen) {
-    if (!origen) return;
+void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen)
+{
+    if (!origen)
+        return;
     Instrucciones *aux = destino;
-    while (aux->next != NULL) {
+    while (aux->next != NULL)
+    {
         aux = aux->next;
     }
     aux->next = origen;
 }
 
-void generar_codigo(Arbol *arbol, Instrucciones *instrucciones)
+void generar_codigo(Arbol *nodo, Instrucciones *instrucciones)
 {
-    if (!arbol) return;
+    if (!nodo)
+        return;
 
     Instrucciones *decl = crear_lista_instrucciones();
     Instrucciones *stmt = crear_lista_instrucciones();
 
-    if (arbol->izq) {
-        decl = construir_declaraciones(arbol->izq);
+    if (nodo->izq)
+    {
+        decl = construir_declaraciones(nodo->izq);
         agregar_instrucciones(instrucciones, decl);
     }
-    if (arbol->der) {
-        stmt = construir_sentencias(arbol->der);
+    if (nodo->der)
+    {
+        stmt = construir_sentencias(nodo->der);
         agregar_instrucciones(instrucciones, stmt);
     }
 }
 
-
-Instrucciones *construir_declaraciones(Arbol *arbol)
+Instrucciones *construir_declaraciones(Arbol *nodo)
 {
-    if (arbol == NULL)
+    if (nodo == NULL)
         return NULL;
 
     Instrucciones *decl = crear_lista_instrucciones();
-    switch (arbol->tipo_info)
+    switch (nodo->tipo_info)
     {
     case DECL_FUNCION:
-        construir_funcion_decl(arbol, decl);
+        construir_funcion_decl(nodo, decl);
         break;
 
     case DECLARACION_VARIABLE:
-        construir_asignacion(arbol, decl);
+        construir_asignacion(nodo, decl);
         break;
 
     default:
-        Instrucciones *izq = construir_declaraciones(arbol->izq);
-        Instrucciones *der = construir_declaraciones(arbol->der);
+        Instrucciones *izq = construir_declaraciones(nodo->izq);
+        Instrucciones *der = construir_declaraciones(nodo->der);
         Instrucciones *aux = izq;
         while (aux->next != NULL)
         {
@@ -58,32 +63,32 @@ Instrucciones *construir_declaraciones(Arbol *arbol)
     return decl;
 }
 
-Instrucciones *construir_sentencias(Arbol *arbol)
+Instrucciones *construir_sentencias(Arbol *nodo)
 {
-    if (arbol == NULL)
+    if (nodo == NULL)
         return NULL;
 
     Instrucciones *stmt = crear_lista_instrucciones();
-    switch (arbol->tipo_info)
+    switch (nodo->tipo_info)
     {
     case CALL_FUNCION:
-        construir_funcion_call(arbol, stmt);
+        construir_funcion_call(nodo, stmt);
         break;
     case ASIGNACION:
-        construir_asignacion(arbol, stmt);
+        construir_asignacion(nodo, stmt);
         break;
     case IF:
-        construir_condicional(arbol, stmt);
+        construir_condicional(nodo, stmt);
         break;
     case WHILE:
-        construir_iteracion(arbol, stmt);
+        construir_iteracion(nodo, stmt);
         break;
     case RETURN:
-        construir_return(arbol, stmt);
+        construir_return(nodo, stmt);
         break;
     default:
-        Instrucciones *izq = construir_sentencias(arbol->izq);
-        Instrucciones *der = construir_sentencias(arbol->der);
+        Instrucciones *izq = construir_sentencias(nodo->izq);
+        Instrucciones *der = construir_sentencias(nodo->der);
         Instrucciones *aux = izq;
         while (aux->next != NULL)
         {
@@ -99,12 +104,13 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones)
 {
     Cuadruplo *ret = malloc(sizeof(Cuadruplo));
     ret->op = RET;
+    Tipo_Info flag = nodo->izq->tipo_info;
 
-    switch (nodo->izq->tipo_info)
+    switch (flag)
     {
     case ID:
     case LITERAL:
-        ret->arg1 = nodo->izq->info;
+        ret->arg1 = crear_simbolo(nodo->izq->info, flag);
         break;
     case OPERADOR_BINARIO:
     case OPERADOR_UNARIO:
@@ -132,6 +138,7 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
     {
         construir_op(nodo->der, instrucciones);
     }
+
     Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
     if (nodo->tipo_info == OPERADOR_BINARIO)
     {
@@ -142,8 +149,17 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
             cuad->arg1 = buscar_resultado(instrucciones); // TODO
             break;
 
-        default:
+        case LITERAL:
+        case ID:
             cuad->arg1 = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
+            break;
+
+        case CALL_FUNCION:
+            construir_funcion_call(nodo->izq, instrucciones);
+            cuad->arg1 = buscar_resultado(instrucciones);
+            break;
+
+        default:
             break;
         }
         switch (nodo->der->tipo_info)
@@ -151,8 +167,18 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
         case OPERADOR_BINARIO:
             cuad->arg2 = buscar_resultado(instrucciones);
             break;
-        default:
+
+        case LITERAL:
+        case ID:
             cuad->arg2 = crear_simbolo(nodo->der->info, nodo->der->tipo_info);
+            break;
+
+        case CALL_FUNCION:
+            construir_funcion_call(nodo->der, instrucciones);
+            cuad->arg2 = buscar_resultado(instrucciones);
+            break;
+
+        default:
             break;
         }
     }
@@ -165,8 +191,17 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
             cuad->arg1 = buscar_resultado(instrucciones); // TODO
             break;
 
-        default:
+        case LITERAL:
+        case ID:
             cuad->arg1 = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
+            break;
+
+        case CALL_FUNCION:
+            construir_funcion_call(nodo->izq, instrucciones);
+            cuad->arg1 = buscar_resultado(instrucciones);
+            break;
+
+        default:
             break;
         }
     }
@@ -251,21 +286,31 @@ void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones)
 {
     Cuadruplo *mov = malloc(sizeof(Cuadruplo));
     mov->op = MOV;
-    mov->resultado = nodo->izq->info;
-    if (nodo->der->tipo_info == LITERAL || nodo->der->tipo_info == ID)
+    mov->resultado = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
+    Tipo_Info flag_der = nodo->der->tipo_info;
+
+    switch (flag_der)
     {
-        mov->arg1 = nodo->der->info;
-    }
-    else if (nodo->der->tipo_info == CALL_FUNCION)
-    {
+    case LITERAL:
+    case ID:
+        mov->arg1 = crear_simbolo(nodo->der->info, flag_der);
+        break;
+
+    case CALL_FUNCION:
         construir_funcion_call(nodo->der, instrucciones);
         mov->arg1 = buscar_resultado(instrucciones);
-    }
-    else
-    {
+        break;
+
+    case OPERADOR_UNARIO:
+    case OPERADOR_BINARIO:
         construir_op(nodo->der, instrucciones);
         mov->arg1 = buscar_resultado(instrucciones);
+        break;
+
+    default:
+        break;
     }
+
     insertar_cuadruplo(mov, instrucciones);
 }
 
@@ -300,7 +345,7 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
     }
 }
 
-void construir_funcion_decl(Arbol *arbol, Instrucciones *instrucciones)
+void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones)
 {
     Cuadruplo *start_fun = malloc(sizeof(Cuadruplo));
     start_fun->op = START_FUN;
@@ -309,7 +354,7 @@ void construir_funcion_decl(Arbol *arbol, Instrucciones *instrucciones)
     tag->op = TAG;
     tag->resultado = crear_etiqueta(NULL);
     insertar_cuadruplo(tag, instrucciones);
-    generar_codigo(arbol->izq, instrucciones);
+    generar_codigo(nodo->izq, instrucciones);
     Cuadruplo *end_fun = malloc(sizeof(Cuadruplo));
     end_fun->op = END_FUN;
     insertar_cuadruplo(end_fun, instrucciones);
@@ -330,20 +375,23 @@ void construir_params(Arbol *nodo, Instrucciones *instrucciones)
     }
 }
 
-void construir_funcion_call(Arbol *arbol, Instrucciones *instrucciones)
+void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
 {
-    construir_params(arbol, instrucciones);
+    construir_params(nodo, instrucciones);
     Cuadruplo *call = malloc(sizeof(Cuadruplo));
     call->op = CALL;
-    call->arg1 = cant_params(arbol);
-    call->resultado = crear_etiqueta(arbol->info->funcion_call.nombre);
+    call->arg1 = cant_params(nodo);
+    call->resultado = crear_etiqueta(nodo->info->funcion_call.nombre);
     insertar_cuadruplo(call, instrucciones);
 }
 
-void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst) {
-    if (!c || !inst) return;
+void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
+{
+    if (!c || !inst)
+        return;
     Instrucciones *aux = inst;
-    while (aux->next != NULL) {
+    while (aux->next != NULL)
+    {
         aux = aux->next;
     }
     Instrucciones *nuevo = malloc(sizeof(Instrucciones));
@@ -352,12 +400,16 @@ void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst) {
     aux->next = nuevo;
 }
 
-Simbolo *buscar_resultado(Instrucciones *inst) {
-    if (!inst) return NULL;
+Simbolo *buscar_resultado(Instrucciones *inst)
+{
+    if (!inst)
+        return NULL;
     Instrucciones *aux = inst;
     Simbolo *res = NULL;
-    while (aux != NULL) {
-        if (aux->expr->op != TAG) {
+    while (aux != NULL)
+    {
+        if (aux->expr->op != TAG)
+        {
             res = aux->expr->resultado;
         }
         aux = aux->next;
@@ -365,32 +417,31 @@ Simbolo *buscar_resultado(Instrucciones *inst) {
     return res;
 }
 
-int cant_params(Arbol *nodo) {
+int cant_params(Arbol *nodo)
+{
     int count = 0;
     Parametro_Call *params = nodo->info->funcion_call.params;
-    while (params) {
+    while (params)
+    {
         count++;
         params = params->next;
     }
     return count;
 }
 
-Simbolo *crear_simbolo(Info_Union *info, Tipo_Info tipo) {
-    Simbolo *s = malloc(sizeof(Simbolo));
-    s->flag = tipo;
-    s->info = info;
-    return s;
-}
-
-Simbolo *crear_etiqueta(char* nombre) {
+Simbolo *crear_etiqueta(char *nombre)
+{
     char buffer[16];
     Simbolo *s = malloc(sizeof(Simbolo));
     Info_Etiqueta *info = malloc(sizeof(Info_Etiqueta));
-    if (nombre == NULL) {
+    if (nombre == NULL)
+    {
         sprintf(buffer, "L%d", CANT_TAG++);
         char *n = strdup(buffer);
         info->nombre = n;
-    } else {
+    }
+    else
+    {
         info->nombre = nombre;
     }
     s->flag = ETIQUETA;
@@ -398,14 +449,10 @@ Simbolo *crear_etiqueta(char* nombre) {
     return s;
 }
 
-Instrucciones *crear_lista_instrucciones() {
+Instrucciones *crear_lista_instrucciones()
+{
     Instrucciones *lista = malloc(sizeof(Instrucciones));
     lista->expr = NULL;
     lista->next = NULL;
     return lista;
 }
-
-
-
-
-

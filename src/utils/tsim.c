@@ -34,13 +34,20 @@ Nivel *cerrar_nivel(Nivel *tabla)
     return tabla->parent;
 }
 
-void agregar_simbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
+Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
 {
-
     Simbolo *s = malloc(sizeof(Simbolo));
     s->flag = flag;
     s->info = info;
     s->next = NULL;
+
+    return s;
+}
+
+void agregar_simbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
+{
+
+    Simbolo *s = crear_simbolo(info, flag);
 
     if (nivel->head == NULL)
         nivel->head = s;
