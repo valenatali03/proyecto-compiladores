@@ -20,6 +20,11 @@ typedef struct Instrucciones
 int CANT_TEMP = 0;
 int CANT_JUMP = 0;
 int CANT_TAG = 0;
+
+extern char **codigo;
+
+static int CANT_LINEAS = 0;
+
 void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen);
 void generar_codigo(Arbol *nodo, Instrucciones *instrucciones);
 Instrucciones *construir_declaraciones(Arbol *nodo);
@@ -37,4 +42,7 @@ void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst);
 Simbolo *buscar_resultado(Instrucciones *inst);
 int cant_params(Arbol *nodo);
 Simbolo *crear_etiqueta(char *nombre);
+Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag);
 Instrucciones *crear_lista_instrucciones();
+static char *simbolo_a_str(Simbolo *s);
+void imprimir_codigo3d(Instrucciones *instrucciones);

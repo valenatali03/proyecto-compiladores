@@ -1,6 +1,8 @@
 #include "../../includes/pre_asm.h"
 #include "string.h"
 
+char **codigo = NULL;
+
 void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen)
 {
     if (!origen)
@@ -114,11 +116,8 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones)
         break;
     case OPERADOR_BINARIO:
     case OPERADOR_UNARIO:
-        construir_op(nodo->izq, instrucciones);
-        ret->arg1 = buscar_resultado(instrucciones);
-        break;
     case CALL_FUNCION:
-        construir_funcion_call(nodo->izq, instrucciones);
+        construir_expresion(nodo->izq, instrucciones);
         ret->arg1 = buscar_resultado(instrucciones);
         break;
     default:
@@ -188,7 +187,7 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
         switch (nodo->izq->tipo_info)
         {
         case OPERADOR_BINARIO:
-            cuad->arg1 = buscar_resultado(instrucciones); // TODO
+            cuad->arg1 = buscar_resultado(instrucciones);
             break;
 
         case LITERAL:
@@ -205,7 +204,8 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
             break;
         }
     }
-    insertar_cuadruplo(cuad, instrucciones); // TODO
+    cuad->resultado = crear_simbolo(NULL, ID);
+    insertar_cuadruplo(cuad, instrucciones);
 }
 
 Tipo_Operador traducir_op(char *op)
@@ -241,12 +241,21 @@ void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
 {
     if (nodo->medio)
     {
-        construir_op(nodo->medio, instrucciones);
+        construir_expresion(nodo->medio, instrucciones);
     }
 
     Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
     cuad->op = IF_FALSE;
-    cuad->arg1 = buscar_resultado(instrucciones);
+
+    if (nodo->medio->tipo_info == ID || nodo->medio->tipo_info == LITERAL)
+    {
+        cuad->arg1 = crear_simbolo(nodo->medio->info, nodo->medio->tipo_info);
+    }
+    else
+    {
+        cuad->arg1 = buscar_resultado(instrucciones);
+    }
+
     cuad->arg2 = NULL;
     // Etiqueta para saltear el bloque verdadero
     cuad->resultado = crear_etiqueta(NULL);
@@ -297,13 +306,9 @@ void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones)
         break;
 
     case CALL_FUNCION:
-        construir_funcion_call(nodo->der, instrucciones);
-        mov->arg1 = buscar_resultado(instrucciones);
-        break;
-
     case OPERADOR_UNARIO:
     case OPERADOR_BINARIO:
-        construir_op(nodo->der, instrucciones);
+        construir_expresion(nodo->der, instrucciones);
         mov->arg1 = buscar_resultado(instrucciones);
         break;
 
@@ -322,11 +327,19 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
         start_while->op = TAG;
         start_while->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(start_while, instrucciones);
-        construir_op(nodo->izq, instrucciones);
+        construir_expresion(nodo->izq, instrucciones);
         // Salto condicional para saltear el while.
         Cuadruplo *jumpc = malloc(sizeof(Cuadruplo));
         jumpc->op = JMPC;
-        jumpc->arg1 = buscar_resultado(instrucciones);
+        if (nodo->izq->tipo_info == ID || nodo->izq->tipo_info == LITERAL)
+        {
+            jumpc->arg1 = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
+        }
+        else
+        {
+            jumpc->arg1 = buscar_resultado(instrucciones);
+        }
+
         jumpc->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(jumpc, instrucciones);
 
@@ -385,6 +398,26 @@ void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
     insertar_cuadruplo(call, instrucciones);
 }
 
+void construir_expresion(Arbol *nodo, Instrucciones *instrucciones)
+{
+    if (!nodo)
+        return;
+
+    switch (nodo->tipo_info)
+    {
+    case OPERADOR_UNARIO:
+    case OPERADOR_BINARIO:
+        construir_op(nodo, instrucciones);
+        break;
+
+    case CALL_FUNCION:
+        construir_funcion_call(nodo, instrucciones);
+        break;
+    default:
+        break;
+    }
+}
+
 void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
 {
     if (!c || !inst)
@@ -433,19 +466,43 @@ Simbolo *crear_etiqueta(char *nombre)
 {
     char buffer[16];
     Simbolo *s = malloc(sizeof(Simbolo));
-    Info_Etiqueta *info = malloc(sizeof(Info_Etiqueta));
+    Info_Union *info = malloc(sizeof(Info_Union));
     if (nombre == NULL)
     {
         sprintf(buffer, "L%d", CANT_TAG++);
         char *n = strdup(buffer);
-        info->nombre = n;
+        info->etiqueta.nombre = n;
     }
     else
     {
-        info->nombre = nombre;
+        info->etiqueta.nombre = nombre;
     }
     s->flag = ETIQUETA;
     s->info = info;
+    return s;
+}
+
+Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
+{
+    if (!info)
+    {
+        char buffer[16];
+        Simbolo *s = malloc(sizeof(Simbolo));
+        Info_Union *info = malloc(sizeof(Info_Union));
+        sprintf(buffer, "t%d", CANT_TEMP++);
+        char *n = strdup(buffer);
+        s->flag = flag;
+        info->id.nombre = n;
+        s->info = info;
+
+        return s;
+    }
+
+    Simbolo *s = malloc(sizeof(Simbolo));
+    s->flag = flag;
+    s->info = info;
+    s->next = NULL;
+
     return s;
 }
 
@@ -455,4 +512,92 @@ Instrucciones *crear_lista_instrucciones()
     lista->expr = NULL;
     lista->next = NULL;
     return lista;
+}
+
+static char *simbolo_a_str(Simbolo *s)
+{
+    if (s == NULL)
+        return "";
+
+    static char buffer[64];
+
+    switch (s->flag)
+    {
+    case ID:
+        return s->info->id.nombre;
+
+    case LITERAL:
+        switch (s->info->literal.tipo)
+        {
+        case ENTERO:
+            sprintf(buffer, "%d", *((int *)s->info->literal.valor));
+            return buffer;
+        case BOOL:
+            sprintf(buffer, "%s", *((int *)s->info->literal.valor) ? "true" : "false");
+            return buffer;
+        default:
+            return "<?>"; // tipo literal no manejado
+        }
+
+    case CALL_FUNCION:
+        return s->info->funcion_call.nombre;
+
+    case ETIQUETA:
+        return s->info->etiqueta.nombre;
+
+    default:
+        return "<?>"; // tipo de símbolo no manejado
+    }
+}
+
+void imprimir_codigo3d(Instrucciones *instrucciones)
+{
+    Instrucciones *aux = instrucciones;
+    char buffer[256];
+
+    CANT_LINEAS = 0;
+    free(codigo);
+    codigo = NULL;
+
+    while (aux != NULL)
+    {
+        Cuadruplo *cuad = aux->expr;
+
+        char *res = cuad->resultado ? simbolo_a_str(cuad->resultado) : "";
+        char *a1 = cuad->arg1 ? simbolo_a_str(cuad->arg1) : "";
+        char *a2 = cuad->arg2 ? simbolo_a_str(cuad->arg2) : "";
+        char *op = operador_a_str(cuad->op);
+
+        switch (cuad->op)
+        {
+        case NOT:
+            sprintf(buffer, "%s %s %s", op, a1, res);
+            break;
+
+        case MOV:
+            sprintf(buffer, "%s %s %s", op, a1, res);
+            break;
+
+        case TAG:
+            sprintf(buffer, "%s:", res);
+            break;
+
+        case MINUS:
+            if (a2 == "")
+            {
+                sprintf(buffer, "%s %s %s", op, a1, res);
+                break;
+            }
+
+        default:
+            sprintf(buffer, "%s %s %s %s", op, a1, a2, res);
+            break;
+        }
+
+        codigo = realloc(codigo, (CANT_LINEAS + 1) * sizeof(char *));
+        codigo[CANT_LINEAS] = strdup(buffer);
+        CANT_LINEAS++;
+
+        aux = aux->next;
+    }
 }

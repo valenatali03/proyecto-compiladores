@@ -31,7 +31,8 @@ typedef enum
     ETIQUETA,
 } Tipo_Info;
 
-typedef enum {
+typedef enum
+{
     ADD,
     MINUS,
     MOD,
@@ -81,5 +82,6 @@ typedef enum
 extern const char *tipo_str[];
 extern const char *tipo_info_str[];
 extern const char *tipo_err_str[];
+extern const char *tipo_op_str[];
 
 #endif
