@@ -1,14 +1,14 @@
 program 
     {
-		integer isTrue() {
-			return 1;
+		integer x = 2 + 2;
+
+		integer foo(integer x){
+			return x;
 		}
 
-		integer main() {
-			if (isTrue()) then {
-				return 1;
-			}
+		void main(){
+			x = foo(2 * 2);
 
-			return 1;
+			return;
 		}
     }

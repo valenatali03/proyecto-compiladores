@@ -6,6 +6,7 @@
 #include "includes/tsim.h"
 #include "includes/semantico.h"
 #include "includes/errores.h"
+#include "includes/pre_asm.h"
 
 extern int yylex(void);
 extern int yyparse(Arbol **arbol);
@@ -15,21 +16,30 @@ extern FILE *yyin;
 FILE *out_lex = NULL;  // Para analizador léxico
 FILE *out_sint = NULL; // Para analizador sintáctico
 FILE *out_sem = NULL;  // Para analizador semántico
+FILE *out_ci = NULL;   // Para codigo intermedio
 
-typedef enum {
+typedef enum
+{
     TARGET_SCAN,
     TARGET_PARSE,
     TARGET_AST,
     TARGET_SEM,
+    TARGET_CI,
     TARGET_DESCONOCIDO
 } Target;
 
-Target parse_target(const char *target_str) 
+Target parse_target(const char *target_str)
 {
-    if (strcmp(target_str, "scan") == 0) return TARGET_SCAN;
-    if (strcmp(target_str, "parse") == 0) return TARGET_PARSE;
-    if (strcmp(target_str, "ast") == 0) return TARGET_AST;
-    if (strcmp(target_str, "sem") == 0) return TARGET_SEM;
+    if (strcmp(target_str, "scan") == 0)
+        return TARGET_SCAN;
+    if (strcmp(target_str, "parse") == 0)
+        return TARGET_PARSE;
+    if (strcmp(target_str, "ast") == 0)
+        return TARGET_AST;
+    if (strcmp(target_str, "sem") == 0)
+        return TARGET_SEM;
+    if (strcmp(target_str, "ci") == 0)
+        return TARGET_CI;
     return TARGET_DESCONOCIDO;
 }
 
@@ -39,22 +49,46 @@ void imprimir_uso(const char *prog)
     exit(1);
 }
 
-FILE *abrir_archivo(const char *base, const char *ext) {
+FILE *abrir_archivo(const char *base, const char *ext)
+{
     char fname[300];
     snprintf(fname, sizeof(fname), "%s%s", base, ext);
     FILE *f = fopen(fname, "w");
-    if (!f) {
+    if (!f)
+    {
         perror("No se puede crear archivo de salida");
         return NULL;
     }
     return f;
 }
 
-void cerrar_archivos() {
-    if (out_lex)  { fclose(out_lex);  out_lex = NULL; }
-    if (out_sint) { fclose(out_sint); out_sint = NULL; }
-    if (out_sem)  { fclose(out_sem);  out_sem = NULL; }
-    if (yyin)     { fclose(yyin);     yyin = NULL; }
+void cerrar_archivos()
+{
+    if (out_lex)
+    {
+        fclose(out_lex);
+        out_lex = NULL;
+    }
+    if (out_sint)
+    {
+        fclose(out_sint);
+        out_sint = NULL;
+    }
+    if (out_sem)
+    {
+        fclose(out_sem);
+        out_sem = NULL;
+    }
+    if (out_ci)
+    {
+        fclose(out_ci);
+        out_ci = NULL;
+    }
+    if (yyin)
+    {
+        fclose(yyin);
+        yyin = NULL;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -82,7 +116,7 @@ int main(int argc, char *argv[])
     }
 
     // Validación del archivo
-    
+
     if (!filename || filename[0] == '-' || !strstr(filename, ".ctds"))
     {
         fprintf(stderr, "Error: archivo inválido. Debe terminar en .ctds y no comenzar con '-'\n");
@@ -108,29 +142,54 @@ int main(int argc, char *argv[])
 
     // Abrir archivos de salida
 
-    switch (t) {
-        case TARGET_SCAN:
-            out_lex = abrir_archivo(base, ".lex");
-            if (!out_lex) { cerrar_archivos(); return 1; }
-            break;
-
-        case TARGET_PARSE:
-        case TARGET_AST:
-            out_lex  = abrir_archivo(base, ".lex");
-            out_sint = abrir_archivo(base, ".sint");
-            if (!out_lex || !out_sint) { cerrar_archivos(); return 1; }
-            break;
-
-        case TARGET_SEM:
-            out_lex  = abrir_archivo(base, ".lex");
-            out_sint = abrir_archivo(base, ".sint");
-            out_sem  = abrir_archivo(base, ".sem");
-            if (!out_lex || !out_sint || !out_sem) { cerrar_archivos(); return 1; }
-            break;
-
-        default:
-            fprintf(stderr, "Target desconocido: %s\n", target);
+    switch (t)
+    {
+    case TARGET_SCAN:
+        out_lex = abrir_archivo(base, ".lex");
+        if (!out_lex)
+        {
+            cerrar_archivos();
             return 1;
+        }
+        break;
+
+    case TARGET_PARSE:
+    case TARGET_AST:
+        out_lex = abrir_archivo(base, ".lex");
+        out_sint = abrir_archivo(base, ".sint");
+        if (!out_lex || !out_sint)
+        {
+            cerrar_archivos();
+            return 1;
+        }
+        break;
+
+    case TARGET_SEM:
+        out_lex = abrir_archivo(base, ".lex");
+        out_sint = abrir_archivo(base, ".sint");
+        out_sem = abrir_archivo(base, ".sem");
+        if (!out_lex || !out_sint || !out_sem)
+        {
+            cerrar_archivos();
+            return 1;
+        }
+        break;
+
+    case TARGET_CI:
+        out_lex = abrir_archivo(base, ".lex");
+        out_sint = abrir_archivo(base, ".sint");
+        out_sem = abrir_archivo(base, ".sem");
+        out_ci = abrir_archivo(base, ".ci");
+        if (!out_lex || !out_sint || !out_sem || !out_ci)
+        {
+            cerrar_archivos();
+            return 1;
+        }
+        break;
+
+    default:
+        fprintf(stderr, "Target desconocido: %s\n", target);
+        return 1;
     }
 
     // Ejecutar etapa
@@ -154,7 +213,7 @@ int main(int argc, char *argv[])
         if (t == TARGET_AST || t == TARGET_SEM)
 
         {
-           exportar_ast_a_dot(arbol, "arbol.dot"); 
+            exportar_ast_a_dot(arbol, "arbol.dot");
         }
 
         if (t == TARGET_SEM)
@@ -163,6 +222,14 @@ int main(int argc, char *argv[])
             Nivel *nivelActual = tabla;
             analisis_semantico(arbol, nivelActual);
             reportar_resultado_semantico(out_sem);
+        }
+
+        if (t == TARGET_CI)
+        {
+            instrucciones = crear_lista_instrucciones();
+            generar_codigo(arbol, instrucciones);
+            instrucciones_to_str(instrucciones);
+            imprimir_codigo_ci(out_ci);
         }
     }
 
