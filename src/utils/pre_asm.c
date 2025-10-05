@@ -157,6 +157,26 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones)
     insertar_cuadruplo(ret, instrucciones);
 }
 
+Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones)
+{
+    if (!nodo) return NULL;
+
+    switch (nodo->tipo_info)
+    {
+    case OPERADOR_UNARIO:
+    case OPERADOR_BINARIO:
+        return buscar_resultado(instrucciones);
+    case ID:
+    case LITERAL:
+        return crear_simbolo(nodo->info, nodo->tipo_info);
+    case CALL_FUNCION:
+        construir_funcion_call(nodo, instrucciones);
+        return buscar_resultado(instrucciones);
+    default:
+        return NULL;
+    }
+}
+
 void construir_op(Arbol *nodo, Instrucciones *instrucciones)
 {
     if (nodo->izq)
@@ -169,73 +189,18 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
     }
 
     Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
-    if (nodo->tipo_info == OPERADOR_BINARIO)
-    {
+
+    if (nodo->tipo_info == OPERADOR_BINARIO) {
         cuad->op = traducir_op(nodo->info->operador.nombre);
-        switch (nodo->izq->tipo_info)
-        {
-        case OPERADOR_BINARIO:
-            cuad->arg1 = buscar_resultado(instrucciones); // TODO
-            break;
-
-        case LITERAL:
-        case ID:
-            cuad->arg1 = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
-            break;
-
-        case CALL_FUNCION:
-            construir_funcion_call(nodo->izq, instrucciones);
-            cuad->arg1 = buscar_resultado(instrucciones);
-            break;
-
-        default:
-            break;
-        }
-        switch (nodo->der->tipo_info)
-        {
-        case OPERADOR_BINARIO:
-            cuad->arg2 = buscar_resultado(instrucciones);
-            break;
-
-        case LITERAL:
-        case ID:
-            cuad->arg2 = crear_simbolo(nodo->der->info, nodo->der->tipo_info);
-            break;
-
-        case CALL_FUNCION:
-            construir_funcion_call(nodo->der, instrucciones);
-            cuad->arg2 = buscar_resultado(instrucciones);
-            break;
-
-        default:
-            break;
-        }
+        cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
+        cuad->arg2 = obtener_arg(nodo->der, instrucciones);
+        cuad->resultado = crear_simbolo(NULL, ID);
+        insertar_cuadruplo(cuad, instrucciones);
     }
     else if (nodo->tipo_info == OPERADOR_UNARIO)
     {
         cuad->op = traducir_op(nodo->info->operador.nombre);
-        switch (nodo->izq->tipo_info)
-        {
-        case OPERADOR_BINARIO:
-            cuad->arg1 = buscar_resultado(instrucciones);
-            break;
-
-        case LITERAL:
-        case ID:
-            cuad->arg1 = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
-            break;
-
-        case CALL_FUNCION:
-            construir_funcion_call(nodo->izq, instrucciones);
-            cuad->arg1 = buscar_resultado(instrucciones);
-            break;
-
-        default:
-            break;
-        }
-    }
-    if (nodo->tipo_info == OPERADOR_BINARIO || nodo->tipo_info == OPERADOR_UNARIO)
-    {
+        cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
         cuad->resultado = crear_simbolo(NULL, ID);
         insertar_cuadruplo(cuad, instrucciones);
     }
