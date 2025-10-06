@@ -48,6 +48,6 @@ int cant_params(Arbol *nodo);
 Simbolo *crear_etiqueta(char *nombre);
 Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag);
 Instrucciones *crear_lista_instrucciones();
-static char *simbolo_a_str(Simbolo *s);
+void simbolo_a_str(Simbolo *s, char buffer[64]);
 void instrucciones_to_str(Instrucciones *instrucciones);
 void imprimir_codigo_ci(FILE *out_ci);

@@ -159,7 +159,8 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones)
 
 Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones)
 {
-    if (!nodo) return NULL;
+    if (!nodo)
+        return NULL;
 
     switch (nodo->tipo_info)
     {
@@ -190,7 +191,8 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
 
     Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
 
-    if (nodo->tipo_info == OPERADOR_BINARIO) {
+    if (nodo->tipo_info == OPERADOR_BINARIO)
+    {
         cuad->op = traducir_op(nodo->info->operador.nombre);
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
         cuad->arg2 = obtener_arg(nodo->der, instrucciones);
@@ -549,39 +551,46 @@ Instrucciones *crear_lista_instrucciones()
     return lista;
 }
 
-static char *simbolo_a_str(Simbolo *s)
+void simbolo_a_str(Simbolo *s, char buffer[64])
 {
     if (s == NULL)
-        return "";
-
-    static char buffer[64];
+    {
+        buffer[0] = '\0';
+        return;
+    }
 
     switch (s->flag)
     {
     case ID:
-        return s->info->id.nombre;
+        sprintf(buffer, "%s", s->info->id.nombre);
+        break;
 
     case LITERAL:
         switch (s->info->literal.tipo)
         {
         case ENTERO:
             sprintf(buffer, "%d", *((int *)s->info->literal.valor));
-            return buffer;
+            break;
         case BOOL:
             sprintf(buffer, "%s", *((int *)s->info->literal.valor) ? "true" : "false");
-            return buffer;
+            break;
         default:
-            return "<?>"; // tipo literal no manejado
+            sprintf(buffer, "<?>");
+            break;
         }
+        break;
 
     case CALL_FUNCION:
-        return s->info->funcion_call.nombre;
+        sprintf(buffer, "%s", s->info->funcion_call.nombre);
+        break;
 
     case ETIQUETA:
-        return s->info->etiqueta.nombre;
+        sprintf(buffer, "%s", s->info->etiqueta.nombre);
+        break;
 
     default:
-        return "<?>"; // tipo de símbolo no manejado
+        sprintf(buffer, "<?>");
+        break;
     }
 }
 
@@ -593,15 +602,17 @@ void instrucciones_to_str(Instrucciones *instrucciones)
     CANT_LINEAS = 0;
     free(codigo);
     codigo = NULL;
+    char res[64], a1[64], a2[64];
+    char *op;
 
     while (aux != NULL)
     {
         Cuadruplo *cuad = aux->expr;
 
-        char *res = cuad->resultado ? simbolo_a_str(cuad->resultado) : "";
-        char *a1 = cuad->arg1 ? simbolo_a_str(cuad->arg1) : "";
-        char *a2 = cuad->arg2 ? simbolo_a_str(cuad->arg2) : "";
-        char *op = tipo_op_str[cuad->op];
+        op = tipo_op_str[cuad->op];
+        simbolo_a_str(cuad->resultado, res);
+        simbolo_a_str(cuad->arg1, a1);
+        simbolo_a_str(cuad->arg2, a2);
 
         switch (cuad->op)
         {
