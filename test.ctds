@@ -1,13 +1,20 @@
 program 
     {
-		integer x = 2 + 2;
+		integer x = 2 + 3;
+
+		bool y = true;
 
 		integer foo(integer x){
 			return x;
 		}
 
 		void main(){
-			x = foo(2 * 2);
+			if(y) then {
+				foo(3);
+				return;
+			} else {
+				return;
+			}
 
 			return;
 		}

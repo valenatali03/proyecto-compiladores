@@ -189,10 +189,9 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
         construir_op(nodo->der, instrucciones);
     }
 
-    Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
-
     if (nodo->tipo_info == OPERADOR_BINARIO)
     {
+        Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
         cuad->op = traducir_op(nodo->info->operador.nombre);
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
         cuad->arg2 = obtener_arg(nodo->der, instrucciones);
@@ -201,6 +200,7 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
     }
     else if (nodo->tipo_info == OPERADOR_UNARIO)
     {
+        Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
         cuad->op = traducir_op(nodo->info->operador.nombre);
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
         cuad->resultado = crear_simbolo(NULL, ID);
@@ -360,14 +360,18 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
 
 void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones)
 {
+    
+    Cuadruplo *tag = malloc(sizeof(Cuadruplo));
+    tag->op = TAG;
+    tag->resultado = crear_etiqueta(nodo->info->funcion_decl.nombre);
+    insertar_cuadruplo(tag, instrucciones);
+
     Cuadruplo *start_fun = malloc(sizeof(Cuadruplo));
     start_fun->op = START_FUN;
     insertar_cuadruplo(start_fun, instrucciones);
-    Cuadruplo *tag = malloc(sizeof(Cuadruplo));
-    tag->op = TAG;
-    tag->resultado = crear_etiqueta(NULL);
-    insertar_cuadruplo(tag, instrucciones);
+
     construir_bloque(nodo->izq, instrucciones);
+
     Cuadruplo *end_fun = malloc(sizeof(Cuadruplo));
     end_fun->op = END_FUN;
     insertar_cuadruplo(end_fun, instrucciones);
