@@ -21,6 +21,8 @@ extern int CANT_LINEAS;
 extern int CANT_TEMP;
 extern int CANT_JUMP;
 extern int CANT_TAG;
+extern int OFFSET;
+extern int OFFSET_INC;
 
 extern char **codigo;
 extern Instrucciones *instrucciones;

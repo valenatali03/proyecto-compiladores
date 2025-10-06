@@ -5,6 +5,8 @@ int CANT_LINEAS = 0;
 int CANT_TEMP = 0;
 int CANT_JUMP = 0;
 int CANT_TAG = 0;
+int OFFSET = 0;
+int OFFSET_INC = 4;
 char **codigo = NULL;
 Instrucciones *instrucciones = NULL;
 Instrucciones *ultima_instruccion = NULL;
@@ -224,12 +226,12 @@ Tipo_Operador traducir_op(char *op)
 
 void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
 {
-    if (!nodo->medio) return;
+    if (!nodo->medio)
+        return;
 
     Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
     cuad->op = IF_FALSE;
     cuad->arg1 = construir_expresion(nodo->medio, instrucciones);
-
 
     cuad->arg2 = NULL;
     // Etiqueta para saltear el bloque verdadero
@@ -308,7 +310,7 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
 
 void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones)
 {
-    
+    OFFSET = 0;
     Cuadruplo *tag = malloc(sizeof(Cuadruplo));
     tag->op = TAG;
     tag->resultado = crear_etiqueta(nodo->info->funcion_decl.nombre);
@@ -413,7 +415,6 @@ void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
     ultima_instruccion->next = nuevo;
 
     ultima_instruccion = nuevo;
-
 }
 
 Simbolo *buscar_resultado(Instrucciones *inst)
@@ -467,22 +468,37 @@ Simbolo *crear_etiqueta(char *nombre)
 
 Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
 {
-    if (!info)
-    {
-        char buffer[16];
-        Simbolo *s = malloc(sizeof(Simbolo));
-        Info_Union *info = malloc(sizeof(Info_Union));
-        sprintf(buffer, "t%d", CANT_TEMP++);
-        char *n = strdup(buffer);
-        s->flag = flag;
-        info->id.nombre = n;
-        s->info = info;
-
-        return s;
-    }
-
     Simbolo *s = malloc(sizeof(Simbolo));
     s->flag = flag;
+    if (flag == ID)
+    {
+        char buffer[16];
+        if (!info)
+        {
+            Info_Union *info = malloc(sizeof(Info_Union));
+            sprintf(buffer, "t%d", CANT_TEMP++);
+            char *n = strdup(buffer);
+            s->flag = flag;
+            info->id.nombre = n;
+            info->id.offset = OFFSET;
+            OFFSET = OFFSET + OFFSET_INC;
+            s->info = info;
+
+            return s;
+        }
+        else
+        {
+            s->info = info;
+            if (s->info->id.offset == NULL)
+            {
+                s->info->id.offset = OFFSET;
+                OFFSET = OFFSET + OFFSET_INC;
+            }
+
+            return s;
+        }
+    }
+
     s->info = info;
     s->next = NULL;
 
@@ -508,7 +524,7 @@ void simbolo_a_str(Simbolo *s, char buffer[64])
     switch (s->flag)
     {
     case ID:
-        sprintf(buffer, "%s", s->info->id.nombre);
+        sprintf(buffer, "%s (OFFSET: %d)", s->info->id.nombre, s->info->id.offset);
         break;
 
     case LITERAL:
