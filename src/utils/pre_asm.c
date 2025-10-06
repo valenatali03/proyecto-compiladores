@@ -7,6 +7,7 @@ int CANT_JUMP = 0;
 int CANT_TAG = 0;
 char **codigo = NULL;
 Instrucciones *instrucciones = NULL;
+Instrucciones *ultima_instruccion = NULL;
 
 void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen)
 {
@@ -136,23 +137,7 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones)
         return;
     }
 
-    Tipo_Info flag = nodo->izq->tipo_info;
-
-    switch (flag)
-    {
-    case ID:
-    case LITERAL:
-        ret->arg1 = crear_simbolo(nodo->izq->info, flag);
-        break;
-    case OPERADOR_BINARIO:
-    case OPERADOR_UNARIO:
-    case CALL_FUNCION:
-        construir_expresion(nodo->izq, instrucciones);
-        ret->arg1 = buscar_resultado(instrucciones);
-        break;
-    default:
-        break;
-    }
+    ret->arg1 = construir_expresion(nodo->izq, instrucciones);
 
     insertar_cuadruplo(ret, instrucciones);
 }
@@ -239,22 +224,12 @@ Tipo_Operador traducir_op(char *op)
 
 void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
 {
-    if (nodo->medio)
-    {
-        construir_expresion(nodo->medio, instrucciones);
-    }
+    if (!nodo->medio) return;
 
     Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
     cuad->op = IF_FALSE;
+    cuad->arg1 = construir_expresion(nodo->medio, instrucciones);
 
-    if (nodo->medio->tipo_info == ID || nodo->medio->tipo_info == LITERAL)
-    {
-        cuad->arg1 = crear_simbolo(nodo->medio->info, nodo->medio->tipo_info);
-    }
-    else
-    {
-        cuad->arg1 = buscar_resultado(instrucciones);
-    }
 
     cuad->arg2 = NULL;
     // Etiqueta para saltear el bloque verdadero
@@ -295,27 +270,8 @@ void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones)
 {
     Cuadruplo *mov = malloc(sizeof(Cuadruplo));
     mov->op = MOV;
+    mov->arg1 = construir_expresion(nodo->der, instrucciones);
     mov->resultado = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
-    Tipo_Info flag_der = nodo->der->tipo_info;
-
-    switch (flag_der)
-    {
-    case LITERAL:
-    case ID:
-        mov->arg1 = crear_simbolo(nodo->der->info, flag_der);
-        break;
-
-    case CALL_FUNCION:
-    case OPERADOR_UNARIO:
-    case OPERADOR_BINARIO:
-        construir_expresion(nodo->der, instrucciones);
-        mov->arg1 = buscar_resultado(instrucciones);
-        break;
-
-    default:
-        break;
-    }
-
     insertar_cuadruplo(mov, instrucciones);
 }
 
@@ -327,18 +283,10 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
         start_while->op = TAG;
         start_while->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(start_while, instrucciones);
-        construir_expresion(nodo->izq, instrucciones);
         // Salto condicional para saltear el while.
         Cuadruplo *jumpc = malloc(sizeof(Cuadruplo));
         jumpc->op = JMPC;
-        if (nodo->izq->tipo_info == ID || nodo->izq->tipo_info == LITERAL)
-        {
-            jumpc->arg1 = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
-        }
-        else
-        {
-            jumpc->arg1 = buscar_resultado(instrucciones);
-        }
+        jumpc->arg1 = construir_expresion(nodo->izq, instrucciones);
 
         jumpc->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(jumpc, instrucciones);
@@ -399,16 +347,7 @@ void construir_params(Arbol *nodo, Instrucciones *instrucciones)
     {
         Cuadruplo *param = malloc(sizeof(Cuadruplo));
         param->op = PARAM;
-        construir_expresion(params_call->expr, instrucciones);
-        if (params_call->expr->tipo_info == LITERAL || params_call->expr->tipo_info == ID)
-        {
-            param->arg1 = crear_simbolo(params_call->expr->info, params_call->expr->tipo_info);
-        }
-        else
-        {
-            param->arg1 = buscar_resultado(instrucciones);
-        }
-
+        param->arg1 = construir_expresion(params_call->expr, instrucciones);
         insertar_cuadruplo(param, instrucciones);
         param = NULL;
         params_call = params_call->next;
@@ -430,22 +369,27 @@ void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
     insertar_cuadruplo(call, instrucciones);
 }
 
-void construir_expresion(Arbol *nodo, Instrucciones *instrucciones)
+Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones)
 {
     if (!nodo)
-        return;
+        return NULL;
 
     switch (nodo->tipo_info)
     {
     case OPERADOR_UNARIO:
     case OPERADOR_BINARIO:
         construir_op(nodo, instrucciones);
+        return buscar_resultado(instrucciones);
         break;
-
+    case ID:
+    case LITERAL:
+        return crear_simbolo(nodo->info, nodo->tipo_info);
     case CALL_FUNCION:
         construir_funcion_call(nodo, instrucciones);
+        return buscar_resultado(instrucciones);
         break;
     default:
+        return NULL;
         break;
     }
 }
@@ -458,20 +402,18 @@ void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
     if (inst->expr == NULL)
     {
         inst->expr = c;
+        ultima_instruccion = inst;
         return;
-    }
-
-    Instrucciones *aux = inst;
-
-    while (aux->next != NULL)
-    {
-        aux = aux->next;
     }
 
     Instrucciones *nuevo = malloc(sizeof(Instrucciones));
     nuevo->expr = c;
     nuevo->next = NULL;
-    aux->next = nuevo;
+
+    ultima_instruccion->next = nuevo;
+
+    ultima_instruccion = nuevo;
+
 }
 
 Simbolo *buscar_resultado(Instrucciones *inst)

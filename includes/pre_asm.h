@@ -32,6 +32,7 @@ void construir_declaracion_metodos(Arbol *nodo, Instrucciones *instrucciones);
 void construir_sentencias(Arbol *nodo, Instrucciones *instrucciones);
 void construir_sentencia(Arbol *nodo, Instrucciones *instrucciones);
 void construir_return(Arbol *nodo, Instrucciones *instrucciones);
+Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones)
 void construir_op(Arbol *nodo, Instrucciones *instrucciones);
 Tipo_Operador traducir_op(char *op);
 void construir_condicional(Arbol *nodo, Instrucciones *instrucciones);
@@ -41,7 +42,7 @@ void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones);
 void construir_bloque(Arbol *nodo, Instrucciones *instrucciones);
 void construir_params(Arbol *nodo, Instrucciones *instrucciones);
 void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones);
-void construir_expresion(Arbol *nodo, Instrucciones *instrucciones);
+Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones);
 void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst);
 Simbolo *buscar_resultado(Instrucciones *inst);
 int cant_params(Arbol *nodo);
