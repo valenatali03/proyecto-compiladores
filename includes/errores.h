@@ -52,6 +52,6 @@ void reportarError(CodigoError codigo, int linea, int colum, ...);
  *
  * @param out_sem  Archivo de salida donde se escribe el reporte
  */
-void reportar_resultado_semantico(FILE *out_sem);
+int reportar_resultado_semantico(FILE *out_sem);
 
 #endif

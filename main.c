@@ -206,25 +206,26 @@ int main(int argc, char *argv[])
     Arbol *arbol = NULL;
     int res = yyparse(&arbol);
 
-    if (res == 0) // No hay error de sintaxis
+    if (res != 0)
     {
-        fprintf(out_sint, "Análisis sintáctico exitoso\n");
+        return 1;
+    }
 
-        if (t == TARGET_AST || t == TARGET_SEM)
+    fprintf(out_sint, "Análisis sintáctico exitoso\n");
 
-        {
-            exportar_ast_a_dot(arbol, "arbol.dot");
-        }
+    if (t == TARGET_AST || t == TARGET_SEM || t == TARGET_CI)
+    {
+        exportar_ast_a_dot(arbol, "arbol.dot");
+    }
 
-        if (t == TARGET_SEM)
-        {
-            tabla = crear_tabla();
-            Nivel *nivelActual = tabla;
-            analisis_semantico(arbol, nivelActual);
-            reportar_resultado_semantico(out_sem);
-        }
+    if (t == TARGET_SEM || t == TARGET_CI)
+    {
+        tabla = crear_tabla();
+        Nivel *nivelActual = tabla;
+        analisis_semantico(arbol, nivelActual);
+        int error_semantico = reportar_resultado_semantico(out_sem);
 
-        if (t == TARGET_CI)
+        if (t == TARGET_CI && !error_semantico)
         {
             instrucciones = crear_lista_instrucciones();
             generar_codigo(arbol, instrucciones);
