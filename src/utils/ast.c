@@ -31,6 +31,7 @@ Arbol *crear_arbol_id(char *id, int linea, int colum, Arbol *izq, Arbol *der)
     arbol->info->id.nombre = strdup(id);
     arbol->info->id.valor = NULL;
     arbol->info->id.tipo = VACIO;
+    arbol->info->id.offset = -1;
     arbol->izq = izq;
     arbol->der = der;
     arbol->medio = NULL;

@@ -14,6 +14,7 @@ typedef struct Info_ID
     char *nombre;
     void *valor;
     Tipo tipo;
+    int offset;
 } Info_ID;
 
 /**
@@ -44,6 +45,7 @@ typedef struct Info_FuncionDecl
     void *valor;
     Tipo tipo;
     Parametro_Decl *params;
+    int offset;
 } Info_FuncionDecl;
 
 typedef struct Info_FuncionCall
@@ -51,6 +53,11 @@ typedef struct Info_FuncionCall
     char *nombre;
     Parametro_Call *params;
 } Info_FuncionCall;
+
+typedef struct Info_Etiqueta
+{
+    char *nombre;
+} Info_Etiqueta;
 
 /**
  * Unión que agrupa la información posible en un nodo del árbol.
@@ -62,6 +69,7 @@ typedef struct Info_Union
     Info_Literal literal;
     Info_FuncionDecl funcion_decl;
     Info_FuncionCall funcion_call;
+    Info_Etiqueta etiqueta;
 } Info_Union;
 
 #endif
