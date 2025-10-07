@@ -45,6 +45,7 @@ typedef struct Info_FuncionDecl
     void *valor;
     Tipo tipo;
     Parametro_Decl *params;
+    int offset;
 } Info_FuncionDecl;
 
 typedef struct Info_FuncionCall
@@ -53,7 +54,7 @@ typedef struct Info_FuncionCall
     Parametro_Call *params;
 } Info_FuncionCall;
 
-typedef struct Info_Etiqueta 
+typedef struct Info_Etiqueta
 {
     char *nombre;
 } Info_Etiqueta;

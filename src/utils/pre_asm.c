@@ -318,10 +318,12 @@ void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones)
 
     Cuadruplo *start_fun = malloc(sizeof(Cuadruplo));
     start_fun->op = START_FUN;
+    start_fun->arg1 = crear_simbolo(nodo->info, nodo->tipo_info);
     insertar_cuadruplo(start_fun, instrucciones);
 
     construir_bloque(nodo->izq, instrucciones);
 
+    nodo->info->funcion_decl.offset = OFFSET;
     Cuadruplo *end_fun = malloc(sizeof(Cuadruplo));
     end_fun->op = END_FUN;
     insertar_cuadruplo(end_fun, instrucciones);
@@ -480,8 +482,8 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
             char *n = strdup(buffer);
             s->flag = flag;
             info->id.nombre = n;
-            info->id.offset = OFFSET;
             OFFSET = OFFSET + OFFSET_INC;
+            info->id.offset = OFFSET;
             s->info = info;
 
             return s;
@@ -489,10 +491,10 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
         else
         {
             s->info = info;
-            if (s->info->id.offset == NULL)
+            if (s->info->id.offset == -1)
             {
-                s->info->id.offset = OFFSET;
                 OFFSET = OFFSET + OFFSET_INC;
+                s->info->id.offset = OFFSET;
             }
 
             return s;
@@ -540,6 +542,10 @@ void simbolo_a_str(Simbolo *s, char buffer[64])
             sprintf(buffer, "<?>");
             break;
         }
+        break;
+
+    case DECL_FUNCION:
+        sprintf(buffer, "%s (OFFSET: %d)", s->info->funcion_decl.nombre, s->info->funcion_decl.offset);
         break;
 
     case CALL_FUNCION:

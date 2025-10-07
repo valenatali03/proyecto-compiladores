@@ -9,6 +9,7 @@ program
 		}
 
 		void main(){
+			bool y = true;
 			if(y) then {
 				foo(3);
 				return;
