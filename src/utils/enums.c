@@ -65,3 +65,16 @@ const char *tipo_op_str[] = {
     [TAG] = "TAG",
     [JMPC] = "JMPC",
     [NOP] = "NOP"};
+
+const char *tipo_op_asm[] = {
+    [MOV] = "movl",
+    [ADD] = "addl",
+    [MINUS] = "subl",
+    [MULT] = "imull",
+    [DIV] = "%%eax",
+    [MOD] = "%%edx",
+    [AND] = "andl",
+    [OR] = "orl",
+    [COMP] = "sete",
+    [GT] = "setg",
+    [LT] = "setl"};

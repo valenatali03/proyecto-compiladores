@@ -6,7 +6,7 @@
 #include "includes/tsim.h"
 #include "includes/semantico.h"
 #include "includes/errores.h"
-#include "includes/pre_asm.h"
+#include "includes/asm.h"
 
 extern int yylex(void);
 extern int yyparse(Arbol **arbol);
@@ -17,6 +17,7 @@ FILE *out_lex = NULL;  // Para analizador léxico
 FILE *out_sint = NULL; // Para analizador sintáctico
 FILE *out_sem = NULL;  // Para analizador semántico
 FILE *out_ci = NULL;   // Para codigo intermedio
+FILE *out_s = NULL;
 
 typedef enum
 {
@@ -25,6 +26,7 @@ typedef enum
     TARGET_AST,
     TARGET_SEM,
     TARGET_CI,
+    TARGET_S,
     TARGET_DESCONOCIDO
 } Target;
 
@@ -40,6 +42,8 @@ Target parse_target(const char *target_str)
         return TARGET_SEM;
     if (strcmp(target_str, "ci") == 0)
         return TARGET_CI;
+    if (strcmp(target_str, "s") == 0)
+        return TARGET_S;
     return TARGET_DESCONOCIDO;
 }
 
@@ -83,6 +87,11 @@ void cerrar_archivos()
     {
         fclose(out_ci);
         out_ci = NULL;
+    }
+    if (out_s)
+    {
+        fclose(out_s);
+        out_s = NULL;
     }
     if (yyin)
     {
@@ -187,6 +196,18 @@ int main(int argc, char *argv[])
         }
         break;
 
+    case TARGET_S:
+        out_lex = abrir_archivo(base, ".lex");
+        out_sint = abrir_archivo(base, ".sint");
+        out_sem = abrir_archivo(base, ".sem");
+        out_ci = abrir_archivo(base, ".ci");
+        out_s = abrir_archivo(base, ".s");
+        if (!out_lex || !out_sint || !out_sem || !out_ci || !out_s)
+        {
+            cerrar_archivos();
+            return 1;
+        }
+        break;
     default:
         fprintf(stderr, "Target desconocido: %s\n", target);
         return 1;
@@ -218,7 +239,7 @@ int main(int argc, char *argv[])
         exportar_ast_a_dot(arbol, "arbol.dot");
     }
 
-    if (t == TARGET_SEM || t == TARGET_CI)
+    if (t == TARGET_SEM || t == TARGET_CI || t == TARGET_S)
     {
         tabla = crear_tabla();
         Nivel *nivelActual = tabla;
@@ -232,6 +253,16 @@ int main(int argc, char *argv[])
             instrucciones_to_str(instrucciones);
             imprimir_codigo_ci(out_ci);
         }
+    }
+
+    if (t == TARGET_S)
+    {
+        instrucciones = crear_lista_instrucciones();
+        generar_codigo(arbol, instrucciones);
+        instrucciones_to_str(instrucciones);
+        imprimir_codigo_ci(out_ci);
+        directivas(out_s);
+        generar_asm(out_s, instrucciones);
     }
 
     cerrar_archivos();

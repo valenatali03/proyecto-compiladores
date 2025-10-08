@@ -470,6 +470,7 @@ Simbolo *crear_etiqueta(char *nombre)
 
 Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
 {
+
     Simbolo *s = malloc(sizeof(Simbolo));
     s->flag = flag;
     if (flag == ID)

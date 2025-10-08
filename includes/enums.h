@@ -83,5 +83,6 @@ extern const char *tipo_str[];
 extern const char *tipo_info_str[];
 extern const char *tipo_err_str[];
 extern const char *tipo_op_str[];
+extern const char *tipo_op_asm[];
 
 #endif

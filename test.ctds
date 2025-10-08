@@ -1,22 +1,4 @@
 program 
     {
-		integer x = 2 + 3;
-
-		bool y = true;
-
-		integer foo(integer x){
-			return x;
-		}
-
-		void main(){
-			bool y = true;
-			if(y) then {
-				foo(3);
-				return;
-			} else {
-				return;
-			}
-
-			return;
-		}
+		  integer y = y == 2;
     }
