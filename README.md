@@ -15,4 +15,7 @@ La información detallada sobre cómo compilar el proyecto, ejecutar el analizad
 
 ## Ramas correspondientes a entregas de etapas
   - Entrega 1 (Scanner y Parser): Entrega-15/9
+  - Entrega 2 (AST y Tabla de Símbolos): Entrega-24/9
+  - Entrega 3 (Análisis Semántico): Entrega-1/10
+  - Entrega 4 (Código Intermedio): Entrega-8/10
 
