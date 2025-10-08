@@ -64,4 +64,5 @@ const char *tipo_op_str[] = {
     [PARAM] = "PARAM",
     [TAG] = "TAG",
     [JMPC] = "JMPC",
+    [EXTERN] = "EXTERN",
     [NOP] = "NOP"};

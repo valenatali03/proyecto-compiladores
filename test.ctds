@@ -4,14 +4,12 @@ program
 
 		bool y = true;
 
-		integer foo(integer x){
-			return x;
+		integer foo(integer x, integer y){
+			return x + y;
 		}
 
 		void main(){
-			bool y = true;
 			if(y) then {
-				foo(3);
 				return;
 			} else {
 				return;

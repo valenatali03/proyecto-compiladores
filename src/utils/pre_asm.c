@@ -7,6 +7,7 @@ int CANT_JUMP = 0;
 int CANT_TAG = 0;
 int OFFSET = 0;
 int OFFSET_INC = 4;
+int CANT_VAR = 0;
 char **codigo = NULL;
 Instrucciones *instrucciones = NULL;
 Instrucciones *ultima_instruccion = NULL;
@@ -56,6 +57,7 @@ void construir_declaracion_variables(Arbol *nodo, Instrucciones *instrucciones)
     if (nodo->tipo_info == DECLARACION_VARIABLE)
     {
         construir_asignacion(nodo, instrucciones);
+        CANT_VAR += 1;
     }
 }
 
@@ -310,23 +312,35 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
 
 void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones)
 {
-    OFFSET = 0;
-    Cuadruplo *tag = malloc(sizeof(Cuadruplo));
-    tag->op = TAG;
-    tag->resultado = crear_etiqueta(nodo->info->funcion_decl.nombre);
-    insertar_cuadruplo(tag, instrucciones);
+    if (!nodo->info->funcion_decl.esExterna)
+    {
+        CANT_VAR = 0;
+        Cuadruplo *tag = malloc(sizeof(Cuadruplo));
+        tag->op = TAG;
+        tag->resultado = crear_etiqueta(nodo->info->funcion_decl.nombre);
+        insertar_cuadruplo(tag, instrucciones);
 
-    Cuadruplo *start_fun = malloc(sizeof(Cuadruplo));
-    start_fun->op = START_FUN;
-    start_fun->arg1 = crear_simbolo(nodo->info, nodo->tipo_info);
-    insertar_cuadruplo(start_fun, instrucciones);
+        Cuadruplo *start_fun = malloc(sizeof(Cuadruplo));
+        start_fun->op = START_FUN;
+        start_fun->arg1 = crear_simbolo(nodo->info, nodo->tipo_info);
+        insertar_cuadruplo(start_fun, instrucciones);
 
-    construir_bloque(nodo->izq, instrucciones);
+        construir_bloque(nodo->izq, instrucciones);
+        nodo->info->funcion_decl.cantVariables = CANT_VAR;
+        OFFSET = nodo->info->funcion_decl.cantVariables * OFFSET_INC;
 
-    nodo->info->funcion_decl.offset = OFFSET;
-    Cuadruplo *end_fun = malloc(sizeof(Cuadruplo));
-    end_fun->op = END_FUN;
-    insertar_cuadruplo(end_fun, instrucciones);
+        nodo->info->funcion_decl.offset = OFFSET;
+        Cuadruplo *end_fun = malloc(sizeof(Cuadruplo));
+        end_fun->op = END_FUN;
+        insertar_cuadruplo(end_fun, instrucciones);
+    }
+    else
+    {
+        Cuadruplo *externo = malloc(sizeof(Cuadruplo));
+        externo->op = EXTERN;
+        externo->arg1 = crear_simbolo(nodo->info, nodo->tipo_info);
+        insertar_cuadruplo(externo, instrucciones);
+    }
 }
 
 void construir_bloque(Arbol *nodo, Instrucciones *instrucciones)
@@ -482,9 +496,10 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
             char *n = strdup(buffer);
             s->flag = flag;
             info->id.nombre = n;
-            OFFSET = OFFSET + OFFSET_INC;
+            OFFSET = OFFSET - OFFSET_INC;
             info->id.offset = OFFSET;
             s->info = info;
+            CANT_VAR += 1;
 
             return s;
         }
@@ -526,7 +541,7 @@ void simbolo_a_str(Simbolo *s, char buffer[64])
     switch (s->flag)
     {
     case ID:
-        sprintf(buffer, "%s (OFFSET: %d)", s->info->id.nombre, s->info->id.offset);
+        sprintf(buffer, "%s", s->info->id.nombre);
         break;
 
     case LITERAL:
@@ -545,7 +560,7 @@ void simbolo_a_str(Simbolo *s, char buffer[64])
         break;
 
     case DECL_FUNCION:
-        sprintf(buffer, "%s (OFFSET: %d)", s->info->funcion_decl.nombre, s->info->funcion_decl.offset);
+        sprintf(buffer, "%s", s->info->funcion_decl.nombre);
         break;
 
     case CALL_FUNCION:
