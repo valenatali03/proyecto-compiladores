@@ -46,12 +46,16 @@ typedef struct Info_FuncionDecl
     Tipo tipo;
     Parametro_Decl *params;
     int offset;
+    int esExterna;
+    int cantVariables;
 } Info_FuncionDecl;
 
 typedef struct Info_FuncionCall
 {
     char *nombre;
     Parametro_Call *params;
+    int esExterna;
+    int cantVariables;
 } Info_FuncionCall;
 
 typedef struct Info_Etiqueta

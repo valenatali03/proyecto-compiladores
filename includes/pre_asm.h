@@ -23,6 +23,7 @@ extern int CANT_JUMP;
 extern int CANT_TAG;
 extern int OFFSET;
 extern int OFFSET_INC;
+extern int CANT_VAR;
 
 extern char **codigo;
 extern Instrucciones *instrucciones;

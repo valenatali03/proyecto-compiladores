@@ -111,6 +111,7 @@ void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
         {
             nivelActual = procesar_bloque(arbol->izq, nivelActual, params);
             char *nombre = arbol->info->funcion_decl.nombre;
+            arbol->info->funcion_decl.esExterna = 0;
             if (buscar_return(arbol->izq) == 0 && arbol->info->funcion_decl.tipo != VACIO)
             {
                 reportarError(FUN_SIN_RETURN, arbol->linea, arbol->colum, nombre);
@@ -126,6 +127,7 @@ void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
                 procesar_params(params, temp);
                 cerrar_nivel(temp);
             }
+            arbol->info->funcion_decl.esExterna = 1;
         }
 
         return;
@@ -596,6 +598,8 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
         // printf("Cantidad de parámetros no coincide\n");
         return 0;
     }
+    arbol->info->funcion_call.cantVariables = metodo->funcion_decl.cantVariables;
+    arbol->info->funcion_call.esExterna = metodo->funcion_decl.esExterna;
 
     return 1;
 }

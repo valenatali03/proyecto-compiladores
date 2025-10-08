@@ -64,6 +64,7 @@ const char *tipo_op_str[] = {
     [PARAM] = "PARAM",
     [TAG] = "TAG",
     [JMPC] = "JMPC",
+    [EXTERN] = "EXTERN",
     [NOP] = "NOP"};
 
 const char *tipo_op_asm[] = {
@@ -78,3 +79,4 @@ const char *tipo_op_asm[] = {
     [COMP] = "sete",
     [GT] = "setg",
     [LT] = "setl"};
+;

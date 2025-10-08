@@ -56,6 +56,7 @@ typedef enum
     PARAM,
     TAG,
     JMPC,
+    EXTERN,
     NOP,
 } Tipo_Operador;
 
