@@ -48,6 +48,7 @@ typedef struct Info_FuncionDecl
     int offset;
     int esExterna;
     int cantVariables;
+    int cant_params;
 } Info_FuncionDecl;
 
 typedef struct Info_FuncionCall
@@ -56,6 +57,7 @@ typedef struct Info_FuncionCall
     Parametro_Call *params;
     int esExterna;
     int cantVariables;
+    int cant_params;
 } Info_FuncionCall;
 
 typedef struct Info_Etiqueta

@@ -7,6 +7,9 @@ int CANT_JUMP = 0;
 int CANT_TAG = 0;
 int OFFSET = 0;
 int OFFSET_INC = 4;
+int OFFSET_PARAMS_REG = 0;
+int OFFSET_PARAMS = 0;
+int OFFSET_GAP = 16;
 int CANT_VAR = 0;
 char **codigo = NULL;
 Instrucciones *instrucciones = NULL;
@@ -379,7 +382,7 @@ void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
     call->op = CALL;
     Info_Union *info = malloc(sizeof(Info_Union));
     int *cant = malloc(sizeof(int));
-    *cant = cant_params(nodo);
+    *cant = nodo->info->funcion_call.cant_params;
     info->literal.valor = cant;
     info->literal.tipo = ENTERO;
     call->arg1 = crear_simbolo(info, LITERAL);
@@ -448,18 +451,6 @@ Simbolo *buscar_resultado(Instrucciones *inst)
         aux = aux->next;
     }
     return res;
-}
-
-int cant_params(Arbol *nodo)
-{
-    int count = 0;
-    Parametro_Call *params = nodo->info->funcion_call.params;
-    while (params)
-    {
-        count++;
-        params = params->next;
-    }
-    return count;
 }
 
 Simbolo *crear_etiqueta(char *nombre)

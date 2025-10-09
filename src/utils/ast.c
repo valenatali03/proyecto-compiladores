@@ -66,6 +66,7 @@ Arbol *crear_arbol_funcion_decl(char *nombre, Tipo tipo, Parametro_Decl *params,
     arbol->info->funcion_decl.nombre = strdup(nombre);
     arbol->info->funcion_decl.tipo = tipo;
     arbol->info->funcion_decl.params = params;
+    arbol->info->funcion_decl.cant_params = contar_parametros_decl(params);
     arbol->izq = izq;
     arbol->der = der;
     arbol->medio = NULL;
@@ -82,6 +83,7 @@ Arbol *crear_arbol_funcion_call(char *nombre, Parametro_Call *params, int linea,
     arbol->colum = colum;
     arbol->info->funcion_call.nombre = strdup(nombre);
     arbol->info->funcion_call.params = params;
+    arbol->info->funcion_call.cant_params = contar_parametros_call(params);
     arbol->izq = izq;
     arbol->der = der;
     arbol->medio = NULL;

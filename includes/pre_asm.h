@@ -23,6 +23,9 @@ extern int CANT_JUMP;
 extern int CANT_TAG;
 extern int OFFSET;
 extern int OFFSET_INC;
+extern int OFFSET_PARAMS_REG;
+extern int OFFSET_PARAMS;
+extern int OFFSET_GAP;
 extern int CANT_VAR;
 
 extern char **codigo;
@@ -48,7 +51,6 @@ void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones);
 Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones);
 void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst);
 Simbolo *buscar_resultado(Instrucciones *inst);
-int cant_params(Arbol *nodo);
 Simbolo *crear_etiqueta(char *nombre);
 Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag);
 Instrucciones *crear_lista_instrucciones();

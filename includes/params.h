@@ -24,5 +24,7 @@ typedef struct Parametro_Call
 } Parametro_Call;
 
 void *agregar_param(void *params, void *data, Tipo_Info tipo_param, int linea, int colum);
+int contar_parametros_decl(Parametro_Decl *params);
+int contar_parametros_call(Parametro_Call *params);
 
 #endif

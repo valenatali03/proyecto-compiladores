@@ -72,11 +72,17 @@ const char *tipo_op_asm[] = {
     [ADD] = "addl",
     [MINUS] = "subl",
     [MULT] = "imull",
-    [DIV] = "%%eax",
-    [MOD] = "%%edx",
     [AND] = "andl",
     [OR] = "orl",
     [COMP] = "sete",
     [GT] = "setg",
     [LT] = "setl"};
-;
+
+const char *reg_str[] = {
+    [EDI] = "%edi",
+    [ESI] = "%esi",
+    [EDX] = "%edx",
+    [ECX] = "%ecx",
+    [R8D] = "%r8d",
+    [R9D] = "%r9d",
+    [EAX] = "%eax"};

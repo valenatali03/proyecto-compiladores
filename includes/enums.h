@@ -60,6 +60,17 @@ typedef enum
     NOP,
 } Tipo_Operador;
 
+typedef enum
+{
+    EDI,
+    ESI,
+    EDX,
+    ECX,
+    R8D,
+    R9D,
+    EAX
+} Registro;
+
 // Tipos de errores
 typedef enum
 {
@@ -85,5 +96,6 @@ extern const char *tipo_info_str[];
 extern const char *tipo_err_str[];
 extern const char *tipo_op_str[];
 extern const char *tipo_op_asm[];
+extern const char *reg_str[];
 
 #endif
