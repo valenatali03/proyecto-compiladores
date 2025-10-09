@@ -497,8 +497,7 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
             char *n = strdup(buffer);
             s->flag = flag;
             info->id.nombre = n;
-            OFFSET = OFFSET - OFFSET_INC;
-            info->id.offset = OFFSET;
+            info->id.offset = -1;
             s->info = info;
             CANT_VAR += 1;
 
@@ -507,11 +506,6 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
         else
         {
             s->info = info;
-            if (s->info->id.offset == -1)
-            {
-                OFFSET = OFFSET + OFFSET_INC;
-                s->info->id.offset = OFFSET;
-            }
 
             return s;
         }
