@@ -361,23 +361,25 @@ void construir_bloque(Arbol *nodo, Instrucciones *instrucciones)
     }
 }
 
-void construir_params(Arbol *nodo, Instrucciones *instrucciones)
+void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones)
 {
-    Parametro_Call *params_call = nodo->info->funcion_call.params;
-    while (params_call != NULL)
+    if (!params_call)
     {
-        Cuadruplo *param = malloc(sizeof(Cuadruplo));
-        param->op = PARAM;
-        param->arg1 = construir_expresion(params_call->expr, instrucciones);
-        insertar_cuadruplo(param, instrucciones);
-        param = NULL;
-        params_call = params_call->next;
+        return;
     }
-}
+    if (params_call)
+    {
+        construir_params(params_call->next, instrucciones);
+    }
 
+    Cuadruplo *param = malloc(sizeof(Cuadruplo));
+    param->op = PARAM;
+    param->arg1 = construir_expresion(params_call->expr, instrucciones);
+    insertar_cuadruplo(param, instrucciones);
+}
 void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
 {
-    construir_params(nodo, instrucciones);
+    construir_params(nodo->info->funcion_call.params, instrucciones);
     Cuadruplo *call = malloc(sizeof(Cuadruplo));
     call->op = CALL;
     Info_Union *info = malloc(sizeof(Info_Union));

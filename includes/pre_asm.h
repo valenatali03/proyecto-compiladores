@@ -46,7 +46,7 @@ void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones);
 void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones);
 void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones);
 void construir_bloque(Arbol *nodo, Instrucciones *instrucciones);
-void construir_params(Arbol *nodo, Instrucciones *instrucciones);
+void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones);
 void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones);
 Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones);
 void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst);

@@ -239,23 +239,25 @@ int main(int argc, char *argv[])
         exportar_ast_a_dot(arbol, "arbol.dot");
     }
 
+    int error_semantico;
+
     if (t == TARGET_SEM || t == TARGET_CI || t == TARGET_S)
     {
         tabla = crear_tabla();
         Nivel *nivelActual = tabla;
         analisis_semantico(arbol, nivelActual);
-        int error_semantico = reportar_resultado_semantico(out_sem);
-
-        if (t == TARGET_CI && !error_semantico)
-        {
-            instrucciones = crear_lista_instrucciones();
-            generar_codigo(arbol, instrucciones);
-            instrucciones_to_str(instrucciones);
-            imprimir_codigo_ci(out_ci);
-        }
+        error_semantico = reportar_resultado_semantico(out_sem);
     }
 
-    if (t == TARGET_S)
+    if (t == TARGET_CI && !error_semantico)
+    {
+        instrucciones = crear_lista_instrucciones();
+        generar_codigo(arbol, instrucciones);
+        instrucciones_to_str(instrucciones);
+        imprimir_codigo_ci(out_ci);
+    }
+
+    if (t == TARGET_S && !error_semantico)
     {
         instrucciones = crear_lista_instrucciones();
         generar_codigo(arbol, instrucciones);
