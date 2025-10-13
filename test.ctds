@@ -1,11 +1,8 @@
 program 
     {
-        integer inc(integer x, integer y, integer z){
-            return x;
-        }
+		integer x = 0;
 
-		void main(){
-            inc(2, 3, 4);
-            return;
-        }
+		integer main() {
+			return x;
+		}
     }

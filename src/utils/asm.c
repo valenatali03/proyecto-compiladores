@@ -218,6 +218,7 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
 
     switch (op)
     {
+    case NOT:
     case MINUS:
         if (!arg2)
         {
@@ -225,6 +226,8 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
                 fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
             else if (arg1->flag == ID)
                 fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+            else if (arg1->flag == ETIQUETA)
+                fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
 
             fprintf(out_s, "\tnegl\t%%eax\n");
             fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
@@ -238,11 +241,15 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
             fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
         else if (arg1->flag == ID)
             fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+        else if (arg1->flag == ETIQUETA)
+            fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
 
         if (arg2->flag == LITERAL)
             fprintf(out_s, "\t%s\t$%d, %%eax\n", tipo_op_asm[op], *(int *)arg2->info->literal.valor);
         else if (arg2->flag == ID)
             fprintf(out_s, "\t%s\t%d(%%rbp), %%eax\n", tipo_op_asm[op], arg2->info->id.offset);
+        else if(arg2->flag == ETIQUETA)
+            fprintf(out_s, "\t%s\t%s, %%eax\n", tipo_op_asm[op],arg2->info->etiqueta.nombre);
 
         fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
         break;
@@ -253,12 +260,16 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
             fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
         else if (arg1->flag == ID)
             fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+        else if (arg1->flag == ETIQUETA)
+            fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
         fputs("\tcltd\n", out_s);
 
         if (arg2->flag == LITERAL)
             fprintf(out_s, "\tidivl\t$%d, %%eax\n", *(int *)arg2->info->literal.valor);
         else if (arg2->flag == ID)
-            fprintf(out_s, "\tidivl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+            fprintf(out_s, "\tidivl\t%d(%%rbp), %%eax\n", arg2->info->id.offset);
+        else if (arg2->flag == ETIQUETA)
+            fprintf(out_s, "\tidivl\t%s, %%eax\n", arg2->info->etiqueta.nombre);
 
         fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", tipo_op_asm[op], res->info->id.offset);
         break;
@@ -270,11 +281,15 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
             fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
         else if (arg1->flag == ID)
             fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+        else if (arg1->flag == ETIQUETA)
+            fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
 
         if (arg2->flag == LITERAL)
             fprintf(out_s, "\tcmpl\t$%d, %%eax\n", *(int *)arg2->info->literal.valor);
         else if (arg2->flag == ID)
-            fprintf(out_s, "\tcmpl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+            fprintf(out_s, "\tcmpl\t%d(%%rbp), %%eax\n", arg2->info->id.offset);
+        else if (arg1->flag == ETIQUETA)
+            fprintf(out_s, "\tcmpl\t%s, %%eax\n", arg2->info->etiqueta.nombre);
 
         fprintf(out_s, "\t%s\t%%al\n", tipo_op_asm[op]);
         fputs("\tmovzbl\t%al, %eax\n", out_s);
