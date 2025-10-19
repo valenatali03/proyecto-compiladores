@@ -9,6 +9,8 @@ int main_has_params = 0;
 int main_params_line = 0;
 int main_params_colum = 0;
 
+extern int CANT_NIVELES;
+
 void analisis_semantico(Arbol *arbol, Nivel *nivelActual)
 {
     if (arbol == NULL)
@@ -93,6 +95,12 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
     {
         // return;
     }
+
+    if (CANT_NIVELES == 0)
+    {
+        arbol->izq->info->id.global = 1;
+    }
+
     agregar_simbolo(nivelActual, arbol->izq->info, arbol->izq->tipo_info);
 }
 
