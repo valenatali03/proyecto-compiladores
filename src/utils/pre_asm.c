@@ -361,7 +361,7 @@ void construir_bloque(Arbol *nodo, Instrucciones *instrucciones)
     }
 }
 
-void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones)
+void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones, Instrucciones *parametros)
 {
     if (!params_call)
     {
@@ -369,17 +369,19 @@ void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones)
     }
     if (params_call)
     {
-        construir_params(params_call->next, instrucciones);
+        construir_params(params_call->next, instrucciones, parametros);
     }
 
     Cuadruplo *param = malloc(sizeof(Cuadruplo));
     param->op = PARAM;
     param->arg1 = construir_expresion(params_call->expr, instrucciones);
-    insertar_cuadruplo(param, instrucciones);
+    insertar_cuadruplo(param, parametros);
 }
 void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
 {
-    construir_params(nodo->info->funcion_call.params, instrucciones);
+    Instrucciones* parametros = malloc(sizeof(Instrucciones));
+    construir_params(nodo->info->funcion_call.params, instrucciones, parametros);
+    insertar_cuadruplos(parametros, instrucciones);
     Cuadruplo *call = malloc(sizeof(Cuadruplo));
     call->op = CALL;
     Info_Union *info = malloc(sizeof(Info_Union));
@@ -388,8 +390,20 @@ void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
     info->literal.valor = cant;
     info->literal.tipo = ENTERO;
     call->arg1 = crear_simbolo(info, LITERAL);
-    call->resultado = crear_etiqueta(nodo->info->funcion_call.nombre);
+    call->arg2 = crear_etiqueta(nodo->info->funcion_call.nombre);
+    call->resultado = crear_simbolo(NULL, ID);
     insertar_cuadruplo(call, instrucciones);
+}
+
+void insertar_cuadruplos(Instrucciones* p, Instrucciones* q) {
+    Instrucciones *aux = p;
+    while (aux)
+    {
+        insertar_cuadruplo(aux->expr, q);
+        printf("%s\n", tipo_op_str[aux->expr->op]);
+        aux = aux->next;
+    }
+    
 }
 
 Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones)
@@ -417,6 +431,7 @@ Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones)
     }
 }
 
+
 void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
 {
     if (!c || !inst)
@@ -425,17 +440,20 @@ void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
     if (inst->expr == NULL)
     {
         inst->expr = c;
-        ultima_instruccion = inst;
         return;
+    }
+
+    Instrucciones *aux = inst;
+
+    while (aux->next != NULL)
+    {
+        aux = aux->next;
     }
 
     Instrucciones *nuevo = malloc(sizeof(Instrucciones));
     nuevo->expr = c;
     nuevo->next = NULL;
-
-    ultima_instruccion->next = nuevo;
-
-    ultima_instruccion = nuevo;
+    aux->next = nuevo;
 }
 
 Simbolo *buscar_resultado(Instrucciones *inst)
