@@ -14,6 +14,7 @@ typedef struct Info_ID
     char *nombre;
     void *valor;
     Tipo tipo;
+    int global;
     int offset;
 } Info_ID;
 
