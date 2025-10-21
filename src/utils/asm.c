@@ -71,7 +71,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             break;
 
         case PARAM:
-            if (!ptr_params)
+            if (!params)
             {
                 params = malloc(sizeof(Simbolo));
                 params->info = arg1->info;
@@ -153,6 +153,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
             fputs("\tmovl\t%eax, %edi\n", out_s);
             fprintf(out_s, "\tcall\t%s\n", res->info->etiqueta.nombre);
+            ptr_params = NULL;
             params = NULL;
             break;
 
