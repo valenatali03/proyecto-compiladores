@@ -7,6 +7,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
     Simbolo *ptr_params = params;
     int cant_params;
     int cant_params_sin_reg = 0;
+    bool inicio_fun = false;
 
     while (aux)
     {
@@ -21,6 +22,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
         switch (op)
         {
+        case NOT:
         case MINUS:
         case MULT:
         case OR:
@@ -54,6 +56,10 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
                 fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
                 fprintf(out_s, "\tcmpl\t$0, %%eax\n");
             }
+            else if (arg1->flag == ID && arg1->info->id.global)
+            {
+                fprintf(out_s, "\tcmpl\t$0, %s(%%rip)\n", arg1->info->id.nombre);
+            }
             else if (arg1->flag == ID)
             {
                 fprintf(out_s, "\tcmpl\t$0, %d(%%rbp)\n", arg1->info->id.offset);
@@ -67,6 +73,11 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             break;
 
         case TAG:
+            if (aux->next->expr->op == START_FUN)
+            {
+                fprintf(out_s, "\t.globl\t%s\n", res->info->etiqueta.nombre);
+            }
+
             fprintf(out_s, "%s:\n", res->info->etiqueta.nombre);
             break;
 
@@ -126,13 +137,11 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
                     }
 
                     if (ptr_params->flag == LITERAL)
-                    {
                         fprintf(out_s, "\tmovl\t$%d, %s\n", *(int *)ptr_params->info->literal.valor, reg);
-                    }
+                    else if (ptr_params->flag == ID && ptr_params->info->id.global)
+                        fprintf(out_s, "\tmovl\t%s(%%rip), %s\n", ptr_params->info->id.nombre, reg);
                     else if (ptr_params->flag == ID)
-                    {
                         fprintf(out_s, "\tmovl\t%d(%%rbp), %s\n", ptr_params->info->id.offset, reg);
-                    }
                 }
 
                 ptr_params = ptr_params->next;
@@ -144,6 +153,8 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             {
                 if (ptr_params_sin_reg->flag == LITERAL)
                     fprintf(out_s, "\tmovl\t$%d, %%edi\n", *(int *)ptr_params_sin_reg->info->literal.valor);
+                else if (ptr_params_sin_reg->flag == ID && ptr_params_sin_reg->info->id.global)
+                    fprintf(out_s, "\tmovl\t%s(%%rip), %%edi\n", ptr_params_sin_reg->info->id.nombre);
                 else if (ptr_params_sin_reg->flag == ID)
                     fprintf(out_s, "\tmovl\t%d(%%rbp), %%edi\n", ptr_params_sin_reg->info->id.offset);
 
@@ -152,12 +163,14 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             }
 
             fputs("\tmovl\t%eax, %edi\n", out_s);
-            fprintf(out_s, "\tcall\t%s\n", res->info->etiqueta.nombre);
+            fprintf(out_s, "\tcall\t%s\n", arg2->info->etiqueta.nombre);
+            fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
             ptr_params = NULL;
             params = NULL;
             break;
 
         case START_FUN:
+            inicio_fun = true;
             int cant_var = arg1->info->funcion_decl.cantVariables;
             cant_params = arg1->info->funcion_decl.cant_params;
             cant_params_sin_reg = 0;
@@ -185,6 +198,8 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
             if (arg1 && arg1->flag == LITERAL)
                 fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
+            else if (arg1 && arg1->flag == ID && arg1->info->id.global)
+                fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
             else if (arg1 && arg1->flag == ID)
                 fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
 
@@ -194,19 +209,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             break;
 
         case MOV:
-            if (arg1->flag == LITERAL)
-            {
-                fprintf(out_s, "\tmovl\t$%d, %d(%%rbp)\n", *(int *)arg1->info->literal.valor, res->info->id.offset);
-            }
-            else if (arg1->flag == ID)
-            {
-                fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-                fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
-            }
-            else if (arg1->flag == ETIQUETA)
-            {
-                fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
-            }
+            mov(out_s, arg1, res, inicio_fun);
 
             break;
         default:
@@ -215,11 +218,6 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
         aux = aux->next;
     }
-}
-
-void directivas(FILE *out_s)
-{
-    fputs("\t.globl main\n", out_s);
 }
 
 void operadores(FILE *out_s, Instrucciones *instrucciones)
@@ -232,6 +230,23 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     switch (op)
     {
     case NOT:
+        if (arg1->flag == LITERAL)
+            fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
+        else if (arg1->flag == ID && res->info->id.global)
+            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
+        else if (arg1->flag == ID)
+            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+        else if (arg1->flag == ETIQUETA)
+            fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
+
+        fputs("\ttestl\t%eax, %eax\n", out_s);
+        fputs("\tsete\t%al\n", out_s);
+        fputs("\tmovzbl\t%al, %eax\n", out_s);
+
+        fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
+
+        break;
+
     case MINUS:
         if (!arg2)
         {
@@ -314,25 +329,68 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     }
 }
 
-void calcular_offset_var(Simbolo *var)
+void mov(FILE *out_s, Simbolo *arg1, Simbolo *res, bool inicio_fun)
 {
-    if (!var)
+    if (!arg1 || !res)
+        return;
+
+    bool res_global = res->info->id.global;
+    bool arg_global = arg1->info->id.global;
+
+    if (res_global && !inicio_fun)
     {
+        fprintf(out_s, "\t.globl \t%s\n", res->info->id.nombre);
+        fprintf(out_s, "\t.data\n");
+        fprintf(out_s, "%s:\n", res->info->id.nombre);
+        fprintf(out_s, "\t.long \t%d\n", *(int *)arg1->info->literal.valor);
+        fprintf(out_s, "\t.text\n");
         return;
     }
 
-    if (var->flag != ID)
+    switch (arg1->flag)
     {
-        return;
-    }
+    case LITERAL:
+        if (res_global)
+            fprintf(out_s, "\tmovl\t$%d, %s(%%rip)\n",
+                    *(int *)arg1->info->literal.valor,
+                    res->info->id.nombre);
+        else
+            fprintf(out_s, "\tmovl\t$%d, %d(%%rbp)\n",
+                    *(int *)arg1->info->literal.valor,
+                    res->info->id.offset);
+        break;
 
-    if (var->info->id.offset != -1)
-    {
-        return;
-    }
+    case ID:
+        if (arg_global && res_global)
+        {
+            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
+            fprintf(out_s, "\tmovl\t%%eax, %s(%%rip)\n", res->info->id.nombre);
+        }
+        else if (arg_global && !res_global)
+        {
+            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
+            fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
+        }
+        else if (!arg_global && res_global)
+        {
+            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+            fprintf(out_s, "\tmovl\t%%eax, %s(%%rip)\n", res->info->id.nombre);
+        }
+        else
+        {
+            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
+            fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
+        }
+        break;
 
-    var->info->id.offset = -OFFSET;
-    OFFSET -= OFFSET_INC;
+    case ETIQUETA:
+        fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
+        break;
+
+    default:
+        fprintf(stderr, "tipo de argumento no soportado\n");
+        break;
+    }
 }
 
 void params_decl(Parametro_Decl *params, FILE *out_s, int cant_var, int cant_params)
@@ -360,4 +418,25 @@ void params_decl(Parametro_Decl *params, FILE *out_s, int cant_var, int cant_par
 
         param = param->next;
     }
+}
+
+void calcular_offset_var(Simbolo *var)
+{
+    if (!var)
+    {
+        return;
+    }
+
+    if (var->flag != ID)
+    {
+        return;
+    }
+
+    if (var->info->id.offset != -1)
+    {
+        return;
+    }
+
+    var->info->id.offset = -OFFSET;
+    OFFSET -= OFFSET_INC;
 }

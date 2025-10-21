@@ -263,7 +263,6 @@ int main(int argc, char *argv[])
         generar_codigo(arbol, instrucciones);
         instrucciones_to_str(instrucciones);
         imprimir_codigo_ci(out_ci);
-        directivas(out_s);
         generar_asm(out_s, instrucciones);
     }
 

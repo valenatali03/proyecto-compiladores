@@ -379,7 +379,7 @@ void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones,
 }
 void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
 {
-    Instrucciones* parametros = malloc(sizeof(Instrucciones));
+    Instrucciones *parametros = malloc(sizeof(Instrucciones));
     construir_params(nodo->info->funcion_call.params, instrucciones, parametros);
     insertar_cuadruplos(parametros, instrucciones);
     Cuadruplo *call = malloc(sizeof(Cuadruplo));
@@ -395,15 +395,14 @@ void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
     insertar_cuadruplo(call, instrucciones);
 }
 
-void insertar_cuadruplos(Instrucciones* p, Instrucciones* q) {
+void insertar_cuadruplos(Instrucciones *p, Instrucciones *q)
+{
     Instrucciones *aux = p;
     while (aux)
     {
         insertar_cuadruplo(aux->expr, q);
-        printf("%s\n", tipo_op_str[aux->expr->op]);
         aux = aux->next;
     }
-    
 }
 
 Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones)
@@ -430,7 +429,6 @@ Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones)
         break;
     }
 }
-
 
 void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
 {
