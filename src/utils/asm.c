@@ -252,6 +252,8 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
         {
             if (arg1->flag == LITERAL)
                 fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
+            else if (arg1->flag == ID && res->info->id.global)
+                fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
             else if (arg1->flag == ID)
                 fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
             else if (arg1->flag == ETIQUETA)
@@ -267,6 +269,8 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     case ADD:
         if (arg1->flag == LITERAL)
             fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
+        else if (arg1->flag == ID && arg1->info->id.global)
+            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
         else if (arg1->flag == ID)
             fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
         else if (arg1->flag == ETIQUETA)
@@ -274,6 +278,8 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
 
         if (arg2->flag == LITERAL)
             fprintf(out_s, "\t%s\t$%d, %%eax\n", tipo_op_asm[op], *(int *)arg2->info->literal.valor);
+        else if (arg2->flag == ID && arg2->info->id.global)
+            fprintf(out_s, "\t%s\t%s(%%rip), %%eax\n", tipo_op_asm[op], arg2->info->id.nombre);
         else if (arg2->flag == ID)
             fprintf(out_s, "\t%s\t%d(%%rbp), %%eax\n", tipo_op_asm[op], arg2->info->id.offset);
         else if (arg2->flag == ETIQUETA)
@@ -286,6 +292,8 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     case DIV:
         if (arg1->flag == LITERAL)
             fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
+        else if (arg1->flag == ID && arg1->info->id.global)
+            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
         else if (arg1->flag == ID)
             fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
         else if (arg1->flag == ETIQUETA)
@@ -294,6 +302,8 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
 
         if (arg2->flag == LITERAL)
             fprintf(out_s, "\tidivl\t$%d, %%eax\n", *(int *)arg2->info->literal.valor);
+        else if (arg2->flag == ID && arg2->info->id.global)
+            fprintf(out_s, "\tidivl\t%s(%%rip), %%eax\n", arg2->info->id.nombre);
         else if (arg2->flag == ID)
             fprintf(out_s, "\tidivl\t%d(%%rbp), %%eax\n", arg2->info->id.offset);
         else if (arg2->flag == ETIQUETA)
@@ -307,6 +317,8 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     case GT:
         if (arg1->flag == LITERAL)
             fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
+        else if (arg1->flag == ID && arg1->info->id.global)
+            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
         else if (arg1->flag == ID)
             fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
         else if (arg1->flag == ETIQUETA)
@@ -314,6 +326,8 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
 
         if (arg2->flag == LITERAL)
             fprintf(out_s, "\tcmpl\t$%d, %%eax\n", *(int *)arg2->info->literal.valor);
+        else if (arg2->flag == ID && arg2->info->id.global)
+            fprintf(out_s, "\tcmpl\t%s(%%rip), %%eax\n", arg2->info->id.nombre);
         else if (arg2->flag == ID)
             fprintf(out_s, "\tcmpl\t%d(%%rbp), %%eax\n", arg2->info->id.offset);
         else if (arg1->flag == ETIQUETA)
