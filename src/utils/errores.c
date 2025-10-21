@@ -43,6 +43,14 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
                  linea, colum, nombre);
         break;
     }
+    case VAR_GLOBAL_NO_CONST:
+    {
+        const char *nombre = va_arg(args, const char *);
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: Variable global %s no inicializada con valor constante",
+                 linea, colum, nombre);
+        break;
+    }
     case FUN_NO_DECLARADA:
     {
         const char *nombre = va_arg(args, const char *);
