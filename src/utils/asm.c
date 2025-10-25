@@ -42,6 +42,10 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
                 fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
                 fprintf(out_s, "\tcmpl\t$0, %%eax\n");
             }
+            else if (arg1->flag == ID && arg1->info->id.global)
+            {
+                fprintf(out_s, "\tcmpl\t$0, %s(%%rip)\n", arg1->info->id.nombre);
+            }
             else if (arg1->flag == ID)
             {
                 fprintf(out_s, "\tcmpl\t$0, %d(%%rbp)\n", arg1->info->id.offset);
@@ -191,10 +195,6 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             break;
 
         case RET:
-            if (cant_params_sin_reg > 0)
-            {
-                fprintf(out_s, "\taddq\t$%d, %%rsp\n", cant_params_sin_reg * 8);
-            }
 
             if (arg1 && arg1->flag == LITERAL)
                 fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
@@ -203,10 +203,16 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             else if (arg1 && arg1->flag == ID)
                 fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
 
+            break;
+
+        case END_FUN:
+            if (cant_params_sin_reg > 0)
+            {
+                fprintf(out_s, "\taddq\t$%d, %%rsp\n", cant_params_sin_reg * 8);
+            }
+
             fputs("\tleave\n", out_s);
             fputs("\tret\n", out_s);
-
-            break;
 
         case MOV:
             mov(out_s, arg1, res, inicio_fun);
@@ -309,7 +315,7 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
         else if (arg2->flag == ETIQUETA)
             fprintf(out_s, "\tidivl\t%s, %%eax\n", arg2->info->etiqueta.nombre);
 
-        fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", tipo_op_asm[op], res->info->id.offset);
+        fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", op == DIV ? "%eax" : "%edx", res->info->id.offset);
         break;
 
     case COMP:
