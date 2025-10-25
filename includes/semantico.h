@@ -29,6 +29,14 @@ void procesar_declaracion_variable(Arbol *arbol, Nivel *tabla);
 void declarar_variable(Arbol *arbol, Nivel *tabla);
 
 /**
+ * Verifica si la inicialización de una variable global es constante.
+ *
+ * @param arbol  Nodo del AST de la expresión de inicialización.
+ * @return       1 si la inicialización no es constante, 0 si es válida.
+ */
+int procesar_declaracion_variable_global(Arbol *arbol);
+
+/**
  * Procesa las declaraciones de métodos (funciones).
  *
  * @param arbol        Nodo del AST con la declaración de métodos.

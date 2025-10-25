@@ -68,18 +68,25 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
     if (arbol->izq->info->id.tipo == VACIO)
     {
         reportarError(VAR_VACIO, arbol->linea, arbol->colum, nombre);
-        // printf("Variable declarada VACIO.\n");
-        // return;
     }
 
     if (buscar_simbolo_en_nivel(nivelActual, nombre, arbol->izq->tipo_info))
     {
         reportarError(VAR_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
-        // printf("Variable %s ya declarada.\n", nombre);
         return;
     }
 
     Arbol *expr = arbol->der;
+
+    if (CANT_NIVELES == 0) // Variable global
+    {
+        arbol->izq->info->id.global = 1;
+        if (procesar_declaracion_variable_global(expr))
+        {
+            reportarError(VAR_GLOBAL_NO_CONST, arbol->linea, arbol->colum, nombre);
+            return;
+        }
+    }
 
     if (procesar_expresion(expr, nivelActual))
     {
@@ -88,20 +95,37 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
         if (tId != tExpr)
         {
             reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, tId, tExpr);
-            // printf("Los tipos NO coinciden en la declaracion.\n");
         }
-    }
-    else
-    {
-        // return;
-    }
-
-    if (CANT_NIVELES == 0)
-    {
-        arbol->izq->info->id.global = 1;
     }
 
     agregar_simbolo(nivelActual, arbol->izq->info, arbol->izq->tipo_info);
+}
+
+int procesar_declaracion_variable_global(Arbol *arbol)
+{
+    if (arbol == NULL)
+    {
+        return 0;
+    }
+
+    Tipo_Info t_info = arbol->tipo_info;
+
+    if (t_info == CALL_FUNCION || t_info == ID)
+    {
+        return 1;
+    }
+
+    if (procesar_declaracion_variable_global(arbol->izq))
+    {
+        return 1;
+    }
+
+    if (procesar_declaracion_variable_global(arbol->der))
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
 void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
