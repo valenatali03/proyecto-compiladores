@@ -1,5 +1,39 @@
 #include "../includes/asm.h"
 
+void cargar_a_registro(FILE *out_s, Simbolo *sym, const char *reg)
+{
+    if (!sym) return;
+    
+    if (sym->flag == LITERAL)
+        fprintf(out_s, "\tmovl\t$%d, %s\n", *(int *)sym->info->literal.valor, reg);
+    else if (sym->flag == ID && sym->info->id.global)
+        fprintf(out_s, "\tmovl\t%s(%%rip), %s\n", sym->info->id.nombre, reg);
+    else if (sym->flag == ID)
+        fprintf(out_s, "\tmovl\t%d(%%rbp), %s\n", sym->info->id.offset, reg);
+    else if (sym->flag == ETIQUETA)
+        fprintf(out_s, "\tmovl\t%s, %s\n", sym->info->etiqueta.nombre, reg);
+}
+
+void guardar_desde_registro(FILE *out_s, const char *reg, Simbolo *dest)
+{
+    if (dest->info->id.global)
+        fprintf(out_s, "\tmovl\t%s, %s(%%rip)\n", reg, dest->info->id.nombre);
+    else
+        fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", reg, dest->info->id.offset);
+}
+
+void aplicar_operacion_binaria(FILE *out_s, Simbolo *arg2, const char *instruccion)
+{
+    if (arg2->flag == LITERAL)
+        fprintf(out_s, "\t%s\t$%d, %%eax\n", instruccion, *(int *)arg2->info->literal.valor);
+    else if (arg2->flag == ID && arg2->info->id.global)
+        fprintf(out_s, "\t%s\t%s(%%rip), %%eax\n", instruccion, arg2->info->id.nombre);
+    else if (arg2->flag == ID)
+        fprintf(out_s, "\t%s\t%d(%%rbp), %%eax\n", instruccion, arg2->info->id.offset);
+    else if (arg2->flag == ETIQUETA)
+        fprintf(out_s, "\t%s\t%s, %%eax\n", instruccion, arg2->info->etiqueta.nombre);
+}
+
 void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 {
     Instrucciones *aux = instrucciones;
@@ -36,28 +70,12 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             operadores(out_s, aux);
 
             break;
+
         case IF_FALSE:
-            if (arg1->flag == LITERAL)
-            {
-                fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
-                fprintf(out_s, "\tcmpl\t$0, %%eax\n");
-            }
-            else if (arg1->flag == ID && arg1->info->id.global)
-            {
-                fprintf(out_s, "\tcmpl\t$0, %s(%%rip)\n", arg1->info->id.nombre);
-            }
-            else if (arg1->flag == ID)
-            {
-                fprintf(out_s, "\tcmpl\t$0, %d(%%rbp)\n", arg1->info->id.offset);
-            }
-            fprintf(out_s, "\tje\t%s\n", res->info->etiqueta.nombre);
-
-            break;
-
         case JMPC:
             if (arg1->flag == LITERAL)
             {
-                fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
+                cargar_a_registro(out_s, arg1, "%eax");
                 fprintf(out_s, "\tcmpl\t$0, %%eax\n");
             }
             else if (arg1->flag == ID && arg1->info->id.global)
@@ -140,12 +158,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
                         reg = "%eax";
                     }
 
-                    if (ptr_params->flag == LITERAL)
-                        fprintf(out_s, "\tmovl\t$%d, %s\n", *(int *)ptr_params->info->literal.valor, reg);
-                    else if (ptr_params->flag == ID && ptr_params->info->id.global)
-                        fprintf(out_s, "\tmovl\t%s(%%rip), %s\n", ptr_params->info->id.nombre, reg);
-                    else if (ptr_params->flag == ID)
-                        fprintf(out_s, "\tmovl\t%d(%%rbp), %s\n", ptr_params->info->id.offset, reg);
+                    cargar_a_registro(out_s, ptr_params, reg);
                 }
 
                 ptr_params = ptr_params->next;
@@ -155,20 +168,14 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
             while (ptr_params_sin_reg)
             {
-                if (ptr_params_sin_reg->flag == LITERAL)
-                    fprintf(out_s, "\tmovl\t$%d, %%edi\n", *(int *)ptr_params_sin_reg->info->literal.valor);
-                else if (ptr_params_sin_reg->flag == ID && ptr_params_sin_reg->info->id.global)
-                    fprintf(out_s, "\tmovl\t%s(%%rip), %%edi\n", ptr_params_sin_reg->info->id.nombre);
-                else if (ptr_params_sin_reg->flag == ID)
-                    fprintf(out_s, "\tmovl\t%d(%%rbp), %%edi\n", ptr_params_sin_reg->info->id.offset);
-
+                cargar_a_registro(out_s, ptr_params_sin_reg, "%edi");
                 fputs("\tpushq\t%rdi\n", out_s);
                 ptr_params_sin_reg = ptr_params_sin_reg->next;
             }
 
             fputs("\tmovl\t%eax, %edi\n", out_s);
             fprintf(out_s, "\tcall\t%s\n", arg2->info->etiqueta.nombre);
-            fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
+            guardar_desde_registro(out_s, "%eax", res);
             ptr_params = NULL;
             params = NULL;
             break;
@@ -195,14 +202,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
             break;
 
         case RET:
-
-            if (arg1 && arg1->flag == LITERAL)
-                fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
-            else if (arg1 && arg1->flag == ID && arg1->info->id.global)
-                fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
-            else if (arg1 && arg1->flag == ID)
-                fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-
+            cargar_a_registro(out_s, arg1, "%eax");
             break;
 
         case END_FUN:
@@ -213,6 +213,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
             fputs("\tleave\n", out_s);
             fputs("\tret\n", out_s);
+            break;
 
         case MOV:
             mov(out_s, arg1, res, inicio_fun);
@@ -236,15 +237,7 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     switch (op)
     {
     case NOT:
-        if (arg1->flag == LITERAL)
-            fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
-        else if (arg1->flag == ID && res->info->id.global)
-            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
-        else if (arg1->flag == ID)
-            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-        else if (arg1->flag == ETIQUETA)
-            fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
-
+        cargar_a_registro(out_s, arg1, "%eax");
         fputs("\ttestl\t%eax, %eax\n", out_s);
         fputs("\tsete\t%al\n", out_s);
         fputs("\tmovzbl\t%al, %eax\n", out_s);
@@ -256,79 +249,32 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     case MINUS:
         if (!arg2)
         {
-            if (arg1->flag == LITERAL)
-                fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
-            else if (arg1->flag == ID && res->info->id.global)
-                fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
-            else if (arg1->flag == ID)
-                fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-            else if (arg1->flag == ETIQUETA)
-                fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
-
+            cargar_a_registro(out_s, arg1, "%eax");
             fprintf(out_s, "\tnegl\t%%eax\n");
-            fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
+            guardar_desde_registro(out_s, "%eax", res);
             break;
         }
     case MULT:
     case OR:
     case AND:
     case ADD:
-        if (arg1->flag == LITERAL)
-            fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
-        else if (arg1->flag == ID && arg1->info->id.global)
-            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
-        else if (arg1->flag == ID)
-            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-        else if (arg1->flag == ETIQUETA)
-            fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
-
-        if (arg2->flag == LITERAL)
-            fprintf(out_s, "\t%s\t$%d, %%eax\n", tipo_op_asm[op], *(int *)arg2->info->literal.valor);
-        else if (arg2->flag == ID && arg2->info->id.global)
-            fprintf(out_s, "\t%s\t%s(%%rip), %%eax\n", tipo_op_asm[op], arg2->info->id.nombre);
-        else if (arg2->flag == ID)
-            fprintf(out_s, "\t%s\t%d(%%rbp), %%eax\n", tipo_op_asm[op], arg2->info->id.offset);
-        else if (arg2->flag == ETIQUETA)
-            fprintf(out_s, "\t%s\t%s, %%eax\n", tipo_op_asm[op], arg2->info->etiqueta.nombre);
-
-        fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
+        cargar_a_registro(out_s, arg1, "%eax");
+        aplicar_operacion_binaria(out_s, arg2, tipo_op_asm[op]);
+        guardar_desde_registro(out_s, "%eax", res);
         break;
 
     case MOD:
     case DIV:
-        if (arg1->flag == LITERAL)
-            fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
-        else if (arg1->flag == ID && arg1->info->id.global)
-            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
-        else if (arg1->flag == ID)
-            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-        else if (arg1->flag == ETIQUETA)
-            fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
+        cargar_a_registro(out_s, arg1, "%eax");
         fputs("\tcltd\n", out_s);
-
-        if (arg2->flag == LITERAL)
-            fprintf(out_s, "\tidivl\t$%d, %%eax\n", *(int *)arg2->info->literal.valor);
-        else if (arg2->flag == ID && arg2->info->id.global)
-            fprintf(out_s, "\tidivl\t%s(%%rip), %%eax\n", arg2->info->id.nombre);
-        else if (arg2->flag == ID)
-            fprintf(out_s, "\tidivl\t%d(%%rbp), %%eax\n", arg2->info->id.offset);
-        else if (arg2->flag == ETIQUETA)
-            fprintf(out_s, "\tidivl\t%s, %%eax\n", arg2->info->etiqueta.nombre);
-
+        aplicar_operacion_binaria(out_s, arg2, "idivl");
         fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", op == DIV ? "%eax" : "%edx", res->info->id.offset);
         break;
 
     case COMP:
     case LT:
     case GT:
-        if (arg1->flag == LITERAL)
-            fprintf(out_s, "\tmovl\t$%d, %%eax\n", *(int *)arg1->info->literal.valor);
-        else if (arg1->flag == ID && arg1->info->id.global)
-            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
-        else if (arg1->flag == ID)
-            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-        else if (arg1->flag == ETIQUETA)
-            fprintf(out_s, "\tmovl\t%s, %%eax\n", arg1->info->etiqueta.nombre);
+        cargar_a_registro(out_s, arg1, "%eax");
 
         if (arg2->flag == LITERAL)
             fprintf(out_s, "\tcmpl\t$%d, %%eax\n", *(int *)arg2->info->literal.valor);
@@ -341,9 +287,9 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
 
         fprintf(out_s, "\t%s\t%%al\n", tipo_op_asm[op]);
         fputs("\tmovzbl\t%al, %eax\n", out_s);
-        fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
-
+        guardar_desde_registro(out_s, "%eax", reg);
         break;
+
     default:
         break;
     }
@@ -381,30 +327,12 @@ void mov(FILE *out_s, Simbolo *arg1, Simbolo *res, bool inicio_fun)
         break;
 
     case ID:
-        if (arg_global && res_global)
-        {
-            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
-            fprintf(out_s, "\tmovl\t%%eax, %s(%%rip)\n", res->info->id.nombre);
-        }
-        else if (arg_global && !res_global)
-        {
-            fprintf(out_s, "\tmovl\t%s(%%rip), %%eax\n", arg1->info->id.nombre);
-            fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
-        }
-        else if (!arg_global && res_global)
-        {
-            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-            fprintf(out_s, "\tmovl\t%%eax, %s(%%rip)\n", res->info->id.nombre);
-        }
-        else
-        {
-            fprintf(out_s, "\tmovl\t%d(%%rbp), %%eax\n", arg1->info->id.offset);
-            fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
-        }
+        cargar_a_registro(out_s, arg1, "%eax");
+        guardar_desde_registro(out_s, "%eax", res);
         break;
 
     case ETIQUETA:
-        fprintf(out_s, "\tmovl\t%%eax, %d(%%rbp)\n", res->info->id.offset);
+        guardar_desde_registro(out_s, "%eax", res);
         break;
 
     default:

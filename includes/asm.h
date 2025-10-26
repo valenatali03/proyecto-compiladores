@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include "pre_asm.h"
 
+void cargar_a_registro(FILE *out_s, Simbolo *sym, const char *reg);
+void guardar_desde_registro(FILE *out_s, const char *reg, Simbolo *dest);
+void aplicar_operacion_binaria(FILE *out_s, Simbolo *arg2, const char *instruccion);
 void generar_asm(FILE *out_s, Instrucciones *instrucciones);
 void directivas(FILE *out_s);
 void operadores(FILE *out_s, Instrucciones *instrucciones);
