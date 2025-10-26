@@ -287,7 +287,7 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
 
         fprintf(out_s, "\t%s\t%%al\n", tipo_op_asm[op]);
         fputs("\tmovzbl\t%al, %eax\n", out_s);
-        guardar_desde_registro(out_s, "%eax", reg);
+        guardar_desde_registro(out_s, "%eax", res);
         break;
 
     default:

@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
         imprimir_uso(argv[0]);
     }
 
-    char *target = "sem"; // Por defecto ejecuta hasta la etapa sem
+    char *target = "s"; // Por defecto ejecuta hasta la etapa s
     char *filename = NULL;
 
     for (int i = 1; i < argc; i++)
