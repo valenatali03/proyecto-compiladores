@@ -1,0 +1,34 @@
+program {
+    integer x = 30;
+
+    integer print_int(integer x) extern;
+
+    void f()
+    {
+        x = 2;
+    }
+
+    void g()
+    {   
+        integer x = 3;
+        x = 5;
+    }
+
+    void main() {
+        print_int(x); // 30
+        f();
+        print_int(x); // 2
+        g(); 
+        print_int(x); // 2
+
+        if (!(x == 2)) then
+        {
+            print_int(x);
+        }
+        else
+        {
+            integer x = 7;
+            print_int(x); // 7
+        }
+    }
+}

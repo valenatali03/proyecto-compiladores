@@ -1,0 +1,17 @@
+program {
+	integer print_int(integer x) extern;
+
+    void main() {
+        integer a = 17;
+
+        integer b = 5;
+
+        integer c = a / b;
+
+        integer d = a % b;
+
+        print_int(c); // 3
+
+        print_int(d); // 2
+    }
+}
