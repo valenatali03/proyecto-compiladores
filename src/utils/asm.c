@@ -1,4 +1,5 @@
 #include "../includes/asm.h"
+#include <string.h>
 
 void cargar_a_registro(FILE *out_s, Simbolo *sym, const char *reg)
 {
@@ -42,6 +43,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
     int cant_params;
     int cant_params_sin_reg = 0;
     bool inicio_fun = false;
+    char current_func[64] = {0};
 
     while (aux)
     {
@@ -182,6 +184,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
         case START_FUN:
             inicio_fun = true;
+            strcpy(current_func, arg1->info->funcion_decl.nombre);
             int cant_var = arg1->info->funcion_decl.cantVariables;
             cant_params = arg1->info->funcion_decl.cant_params;
             cant_params_sin_reg = 0;
@@ -203,6 +206,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
         case RET:
             cargar_a_registro(out_s, arg1, "%eax");
+            fprintf(out_s, "\tjmp\tL_end_%s\n", current_func);
             break;
 
         case END_FUN:
@@ -211,8 +215,10 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
                 fprintf(out_s, "\taddq\t$%d, %%rsp\n", cant_params_sin_reg * 8);
             }
 
+            fprintf(out_s, "L_end_%s:\n", current_func);
             fputs("\tleave\n", out_s);
             fputs("\tret\n", out_s);
+            inicio_fun = false;
             break;
 
         case MOV:
@@ -267,7 +273,23 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     case DIV:
         cargar_a_registro(out_s, arg1, "%eax");
         fputs("\tcltd\n", out_s);
-        aplicar_operacion_binaria(out_s, arg2, "idivl");
+        if (arg2->flag == LITERAL)
+        {
+            fprintf(out_s, "\tmovl\t$%d, %%ecx\n", *(int *)arg2->info->literal.valor);
+            fputs("\tidivl\t%ecx\n", out_s);
+        }
+        else if (arg2->flag == ID && arg2->info->id.global)
+        {
+            fprintf(out_s, "\tidivl\t%s(%%rip)\n", arg2->info->id.nombre);
+        }
+        else if (arg2->flag == ID)
+        {
+            fprintf(out_s, "\tidivl\t%d(%%rbp)\n", arg2->info->id.offset);
+        }
+        else if (arg2->flag == ETIQUETA)
+        {
+            fprintf(out_s, "\tidivl\t%s\n", arg2->info->etiqueta.nombre);
+        }
         fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", op == DIV ? "%eax" : "%edx", res->info->id.offset);
         break;
 
