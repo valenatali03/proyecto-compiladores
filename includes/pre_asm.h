@@ -39,7 +39,7 @@ void construir_sentencias(Arbol *nodo, Instrucciones *instrucciones);
 void construir_sentencia(Arbol *nodo, Instrucciones *instrucciones);
 void construir_return(Arbol *nodo, Instrucciones *instrucciones);
 Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones);
-void construir_op(Arbol *nodo, Instrucciones *instrucciones);
+Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones);
 Tipo_Operador traducir_op(char *op);
 void construir_condicional(Arbol *nodo, Instrucciones *instrucciones);
 void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones);

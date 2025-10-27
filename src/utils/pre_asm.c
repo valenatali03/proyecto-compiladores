@@ -158,7 +158,7 @@ Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones)
     {
     case OPERADOR_UNARIO:
     case OPERADOR_BINARIO:
-        return buscar_resultado(instrucciones);
+        return construir_op(nodo, instrucciones);
     case ID:
     case LITERAL:
         return crear_simbolo(nodo->info, nodo->tipo_info);
@@ -170,16 +170,9 @@ Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones)
     }
 }
 
-void construir_op(Arbol *nodo, Instrucciones *instrucciones)
+Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones)
 {
-    if (nodo->izq)
-    {
-        construir_op(nodo->izq, instrucciones);
-    }
-    if (nodo->der)
-    {
-        construir_op(nodo->der, instrucciones);
-    }
+    if (nodo == NULL) return;
 
     if (nodo->tipo_info == OPERADOR_BINARIO)
     {
@@ -189,7 +182,9 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
         cuad->arg2 = obtener_arg(nodo->der, instrucciones);
         cuad->resultado = crear_simbolo(NULL, ID);
         insertar_cuadruplo(cuad, instrucciones);
+        return(cuad->resultado);
     }
+
     else if (nodo->tipo_info == OPERADOR_UNARIO)
     {
         Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
@@ -197,6 +192,7 @@ void construir_op(Arbol *nodo, Instrucciones *instrucciones)
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
         cuad->resultado = crear_simbolo(NULL, ID);
         insertar_cuadruplo(cuad, instrucciones);
+        return(cuad->resultado);
     }
 }
 
