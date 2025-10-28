@@ -14,6 +14,7 @@ int CANT_VAR = 0;
 char **codigo = NULL;
 Instrucciones *instrucciones = NULL;
 Instrucciones *ultima_instruccion = NULL;
+Temporales *temporales_libres = NULL;
 
 void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen)
 {
@@ -172,7 +173,8 @@ Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones)
 
 Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones)
 {
-    if (nodo == NULL) return;
+    if (nodo == NULL)
+        return NULL;
 
     if (nodo->tipo_info == OPERADOR_BINARIO)
     {
@@ -180,9 +182,11 @@ Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones)
         cuad->op = traducir_op(nodo->info->operador.nombre);
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
         cuad->arg2 = obtener_arg(nodo->der, instrucciones);
+        actualizar_temps(cuad->arg1);
+        actualizar_temps(cuad->arg2);
         cuad->resultado = crear_simbolo(NULL, ID);
         insertar_cuadruplo(cuad, instrucciones);
-        return(cuad->resultado);
+        return (cuad->resultado);
     }
 
     else if (nodo->tipo_info == OPERADOR_UNARIO)
@@ -190,9 +194,10 @@ Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones)
         Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
         cuad->op = traducir_op(nodo->info->operador.nombre);
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
+        actualizar_temps(cuad->arg1);
         cuad->resultado = crear_simbolo(NULL, ID);
         insertar_cuadruplo(cuad, instrucciones);
-        return(cuad->resultado);
+        return (cuad->resultado);
     }
 }
 
@@ -464,7 +469,33 @@ Simbolo *buscar_resultado(Instrucciones *inst)
         }
         aux = aux->next;
     }
+    actualizar_temps(res);
     return res;
+}
+
+void actualizar_temps(Simbolo *temp)
+{
+    if (!temp)
+        return;
+
+    if (temp->flag != ID)
+        return;
+
+    if (!temp->info->id.temp)
+        return;
+
+    printf("%s\n", temp->info->id.nombre);
+
+    if (!temporales_libres)
+    {
+        temporales_libres = malloc(sizeof(Temporales));
+        temporales_libres->head = temp;
+        temp->next = NULL;
+        return;
+    }
+
+    temp->next = temporales_libres->head;
+    temporales_libres->head = temp;
 }
 
 Simbolo *crear_etiqueta(char *nombre)
@@ -497,12 +528,22 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
         char buffer[16];
         if (!info)
         {
+
+            if (temporales_libres)
+            {
+                s = temporales_libres->head;
+                s->next = NULL;
+                temporales_libres->head = temporales_libres->head->next;
+                return s;
+            }
+
             Info_Union *info = malloc(sizeof(Info_Union));
             sprintf(buffer, "t%d", CANT_TEMP++);
             char *n = strdup(buffer);
             s->flag = flag;
             info->id.nombre = n;
             info->id.offset = -1;
+            info->id.temp = 1;
             s->info = info;
             CANT_VAR += 1;
 

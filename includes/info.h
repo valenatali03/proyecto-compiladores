@@ -16,6 +16,7 @@ typedef struct Info_ID
     Tipo tipo;
     int global;
     int offset;
+    int temp;
 } Info_ID;
 
 /**

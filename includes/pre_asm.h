@@ -17,6 +17,11 @@ typedef struct Instrucciones
     struct Instrucciones *next;
 } Instrucciones;
 
+typedef struct Temporales
+{
+    Simbolo *head;
+} Temporales;
+
 extern int CANT_LINEAS;
 extern int CANT_TEMP;
 extern int CANT_JUMP;
@@ -30,6 +35,7 @@ extern int CANT_VAR;
 
 extern char **codigo;
 extern Instrucciones *instrucciones;
+extern Temporales *temporales_libres;
 
 void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen);
 void generar_codigo(Arbol *nodo, Instrucciones *instrucciones);
@@ -50,8 +56,9 @@ void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones,
 void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones);
 Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones);
 void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst);
-void insertar_cuadruplos(Instrucciones* p, Instrucciones* q);
+void insertar_cuadruplos(Instrucciones *p, Instrucciones *q);
 Simbolo *buscar_resultado(Instrucciones *inst);
+void actualizar_temps(Simbolo *temp);
 Simbolo *crear_etiqueta(char *nombre);
 Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag);
 Instrucciones *crear_lista_instrucciones();
