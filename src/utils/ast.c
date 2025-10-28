@@ -160,6 +160,17 @@ void imprimir_nodo_dot(Arbol *arbol, FILE *f)
         snprintf(etiqueta, sizeof(etiqueta), "%s", arbol->info->operador.nombre);
         strcpy(color, "white");
         break;
+    case LITERAL:
+        if (arbol->info->literal.tipo == ENTERO)
+            snprintf(etiqueta, sizeof(etiqueta), "%d", *(int *)arbol->info->literal.valor);
+        else if (arbol->info->literal.tipo == BOOL)
+            snprintf(etiqueta, sizeof(etiqueta), "%s", (*(bool *)arbol->info->literal.valor) ? "true" : "false");
+        strcpy(color, "white");
+        break;
+    case ID:
+        snprintf(etiqueta, sizeof(etiqueta), "%s", arbol->info->id.nombre);
+        strcpy(color, "white");
+        break;
     default:
         snprintf(etiqueta, sizeof(etiqueta), "%s", tipo_info_str[arbol->tipo_info]);
         strcpy(color, "white");
