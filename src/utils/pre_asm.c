@@ -533,7 +533,15 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
             {
                 s = temporales_libres->head;
                 s->next = NULL;
-                temporales_libres->head = temporales_libres->head->next;
+                if (!temporales_libres->head->next)
+                {
+                    temporales_libres = NULL;
+                }
+                else
+                {
+                    temporales_libres->head = temporales_libres->head->next;
+                }
+
                 return s;
             }
 
