@@ -3,6 +3,11 @@ void optimizar_operaciones(Arbol *arbol)
 {
     if (arbol != NULL)
     {
+        if (arbol->tipo_info == CALL_FUNCION)
+        {
+            optimizar_parametros(arbol);
+        }
+
         if (arbol->izq != NULL)
         {
             switch (arbol->izq->tipo_info)
@@ -264,4 +269,17 @@ void liberar_nodo_arbol(Arbol *nodo)
     }
 
     free(nodo);
+}
+
+void optimizar_parametros(Arbol *nodo)
+{
+    if (nodo != NULL && nodo->tipo_info == CALL_FUNCION)
+    {
+        Parametro_Call *actual = nodo->info->funcion_call.params;
+        while (actual != NULL)
+        {
+            actual->expr = reducir_operador(actual->expr);
+            actual = actual->next;
+        }
+    }
 }
