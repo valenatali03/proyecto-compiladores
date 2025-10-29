@@ -139,6 +139,7 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones)
 {
     Cuadruplo *ret = malloc(sizeof(Cuadruplo));
     ret->op = RET;
+    ret->arg1 = NULL;
     ret->arg2 = NULL;
     ret->resultado = NULL;
     if (!nodo->izq)
@@ -406,9 +407,15 @@ void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones,
 }
 void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
 {
-    Instrucciones *parametros = malloc(sizeof(Instrucciones));
-    construir_params(nodo->info->funcion_call.params, instrucciones, parametros);
-    insertar_cuadruplos(parametros, instrucciones);
+    Parametro_Call *params = nodo->info->funcion_call.params;
+
+    if (params)
+    {
+        Instrucciones *parametros = crear_lista_instrucciones();
+        construir_params(params, instrucciones, parametros);
+        insertar_cuadruplos(parametros, instrucciones);
+    }
+
     Cuadruplo *call = malloc(sizeof(Cuadruplo));
     call->op = CALL;
     Info_Union *info = malloc(sizeof(Info_Union));
@@ -509,7 +516,6 @@ void actualizar_temps(Simbolo *temp)
 
     if (!temp->info->id.temp)
         return;
-
 
     if (!temporales_libres)
     {
