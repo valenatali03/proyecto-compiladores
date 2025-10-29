@@ -152,6 +152,13 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
                  linea, colum);
         break;
     }
+    case DIV_POR_CERO:
+    {
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                "Linea %d Col %d └── Error: Se encontró una división por cero.", linea, colum);
+        break;
+    }
+
     default:
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error semántico desconocido",

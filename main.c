@@ -7,6 +7,7 @@
 #include "includes/semantico.h"
 #include "includes/errores.h"
 #include "includes/asm.h"
+#include "includes/opt_operadores.h"
 
 extern int yylex(void);
 extern int yyparse(Arbol **arbol);
@@ -234,9 +235,9 @@ int main(int argc, char *argv[])
 
     fprintf(out_sint, "Análisis sintáctico exitoso\n");
 
-    if (t == TARGET_AST || t == TARGET_SEM || t == TARGET_CI)
+    if (t == TARGET_AST || t == TARGET_SEM || t == TARGET_CI || t == TARGET_S)
     {
-        exportar_ast_a_dot(arbol, "arbol.dot");
+        exportar_ast_a_dot(arbol, "arbol_sin_opt.dot");
     }
 
     int error_semantico;
@@ -251,6 +252,8 @@ int main(int argc, char *argv[])
 
     if (t == TARGET_CI && !error_semantico)
     {
+        optimizar_operaciones(arbol);
+        exportar_ast_a_dot(arbol, "arbol_opt.dot");
         instrucciones = crear_lista_instrucciones();
         generar_codigo(arbol, instrucciones);
         instrucciones_to_str(instrucciones);
@@ -259,6 +262,8 @@ int main(int argc, char *argv[])
 
     if (t == TARGET_S && !error_semantico)
     {
+        optimizar_operaciones(arbol);
+        exportar_ast_a_dot(arbol, "arbol_opt.dot");
         instrucciones = crear_lista_instrucciones();
         generar_codigo(arbol, instrucciones);
         instrucciones_to_str(instrucciones);

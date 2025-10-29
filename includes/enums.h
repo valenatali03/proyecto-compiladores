@@ -89,7 +89,8 @@ typedef enum
     MAIN_CON_PARAMS,
     OP_BINARIO,
     OP_UNARIO,
-    NUM_FUERA_RANGO
+    NUM_FUERA_RANGO,
+    DIV_POR_CERO
 } CodigoError;
 
 extern const char *tipo_str[];

@@ -139,6 +139,8 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones)
 {
     Cuadruplo *ret = malloc(sizeof(Cuadruplo));
     ret->op = RET;
+    ret->arg2 = NULL;
+    ret->resultado = NULL;
     if (!nodo->izq)
     {
         insertar_cuadruplo(ret, instrucciones);
@@ -194,6 +196,7 @@ Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones)
         Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
         cuad->op = traducir_op(nodo->info->operador.nombre);
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
+        cuad->arg2 = NULL;
         actualizar_temps(cuad->arg1);
         cuad->resultado = crear_simbolo(NULL, ID);
         insertar_cuadruplo(cuad, instrucciones);
@@ -238,7 +241,6 @@ void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
     Cuadruplo *cuad = malloc(sizeof(Cuadruplo));
     cuad->op = IF_FALSE;
     cuad->arg1 = construir_expresion(nodo->medio, instrucciones);
-
     cuad->arg2 = NULL;
     // Etiqueta para saltear el bloque verdadero
     cuad->resultado = crear_etiqueta(NULL);
@@ -250,10 +252,14 @@ void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
         Cuadruplo *end_if = malloc(sizeof(Cuadruplo));
         end_if->op = JMP;
         end_if->resultado = crear_etiqueta(NULL);
+        end_if->arg1 = NULL;
+        end_if->arg2 = NULL;
         insertar_cuadruplo(end_if, instrucciones);
         // Construyo el cuadruplo que contiene la etiqueta del else.
         Cuadruplo *els = malloc(sizeof(Cuadruplo));
         els->op = TAG;
+        els->arg1 = NULL;
+        els->arg2 = NULL;
         els->resultado = cuad->resultado;
         insertar_cuadruplo(els, instrucciones);
         // Genero el codigo del else
@@ -261,6 +267,8 @@ void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
         // Construyo el cuadruplo que contiene el fin del else
         Cuadruplo *end_else = malloc(sizeof(Cuadruplo));
         end_else->op = TAG;
+        end_else->arg1 = NULL;
+        end_else->arg2 = NULL;
         end_else->resultado = end_if->resultado;
         insertar_cuadruplo(end_else, instrucciones);
     }
@@ -269,6 +277,8 @@ void construir_condicional(Arbol *nodo, Instrucciones *instrucciones)
         // if sin else
         Cuadruplo *end_if = malloc(sizeof(Cuadruplo));
         end_if->op = TAG;
+        end_if->arg1 = NULL;
+        end_if->arg2 = NULL;
         end_if->resultado = cuad->resultado;
         insertar_cuadruplo(end_if, instrucciones);
     }
@@ -279,6 +289,7 @@ void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones)
     Cuadruplo *mov = malloc(sizeof(Cuadruplo));
     mov->op = MOV;
     mov->arg1 = construir_expresion(nodo->der, instrucciones);
+    mov->arg2 = NULL;
     mov->resultado = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
     insertar_cuadruplo(mov, instrucciones);
 }
@@ -289,13 +300,15 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
     {
         Cuadruplo *start_while = malloc(sizeof(Cuadruplo));
         start_while->op = TAG;
+        start_while->arg1 = NULL;
+        start_while->arg2 = NULL;
         start_while->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(start_while, instrucciones);
         // Salto condicional para saltear el while.
         Cuadruplo *jumpc = malloc(sizeof(Cuadruplo));
         jumpc->op = JMPC;
         jumpc->arg1 = construir_expresion(nodo->izq, instrucciones);
-
+        jumpc->arg2 = NULL;
         jumpc->resultado = crear_etiqueta(NULL);
         insertar_cuadruplo(jumpc, instrucciones);
 
@@ -304,11 +317,15 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones)
             construir_bloque(nodo->der, instrucciones);
             Cuadruplo *ciclo = malloc(sizeof(Cuadruplo));
             ciclo->op = JMP;
+            ciclo->arg1 = NULL;
+            ciclo->arg2 = NULL;
             ciclo->resultado = start_while->resultado;
             insertar_cuadruplo(ciclo, instrucciones);
         }
         Cuadruplo *end_while = malloc(sizeof(Cuadruplo));
         end_while->op = TAG;
+        end_while->arg1 = NULL;
+        end_while->arg2 = NULL;
         end_while->resultado = jumpc->resultado;
         insertar_cuadruplo(end_while, instrucciones);
     }
@@ -321,21 +338,26 @@ void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones)
         CANT_VAR = 0;
         Cuadruplo *tag = malloc(sizeof(Cuadruplo));
         tag->op = TAG;
+        tag->arg1 = NULL;
+        tag->arg2 = NULL;
         tag->resultado = crear_etiqueta(nodo->info->funcion_decl.nombre);
         insertar_cuadruplo(tag, instrucciones);
-
         Cuadruplo *start_fun = malloc(sizeof(Cuadruplo));
         start_fun->op = START_FUN;
         start_fun->arg1 = crear_simbolo(nodo->info, nodo->tipo_info);
+        start_fun->arg2 = NULL;
+        start_fun->resultado = NULL;
         insertar_cuadruplo(start_fun, instrucciones);
 
         construir_bloque(nodo->izq, instrucciones);
         nodo->info->funcion_decl.cantVariables = CANT_VAR;
         OFFSET = nodo->info->funcion_decl.cantVariables * OFFSET_INC;
-
         nodo->info->funcion_decl.offset = OFFSET;
         Cuadruplo *end_fun = malloc(sizeof(Cuadruplo));
         end_fun->op = END_FUN;
+        end_fun->arg1 = NULL;
+        end_fun->arg2 = NULL;
+        end_fun->resultado = NULL;
         insertar_cuadruplo(end_fun, instrucciones);
     }
     else
@@ -343,6 +365,8 @@ void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones)
         Cuadruplo *externo = malloc(sizeof(Cuadruplo));
         externo->op = EXTERN;
         externo->arg1 = crear_simbolo(nodo->info, nodo->tipo_info);
+        externo->arg2 = NULL;
+        externo->resultado = NULL;
         insertar_cuadruplo(externo, instrucciones);
     }
 }
@@ -376,6 +400,8 @@ void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones,
     Cuadruplo *param = malloc(sizeof(Cuadruplo));
     param->op = PARAM;
     param->arg1 = construir_expresion(params_call->expr, instrucciones);
+    param->arg2 = NULL;
+    param->resultado = NULL;
     insertar_cuadruplo(param, parametros);
 }
 void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
@@ -484,7 +510,6 @@ void actualizar_temps(Simbolo *temp)
     if (!temp->info->id.temp)
         return;
 
-    printf("%s\n", temp->info->id.nombre);
 
     if (!temporales_libres)
     {
