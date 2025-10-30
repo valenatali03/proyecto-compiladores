@@ -149,6 +149,7 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones)
     }
 
     ret->arg1 = construir_expresion(nodo->izq, instrucciones);
+    actualizar_temp(ret->arg1);
 
     insertar_cuadruplo(ret, instrucciones);
 }
@@ -167,8 +168,7 @@ Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones)
     case LITERAL:
         return crear_simbolo(nodo->info, nodo->tipo_info);
     case CALL_FUNCION:
-        construir_funcion_call(nodo, instrucciones);
-        return buscar_resultado(instrucciones);
+        return construir_funcion_call(nodo, instrucciones);
     default:
         return NULL;
     }
@@ -185,8 +185,8 @@ Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones)
         cuad->op = traducir_op(nodo->info->operador.nombre);
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
         cuad->arg2 = obtener_arg(nodo->der, instrucciones);
-        actualizar_temps(cuad->arg1);
-        actualizar_temps(cuad->arg2);
+        actualizar_temp(cuad->arg1);
+        actualizar_temp(cuad->arg2);
         cuad->resultado = crear_simbolo(NULL, ID);
         insertar_cuadruplo(cuad, instrucciones);
         return (cuad->resultado);
@@ -198,7 +198,7 @@ Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones)
         cuad->op = traducir_op(nodo->info->operador.nombre);
         cuad->arg1 = obtener_arg(nodo->izq, instrucciones);
         cuad->arg2 = NULL;
-        actualizar_temps(cuad->arg1);
+        actualizar_temp(cuad->arg1);
         cuad->resultado = crear_simbolo(NULL, ID);
         insertar_cuadruplo(cuad, instrucciones);
         return (cuad->resultado);
@@ -290,6 +290,7 @@ void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones)
     Cuadruplo *mov = malloc(sizeof(Cuadruplo));
     mov->op = MOV;
     mov->arg1 = construir_expresion(nodo->der, instrucciones);
+    actualizar_temp(mov->arg1);
     mov->arg2 = NULL;
     mov->resultado = crear_simbolo(nodo->izq->info, nodo->izq->tipo_info);
     insertar_cuadruplo(mov, instrucciones);
@@ -405,7 +406,7 @@ void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones,
     param->resultado = NULL;
     insertar_cuadruplo(param, parametros);
 }
-void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
+Simbolo *construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
 {
     Parametro_Call *params = nodo->info->funcion_call.params;
 
@@ -413,6 +414,7 @@ void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
     {
         Instrucciones *parametros = crear_lista_instrucciones();
         construir_params(params, instrucciones, parametros);
+        actualizar_temp_params(parametros);
         insertar_cuadruplos(parametros, instrucciones);
     }
 
@@ -427,6 +429,7 @@ void construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
     call->arg2 = crear_etiqueta(nodo->info->funcion_call.nombre);
     call->resultado = crear_simbolo(NULL, ID);
     insertar_cuadruplo(call, instrucciones);
+    return call->resultado;
 }
 
 void insertar_cuadruplos(Instrucciones *p, Instrucciones *q)
@@ -448,15 +451,13 @@ Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones)
     {
     case OPERADOR_UNARIO:
     case OPERADOR_BINARIO:
-        construir_op(nodo, instrucciones);
-        return buscar_resultado(instrucciones);
+        return construir_op(nodo, instrucciones);
         break;
     case ID:
     case LITERAL:
         return crear_simbolo(nodo->info, nodo->tipo_info);
     case CALL_FUNCION:
-        construir_funcion_call(nodo, instrucciones);
-        return buscar_resultado(instrucciones);
+        return construir_funcion_call(nodo, instrucciones);
         break;
     default:
         return NULL;
@@ -502,11 +503,11 @@ Simbolo *buscar_resultado(Instrucciones *inst)
         }
         aux = aux->next;
     }
-    actualizar_temps(res);
+    actualizar_temp(res);
     return res;
 }
 
-void actualizar_temps(Simbolo *temp)
+void actualizar_temp(Simbolo *temp)
 {
     if (!temp)
         return;
@@ -527,6 +528,22 @@ void actualizar_temps(Simbolo *temp)
 
     temp->next = temporales_libres->head;
     temporales_libres->head = temp;
+}
+
+void actualizar_temp_params(Instrucciones *params)
+{
+    if (!params)
+    {
+        return;
+    }
+
+    Instrucciones *aux = params;
+
+    while (aux)
+    {
+        actualizar_temp(aux->expr->arg1);
+        aux = aux->next;
+    }
 }
 
 Simbolo *crear_etiqueta(char *nombre)
@@ -563,7 +580,6 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
             if (temporales_libres)
             {
                 s = temporales_libres->head;
-                s->next = NULL;
                 if (!temporales_libres->head->next)
                 {
                     temporales_libres = NULL;
