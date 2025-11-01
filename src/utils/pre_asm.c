@@ -598,6 +598,7 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
             s->flag = flag;
             info->id.nombre = n;
             info->id.offset = -1;
+            info->id.global = 0;
             info->id.temp = 1;
             s->info = info;
             CANT_VAR += 1;
