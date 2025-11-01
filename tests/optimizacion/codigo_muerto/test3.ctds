@@ -1,0 +1,18 @@
+program 
+    {
+		void main() {
+
+			integer x = 5;
+
+			x = 7;
+
+			return;
+
+			x = 2;
+
+			if (x < 5) then
+			{
+				x = 12;
+			}
+		}
+    }

@@ -1,0 +1,11 @@
+program 
+    {
+    	integer f(integer x, bool z)
+    	{
+    		return 2 * 3;
+    	}
+
+		void main() {
+			f(1 * -2, true || false);
+		}
+    }
