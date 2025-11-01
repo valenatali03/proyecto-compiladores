@@ -59,8 +59,6 @@ Arbol *reducir_operador(Arbol *nodo)
 {
     if (nodo != NULL)
     {
-        void *a;
-        void *b;
         void *res;
         switch (nodo->tipo_info)
         {
@@ -70,10 +68,10 @@ Arbol *reducir_operador(Arbol *nodo)
             if (nodo->izq->tipo_info == LITERAL && nodo->der->tipo_info == LITERAL)
             {
 
-                a = nodo->izq->info->literal.valor;
-                b = nodo->der->info->literal.valor;
+                Info_Literal a = nodo->izq->info->literal;
+                Info_Literal b = nodo->der->info->literal;
 
-                res = realizar_operacion_binaria(a, b, nodo);
+                res = realizar_operacion_binaria(&a, &b, nodo);
                 if (res != NULL)
                 {
                     Tipo tipo_resultado = nodo->info->operador.tipo;
@@ -92,8 +90,8 @@ Arbol *reducir_operador(Arbol *nodo)
             nodo->izq = reducir_operador(nodo->izq);
             if (nodo->izq->tipo_info == LITERAL)
             {
-                a = nodo->izq->info->literal.valor;
-                res = realizar_operacion_unaria(a, nodo);
+                Info_Literal a = nodo->izq->info->literal;
+                res = realizar_operacion_unaria(&a, nodo);
                 if (res != NULL)
                 {
                     Tipo tipo_resultado = nodo->info->operador.tipo;
@@ -115,16 +113,15 @@ Arbol *reducir_operador(Arbol *nodo)
     return nodo;
 }
 
-void *realizar_operacion_binaria(void *a, void *b, Arbol *nodo_operador)
+void *realizar_operacion_binaria(Info_Literal *a, Info_Literal *b, Arbol *nodo_operador)
 {
-
     Info_Operador op_info = nodo_operador->info->operador;
     void *resultado = NULL;
 
     if (op_info.tipo == ENTERO)
     {
-        int val_a = *(int *)a;
-        int val_b = *(int *)b;
+        int val_a = *(int *)a->valor;
+        int val_b = *(int *)b->valor;
 
         if (strcmp(op_info.nombre, "+") == 0)
         {
@@ -154,61 +151,59 @@ void *realizar_operacion_binaria(void *a, void *b, Arbol *nodo_operador)
         else if (strcmp(op_info.nombre, "%") == 0)
         {
             resultado = malloc(sizeof(int));
-        }
-
-        else if (strcmp(op_info.nombre, "==") == 0)
-        {
-            resultado = malloc(sizeof(bool));
-            *(bool *)resultado = (val_a == val_b);
-        }
-        else if (strcmp(op_info.nombre, "!=") == 0)
-        {
-            resultado = malloc(sizeof(bool));
-            *(bool *)resultado = (val_a != val_b);
-        }
-        else if (strcmp(op_info.nombre, "<") == 0)
-        {
-            resultado = malloc(sizeof(bool));
-            *(bool *)resultado = (val_a < val_b);
-        }
-        else if (strcmp(op_info.nombre, ">") == 0)
-        {
-            resultado = malloc(sizeof(bool));
-            *(bool *)resultado = (val_a > val_b);
+            *(int *)resultado = val_a % val_b;
         }
     }
     else if (op_info.tipo == BOOL)
     {
+        if (strcmp(op_info.nombre, "<") == 0)
+        {
+            int val_a = *(int *)a->valor;
+            int val_b = *(int *)b->valor;
+            resultado = malloc(sizeof(bool));
+            *(bool *)resultado = (val_a < val_b);
+        }
 
-        bool val_a = *(bool *)a;
-        bool val_b = *(bool *)b;
+        if (strcmp(op_info.nombre, ">") == 0)
+        {
+            int val_a = *(int *)a->valor;
+            int val_b = *(int *)b->valor;
+            resultado = malloc(sizeof(bool));
+            *(bool *)resultado = (val_a > val_b);
+        }
 
         if (strcmp(op_info.nombre, "&&") == 0)
         {
+            bool val_a = *(bool *)a->valor;
+            bool val_b = *(bool *)b->valor;
             resultado = malloc(sizeof(bool));
             *(bool *)resultado = val_a && val_b;
         }
         else if (strcmp(op_info.nombre, "||") == 0)
         {
+            bool val_a = *(bool *)a->valor;;
+            bool val_b = *(bool *)b->valor;;
             resultado = malloc(sizeof(bool));
             *(bool *)resultado = val_a || val_b;
         }
         else if (strcmp(op_info.nombre, "==") == 0)
         {
             resultado = malloc(sizeof(bool));
-            *(bool *)resultado = val_a == val_b;
-        }
-        else if (strcmp(op_info.nombre, "!=") == 0)
-        {
-            resultado = malloc(sizeof(bool));
-            *(bool *)resultado = val_a != val_b;
+            if (a->tipo == ENTERO)
+            {
+                *(bool *)resultado = (*(int *)a->valor == *(int *)b->valor);
+            }
+            else
+            {
+                *(bool *)resultado = (*(bool *)a->valor == *(bool *)b->valor);
+            }
         }
     }
 
     return resultado;
 }
 
-void *realizar_operacion_unaria(void *a, Arbol *nodo_operador)
+void *realizar_operacion_unaria(Info_Literal *a, Arbol *nodo_operador)
 {
 
     Info_Operador op_info = nodo_operador->info->operador;
@@ -216,7 +211,7 @@ void *realizar_operacion_unaria(void *a, Arbol *nodo_operador)
 
     if (op_info.tipo == ENTERO)
     {
-        int val_a = *(int *)a;
+        int val_a = *(int *)a->valor;
         if (strcmp(op_info.nombre, "-") == 0)
         {
             resultado = malloc(sizeof(int));
@@ -226,8 +221,8 @@ void *realizar_operacion_unaria(void *a, Arbol *nodo_operador)
     else if (op_info.tipo == BOOL)
     {
 
-        bool val_a = *(bool *)a;
-        if (strcmp(op_info.nombre, "!" == 0))
+        bool val_a = *(bool *)a->valor;
+        if (strcmp(op_info.nombre, "!") == 0)
         {
             resultado = malloc(sizeof(bool));
             *(bool *)resultado = !val_a;
