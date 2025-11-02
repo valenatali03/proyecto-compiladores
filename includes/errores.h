@@ -50,8 +50,7 @@ void reportarError(CodigoError codigo, int linea, int colum, ...);
  * el análisis fue exitoso. En caso contrario, imprime todos los errores
  * almacenados junto con sus descripciones.
  *
- * @param out_sem  Archivo de salida donde se escribe el reporte
  */
-int reportar_resultado_semantico(FILE *out_sem);
+int reportar_resultado_semantico();
 
 #endif

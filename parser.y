@@ -167,5 +167,5 @@
 %%
 
 void yyerror(const char *s) {
-    fprintf(out_sint,"Linea %d Col %d\n└──Error de sintaxis.\n", yylineno, yycolumn);
+    fprintf("Linea %d Col %d\n└──Error de sintaxis.\n", yylineno, yycolumn);
 }
