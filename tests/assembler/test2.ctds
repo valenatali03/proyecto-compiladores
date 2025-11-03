@@ -1,19 +1,15 @@
 program {
-	integer x = 5;
-
-    integer print_int(integer x) extern;
-
-    integer fact(integer x)
-    {
-    	if (x < 2) then
-    	{
-    		return x;
-    	}
-    	
-    	return x * fact(x - 1);
-    }
+	integer print_int(integer x) extern;
 
     void main() {
-        print_int(fact(x));
+        integer a = 17;
+
+        integer b = 5;
+
+        integer c = a / b;
+
+        integer d = a % b;
+
+        print_int(c + d); // 5
     }
 }

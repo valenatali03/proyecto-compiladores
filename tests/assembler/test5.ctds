@@ -1,19 +1,27 @@
 program {
-	integer x = 5;
+    integer print_int(integer x) extern;
 
-	integer print_int(integer x) extern;
-
-	integer inc(integer x)
+    integer inc(integer x)
     {
-        return x + 1;
-    }
-
-	void f(integer x)
-    {
-    	print_int(x);
+    	return x + 1;
     }
 
     void main() {
-        f(inc(x) + 1);
+        integer i = 0;
+
+        while (i < 1) {
+            if (i % 2 == 0) then 
+            {
+                if (i == 2) then 
+                {
+                    print_int(100);
+                } 
+                else 
+                {
+                    print_int(i);
+                }
+            }
+            i = inc(i);
+        }
     }
 }

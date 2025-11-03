@@ -1,20 +1,44 @@
 program {
-	integer print_int(integer x) extern;
+    
+    integer print_int(integer x) extern;
+
+    integer inc(integer x)
+    {
+        return x + 1;
+    }
+
+    bool es_primo(integer n)
+    {
+      integer i = 2;
+
+        if (n < 2) then
+        {
+         return false;
+        }
+
+        while ((i * i) < (n + 1))
+        {
+            if ((n % i) == 0) then
+            {
+               return false;
+            }
+
+            i = inc(i);
+        }
+
+        return true;
+    }
 
     void main() {
-        integer x = 4;
-        integer y = 10;
-        integer res = 0;
+       integer x = 5;
 
-        if ((x < y) && (y < 20)) then
-        {
-            res = 1;
-        }
-        else
-        {
-            res = 0;
-        }
-
-        print_int(res); // 1
+       if (es_primo(x)) then
+       {
+            print_int(x);
+       }
+       else
+       {
+            print_int(0);
+       }
     }
 }
