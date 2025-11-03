@@ -57,7 +57,6 @@ Simbolo *construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones);
 Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones);
 void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst);
 void insertar_cuadruplos(Instrucciones *p, Instrucciones *q);
-Simbolo *buscar_resultado(Instrucciones *inst);
 void actualizar_temp(Simbolo *temp);
 void actualizar_temp_params(Instrucciones *params);
 Simbolo *crear_etiqueta(char *nombre);

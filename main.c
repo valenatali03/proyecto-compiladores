@@ -16,8 +16,8 @@ extern FILE *yyin;
 
 // Archivos de salida globales
 
-FILE *out_ci = NULL;   // Para código intermedio
-FILE *out_s = NULL;    // Para código assembler
+FILE *out_ci = NULL; // Para código intermedio
+FILE *out_s = NULL;  // Para código assembler
 
 typedef enum
 {
@@ -175,6 +175,8 @@ int main(int argc, char *argv[])
     if (t >= TARGET_AST && debug_info)
     {
         exportar_ast_a_dot(arbol, "arbol_sin_opt.dot");
+        system("dot -Tpng arbol_sin_opt.dot -o arbol_sin_opt.png");
+        system("rm arbol_sin_opt.dot");
     }
 
     int error_semantico = 0;
@@ -205,6 +207,8 @@ int main(int argc, char *argv[])
         if (debug_info)
         {
             exportar_ast_a_dot(arbol, "arbol_opt.dot");
+            system("dot -Tpng arbol_opt.dot -o arbol_opt.png");
+            system("rm arbol_opt.dot");
         }
     }
 

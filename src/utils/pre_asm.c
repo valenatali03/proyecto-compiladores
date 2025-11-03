@@ -489,24 +489,6 @@ void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
     aux->next = nuevo;
 }
 
-Simbolo *buscar_resultado(Instrucciones *inst)
-{
-    if (!inst)
-        return NULL;
-    Instrucciones *aux = inst;
-    Simbolo *res = NULL;
-    while (aux != NULL)
-    {
-        if (aux->expr->op != TAG)
-        {
-            res = aux->expr->resultado;
-        }
-        aux = aux->next;
-    }
-    actualizar_temp(res);
-    return res;
-}
-
 void actualizar_temp(Simbolo *temp)
 {
     if (!temp)
