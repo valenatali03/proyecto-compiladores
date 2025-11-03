@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     if (optimizar && t >= TARGET_SEM)
     {
         optimizar_operaciones(arbol);
-        //opt_codigo_muerto(arbol);
+        opt_codigo_muerto(arbol);
 
         if (debug_info)
         {

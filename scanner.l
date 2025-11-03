@@ -4,8 +4,7 @@
 #include <stdbool.h>
 #include "parser.tab.h"
 int yycolumn = 1;
-
-extern FILE *out_lex; 
+ 
 %}
 
 %option yylineno
