@@ -45,38 +45,47 @@ run_semantica() {
 # Ejecuta tests de generación de código assembler
 run_assembler() {
     echo "=== Assembler ==="
-    ok=0 fail=0
-    for f in tests/assembler/*.ctds; do
-        base="${f%.ctds}"
-        nombre=$(basename "$base")
-
-        # Genera código assembler (archivo .s)
-        ./c-tds -target s "$f"
-
-        # Compila funciones externas y archivo generado
-        gcc -c tests/assembler/externas.c -o externas.o
-        gcc -c "$base.s" -o "$base.o"
-        gcc "$base.o" externas.o -o "$base.out" 2>/dev/null
-
-
-        # Ejecuta y compara con salida esperada
-        salida=$("$base.out")
-        esperado=$(cat "$base.cmp")
-        if [ "$salida" = "$esperado" ]; then
-            ((ok++))
-        else
-            echo "FAIL: $nombre"
-            echo "  Esperado: $esperado"
-            echo "  Obtenido: $salida"
-            ((fail++))
-        fi
-
-        # Limpiar archivos temporales
-        rm -f "$base.s" "$base.o" externas.o "$base.out"
-    done
-    [ $fail -eq 0 ] && echo "All pass ($ok)" || echo "$ok PASS, $fail FAIL"
     echo ""
+    
+    for modo in "" "-opt"; do
+        [ -z "$modo" ] && echo "Sin optimizaciones" || echo "Con optimizaciones"
+        
+        ok=0
+        fail=0
+        for f in tests/assembler/*.ctds; do
+            base="${f%.ctds}"
+            nombre=$(basename "$base")
+            
+            # Genera código assembler (archivo .s)
+            ./c-tds -target s $modo "$f"
+            
+            # Compila funciones externas y archivo generado
+            gcc -c tests/assembler/externas.c -o externas.o
+            gcc -c "$base.s" -o "$base.o"
+            gcc "$base.o" externas.o -o "$base.out" 2>/dev/null
+            
+            # Ejecuta y compara con salida esperada
+            salida=$("$base.out")
+            esperado=$(cat "$base.cmp")
+            
+            if [ "$salida" = "$esperado" ]; then
+                ((ok++))
+            else
+                echo "FAIL: $nombre${modo:+ (opt)}"
+                echo "  Esperado: $esperado"
+                echo "  Obtenido: $salida"
+                ((fail++))
+            fi
+            
+            # Limpiar archivos temporales
+            rm -f "$base.s" "$base.o" externas.o "$base.out"
+        done
+        
+        [ $fail -eq 0 ] && echo "All pass ($ok)" || echo "$ok PASS, $fail FAIL"
+        echo ""
+    done
 }
+
 
 echo ""
 echo "Ejecución de tests"
