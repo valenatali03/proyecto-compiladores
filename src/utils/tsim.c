@@ -131,26 +131,6 @@ Info_Union *buscar_simbolo_en_nivel(Nivel *nivel, char *nombre, Tipo_Info flag)
     return NULL;
 }
 
-Info_Union *buscar_ultimo_metodo(Nivel *nivel)
-{
-    if (!nivel)
-        return NULL;
-
-    Simbolo *s = nivel->head;
-    Info_Union *ultimoMetodo = NULL;
-
-    while (s != NULL)
-    {
-        if (s->flag == DECL_FUNCION)
-        {
-            ultimoMetodo = s->info;
-        }
-        s = s->next;
-    }
-
-    return ultimoMetodo;
-}
-
 void imprimir_simbolos(Nivel *nivel)
 {
     for (Simbolo *aux = nivel->head; aux != NULL; aux = aux->next)

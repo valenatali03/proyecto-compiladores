@@ -8,6 +8,7 @@ int is_main = 0;
 int main_has_params = 0;
 int main_params_line = 0;
 int main_params_colum = 0;
+Simbolo *ult_metodo = NULL;
 
 extern int CANT_NIVELES;
 
@@ -193,6 +194,7 @@ void declarar_metodo(Arbol *arbol, Nivel *nivelActual)
     else
     {
         agregar_simbolo(nivelActual, arbol->info, arbol->tipo_info);
+        ult_metodo = arbol->info;
     }
 }
 
@@ -546,7 +548,7 @@ void procesar_return(Arbol *arbol, Nivel *nivelActual)
     if (!arbol)
         return;
 
-    Info_Union *metodo = buscar_ultimo_metodo(tabla);
+    Info_Union *metodo = ult_metodo;
 
     if (!metodo)
         return;

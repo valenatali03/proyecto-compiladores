@@ -100,14 +100,6 @@ Info_Union *buscar_simbolo(Nivel *tabla, char *nombre, Tipo_Info flag);
 Info_Union *buscar_simbolo_en_nivel(Nivel *tabla, char *nombre, Tipo_Info flag);
 
 /**
- * Busca el último método (DECL_FUNCION) agregado en el nivel dado.
- *
- * @param nivel Nivel donde se buscará
- * @return      Puntero a la información de la última función encontrada, NULL si no hay
- */
-Info_Union *buscar_ultimo_metodo(Nivel *nivel);
-
-/**
  * Imprime todos los símbolos de un nivel.
  *
  * @param nivel Nivel cuyos símbolos se imprimirán
