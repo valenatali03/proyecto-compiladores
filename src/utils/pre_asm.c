@@ -12,21 +12,9 @@ int OFFSET_PARAMS = 0;
 int OFFSET_GAP = 16;
 int CANT_VAR = 0;
 char **codigo = NULL;
+Lista_Inst *lista_inst = NULL;
 Instrucciones *instrucciones = NULL;
-Instrucciones *ultima_instruccion = NULL;
 Temporales *temporales_libres = NULL;
-
-void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen)
-{
-    if (!origen)
-        return;
-    Instrucciones *aux = destino;
-    while (aux->next != NULL)
-    {
-        aux = aux->next;
-    }
-    aux->next = origen;
-}
 
 void generar_codigo(Arbol *nodo, Instrucciones *instrucciones)
 {
@@ -412,7 +400,7 @@ Simbolo *construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones)
 
     if (params)
     {
-        Instrucciones *parametros = crear_lista_instrucciones();
+        Instrucciones *parametros = crear_instrucciones();
         construir_params(params, instrucciones, parametros);
         actualizar_temp_params(parametros);
         insertar_cuadruplos(parametros, instrucciones);
@@ -476,17 +464,12 @@ void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst)
         return;
     }
 
-    Instrucciones *aux = inst;
-
-    while (aux->next != NULL)
-    {
-        aux = aux->next;
-    }
-
     Instrucciones *nuevo = malloc(sizeof(Instrucciones));
     nuevo->expr = c;
     nuevo->next = NULL;
-    aux->next = nuevo;
+
+    lista_inst->tail->next = nuevo;
+    lista_inst->tail = nuevo;
 }
 
 void actualizar_temp(Simbolo *temp)
@@ -601,7 +584,15 @@ Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag)
     return s;
 }
 
-Instrucciones *crear_lista_instrucciones()
+Lista_Inst *crear_lista_instrucciones()
+{
+    Lista_Inst *lista = malloc(sizeof(Lista_Inst));
+    lista->head = NULL;
+    lista->tail = NULL;
+    return lista;
+}
+
+Instrucciones *crear_instrucciones()
 {
     Instrucciones *lista = malloc(sizeof(Instrucciones));
     lista->expr = NULL;

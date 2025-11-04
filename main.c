@@ -216,7 +216,10 @@ int main(int argc, char *argv[])
 
     if (t >= TARGET_CI)
     {
-        instrucciones = crear_lista_instrucciones();
+        lista_inst = crear_lista_instrucciones();
+        instrucciones = crear_instrucciones();
+        lista_inst->head = instrucciones;
+        lista_inst->tail = instrucciones;
 
         if (!instrucciones)
         {

@@ -17,6 +17,12 @@ typedef struct Instrucciones
     struct Instrucciones *next;
 } Instrucciones;
 
+typedef struct Lista_Inst
+{
+    Instrucciones *head;
+    Instrucciones *tail;
+} Lista_Inst;
+
 typedef struct Temporales
 {
     Simbolo *head;
@@ -34,10 +40,10 @@ extern int OFFSET_GAP;
 extern int CANT_VAR;
 
 extern char **codigo;
+extern Lista_Inst *lista_inst;
 extern Instrucciones *instrucciones;
 extern Temporales *temporales_libres;
 
-void agregar_instrucciones(Instrucciones *destino, Instrucciones *origen);
 void generar_codigo(Arbol *nodo, Instrucciones *instrucciones);
 void construir_declaracion_variables(Arbol *nodo, Instrucciones *instrucciones);
 void construir_declaracion_metodos(Arbol *nodo, Instrucciones *instrucciones);
@@ -61,7 +67,8 @@ void actualizar_temp(Simbolo *temp);
 void actualizar_temp_params(Instrucciones *params);
 Simbolo *crear_etiqueta(char *nombre);
 Simbolo *crear_simbolo(Info_Union *info, Tipo_Info flag);
-Instrucciones *crear_lista_instrucciones();
+Lista_Inst *crear_lista_instrucciones();
+Instrucciones *crear_instrucciones();
 void simbolo_a_str(Simbolo *s, char buffer[64]);
 void instrucciones_to_str(Instrucciones *instrucciones);
 void imprimir_codigo_ci(FILE *out_ci);
