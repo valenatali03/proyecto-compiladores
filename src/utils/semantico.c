@@ -37,6 +37,8 @@ void analisis_semantico(Arbol *arbol, Nivel *nivelActual)
         reportarError(MAIN_CON_PARAMS, main_params_line, main_params_colum);
         // printf("Error: Funcion main no puede tener parametros \n");
     }
+
+    nivelActual = cerrar_nivel(nivelActual);
 }
 
 void procesar_declaracion_variable(Arbol *arbol, Nivel *nivelActual)

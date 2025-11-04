@@ -47,6 +47,19 @@ Nivel *crear_tabla();
 Nivel *abrir_nivel(Nivel *tabla);
 
 /**
+ * Libera toda la memoria asociada a un nivel (ámbito) de la tabla de símbolos.
+ *
+ * Recorre la lista de símbolos del nivel y libera cada uno de ellos, 
+ * así como la estructura del nivel en sí. 
+ * 
+ * Esta función no libera la información apuntada por los símbolos 
+ * (`info`), ya que puede está compartida con la estructura AST.
+ *
+ * @param tabla Puntero al nivel que se desea liberar
+ */
+void liberar_nivel(Nivel *tabla);
+
+/**
  * Cierra el nivel actual y retorna el nivel padre.
  *
  * @param tabla Nivel actual a cerrar
