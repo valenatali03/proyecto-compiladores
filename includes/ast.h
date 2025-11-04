@@ -23,7 +23,7 @@ typedef struct Arbol
  * Crea un nodo operador del AST.
  *
  * @param op     Nombre del operador
- * @param valor  Valor asociado al operador (si lo hubiera)
+ * @param tipo_op Tipo de operador (Binario o Unario)
  * @param linea  Línea del código fuente
  * @param colum  Columna del código fuente
  * @param izq    Hijo izquierdo

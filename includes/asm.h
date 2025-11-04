@@ -74,3 +74,5 @@ void params_decl(Parametro_Decl *params, FILE *out_s, int cant_var, int cant_par
  * @param var Símbolo que representa la variable a calcular su offset.
  */
 void calcular_offset_var(Simbolo *var);
+
+void obtener_representacion_operando(Simbolo *sym, char *buffer, size_t size);

@@ -3,8 +3,9 @@
 
 void cargar_a_registro(FILE *out_s, Simbolo *sym, const char *reg)
 {
-    if (!sym) return;
-    
+    if (!sym)
+        return;
+
     if (sym->flag == LITERAL)
         fprintf(out_s, "\tmovl\t$%d, %s\n", *(int *)sym->info->literal.valor, reg);
     else if (sym->flag == ID && sym->info->id.global)
@@ -25,14 +26,10 @@ void guardar_desde_registro(FILE *out_s, const char *reg, Simbolo *dest)
 
 void aplicar_operacion_binaria(FILE *out_s, Simbolo *arg2, const char *instruccion)
 {
-    if (arg2->flag == LITERAL)
-        fprintf(out_s, "\t%s\t$%d, %%eax\n", instruccion, *(int *)arg2->info->literal.valor);
-    else if (arg2->flag == ID && arg2->info->id.global)
-        fprintf(out_s, "\t%s\t%s(%%rip), %%eax\n", instruccion, arg2->info->id.nombre);
-    else if (arg2->flag == ID)
-        fprintf(out_s, "\t%s\t%d(%%rbp), %%eax\n", instruccion, arg2->info->id.offset);
-    else if (arg2->flag == ETIQUETA)
-        fprintf(out_s, "\t%s\t%s, %%eax\n", instruccion, arg2->info->etiqueta.nombre);
+    char op_str[128];
+    obtener_representacion_operando(arg2, op_str, sizeof(op_str));
+
+    fprintf(out_s, "\t%s\t%s, %%eax\n", instruccion, op_str);
 }
 
 void generar_asm(FILE *out_s, Instrucciones *instrucciones)
@@ -44,6 +41,7 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
     int cant_params_sin_reg = 0;
     bool inicio_fun = false;
     char current_func[64] = {0};
+    char op_str[128];
 
     while (aux)
     {
@@ -75,19 +73,18 @@ void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 
         case IF_FALSE:
         case JMPC:
+            obtener_representacion_operando(arg1, op_str, sizeof(op_str));
+
             if (arg1->flag == LITERAL)
             {
                 cargar_a_registro(out_s, arg1, "%eax");
                 fprintf(out_s, "\tcmpl\t$0, %%eax\n");
             }
-            else if (arg1->flag == ID && arg1->info->id.global)
+            else
             {
-                fprintf(out_s, "\tcmpl\t$0, %s(%%rip)\n", arg1->info->id.nombre);
+                fprintf(out_s, "\tcmpl\t$0, %s\n", op_str);
             }
-            else if (arg1->flag == ID)
-            {
-                fprintf(out_s, "\tcmpl\t$0, %d(%%rbp)\n", arg1->info->id.offset);
-            }
+
             fprintf(out_s, "\tje\t%s\n", res->info->etiqueta.nombre);
 
             break;
@@ -239,6 +236,7 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     Simbolo *arg1 = instrucciones->expr->arg1;
     Simbolo *arg2 = instrucciones->expr->arg2;
     Simbolo *res = instrucciones->expr->resultado;
+    char op_str[128];
 
     switch (op)
     {
@@ -273,22 +271,17 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     case DIV:
         cargar_a_registro(out_s, arg1, "%eax");
         fputs("\tcltd\n", out_s);
+
+        obtener_representacion_operando(arg2, op_str, sizeof(op_str));
+
         if (arg2->flag == LITERAL)
         {
-            fprintf(out_s, "\tmovl\t$%d, %%ecx\n", *(int *)arg2->info->literal.valor);
+            fprintf(out_s, "\tmovl\t%s, %%ecx\n", op_str);
             fputs("\tidivl\t%ecx\n", out_s);
         }
-        else if (arg2->flag == ID && arg2->info->id.global)
+        else
         {
-            fprintf(out_s, "\tidivl\t%s(%%rip)\n", arg2->info->id.nombre);
-        }
-        else if (arg2->flag == ID)
-        {
-            fprintf(out_s, "\tidivl\t%d(%%rbp)\n", arg2->info->id.offset);
-        }
-        else if (arg2->flag == ETIQUETA)
-        {
-            fprintf(out_s, "\tidivl\t%s\n", arg2->info->etiqueta.nombre);
+            fprintf(out_s, "\tidivl\t%s\n", op_str);
         }
         fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", op == DIV ? "%eax" : "%edx", res->info->id.offset);
         break;
@@ -296,17 +289,11 @@ void operadores(FILE *out_s, Instrucciones *instrucciones)
     case COMP:
     case LT:
     case GT:
+        obtener_representacion_operando(arg2, op_str, sizeof(op_str));
+
         cargar_a_registro(out_s, arg1, "%eax");
 
-        if (arg2->flag == LITERAL)
-            fprintf(out_s, "\tcmpl\t$%d, %%eax\n", *(int *)arg2->info->literal.valor);
-        else if (arg2->flag == ID && arg2->info->id.global)
-            fprintf(out_s, "\tcmpl\t%s(%%rip), %%eax\n", arg2->info->id.nombre);
-        else if (arg2->flag == ID)
-            fprintf(out_s, "\tcmpl\t%d(%%rbp), %%eax\n", arg2->info->id.offset);
-        else if (arg1->flag == ETIQUETA)
-            fprintf(out_s, "\tcmpl\t%s, %%eax\n", arg2->info->etiqueta.nombre);
-
+        fprintf(out_s, "\tcmpl\t%s, %%eax\n", op_str);
         fprintf(out_s, "\t%s\t%%al\n", tipo_op_asm[op]);
         fputs("\tmovzbl\t%al, %eax\n", out_s);
         guardar_desde_registro(out_s, "%eax", res);
@@ -323,7 +310,6 @@ void mov(FILE *out_s, Simbolo *arg1, Simbolo *res, bool inicio_fun)
         return;
 
     bool res_global = res->info->id.global;
-    bool arg_global = arg1->info->id.global;
 
     if (res_global && !inicio_fun)
     {
@@ -409,4 +395,22 @@ void calcular_offset_var(Simbolo *var)
 
     var->info->id.offset = -OFFSET;
     OFFSET -= OFFSET_INC;
+}
+
+void obtener_representacion_operando(Simbolo *sym, char *buffer, size_t size)
+{
+    if (!sym)
+    {
+        buffer[0] = '\0';
+        return;
+    }
+
+    if (sym->flag == LITERAL)
+        snprintf(buffer, size, "$%d", *(int *)sym->info->literal.valor);
+    else if (sym->flag == ID && sym->info->id.global)
+        snprintf(buffer, size, "%s(%%rip)", sym->info->id.nombre);
+    else if (sym->flag == ID)
+        snprintf(buffer, size, "%d(%%rbp)", sym->info->id.offset);
+    else if (sym->flag == ETIQUETA)
+        snprintf(buffer, size, "%s", sym->info->etiqueta.nombre);
 }
