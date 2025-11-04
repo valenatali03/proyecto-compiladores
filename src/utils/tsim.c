@@ -27,11 +27,29 @@ Nivel *abrir_nivel(Nivel *tabla)
     return nivel;
 }
 
+void liberar_nivel(Nivel *tabla)
+{
+    Simbolo *s = tabla->head;
+
+    while (s != NULL)
+    {
+        Simbolo *aux = s;
+        s = s->next;
+        free(aux);
+    }
+
+    free(tabla);
+}
+
 Nivel *cerrar_nivel(Nivel *tabla)
 {
     CANT_NIVELES--;
 
-    return tabla->parent;
+    Nivel* nivel_superior = tabla->parent;
+
+    liberar_nivel(tabla);
+
+    return nivel_superior;
 }
 
 void agregar_simbolo(Nivel *nivel, Info_Union *info, Tipo_Info flag)
