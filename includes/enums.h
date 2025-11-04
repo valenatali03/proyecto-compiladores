@@ -31,6 +31,7 @@ typedef enum
     ETIQUETA,
 } Tipo_Info;
 
+//Tipos de operadores posibles para los cuádruplos del código intermedio.
 typedef enum
 {
     ADD,
