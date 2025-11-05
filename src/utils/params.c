@@ -70,3 +70,27 @@ void *agregar_param(void *params, void *data, Tipo_Info tipo_param, int linea, i
     }
     return NULL;
 }
+
+int contar_parametros_decl(Parametro_Decl *params)
+{
+    int count = 0;
+    Parametro_Decl *aux = params;
+    while (aux)
+    {
+        count++;
+        aux = aux->next;
+    }
+    return count;
+}
+
+int contar_parametros_call(Parametro_Call *params)
+{
+    int count = 0;
+    Parametro_Call *aux = params;
+    while (aux)
+    {
+        count++;
+        aux = aux->next;
+    }
+    return count;
+}

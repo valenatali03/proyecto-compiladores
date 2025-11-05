@@ -3,7 +3,14 @@
 
 #include "enums.h"
 
+/**
+ * Estructura que contiene los parámetros formales de una declaración de función.
+ */
 typedef struct Parametro_Decl Parametro_Decl;
+
+/**
+ * Estructura que contiene los parámetros actuales de una llamada a función.
+ */
 typedef struct Parametro_Call Parametro_Call;
 
 /**
@@ -14,7 +21,10 @@ typedef struct Info_ID
     char *nombre;
     void *valor;
     Tipo tipo;
+    int global;
+    int usos;
     int offset;
+    int temp;
 } Info_ID;
 
 /**
@@ -37,7 +47,7 @@ typedef struct Info_Literal
 } Info_Literal;
 
 /**
- * Información asociada a una función.
+ * Información asociada a una declaración de función.
  */
 typedef struct Info_FuncionDecl
 {
@@ -46,14 +56,27 @@ typedef struct Info_FuncionDecl
     Tipo tipo;
     Parametro_Decl *params;
     int offset;
+    int esExterna;
+    int usos;
+    int cantVariables;
+    int cant_params;
 } Info_FuncionDecl;
 
+/**
+ * Información asociada a una llamada a función.
+ */
 typedef struct Info_FuncionCall
 {
     char *nombre;
     Parametro_Call *params;
+    int esExterna;
+    int cantVariables;
+    int cant_params;
 } Info_FuncionCall;
 
+/**
+ * Información asociada a una etiqueta.
+ */
 typedef struct Info_Etiqueta
 {
     char *nombre;

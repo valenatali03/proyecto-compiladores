@@ -1,0 +1,17 @@
+program 
+    {
+		void main() {
+
+			bool z = false && true;
+
+			bool x = 3 > 2 && 1 < 10;
+
+			z = z || true;
+
+			z = !!!false;
+
+			z = 3 == 2;
+
+			z = true == false;
+		}
+    }

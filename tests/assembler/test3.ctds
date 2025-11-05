@@ -1,0 +1,19 @@
+program {
+	integer x = 5;
+
+	integer print_int(integer x) extern;
+
+	integer inc(integer x)
+    {
+        return x + 1;
+    }
+
+	void f(integer x)
+    {
+    	print_int(x);
+    }
+
+    void main() {
+        f(inc(x) + 1);
+    }
+}

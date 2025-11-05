@@ -8,6 +8,9 @@ int is_main = 0;
 int main_has_params = 0;
 int main_params_line = 0;
 int main_params_colum = 0;
+Info_Union *ult_metodo = NULL;
+
+extern int CANT_NIVELES;
 
 void analisis_semantico(Arbol *arbol, Nivel *nivelActual)
 {
@@ -35,6 +38,8 @@ void analisis_semantico(Arbol *arbol, Nivel *nivelActual)
         reportarError(MAIN_CON_PARAMS, main_params_line, main_params_colum);
         // printf("Error: Funcion main no puede tener parametros \n");
     }
+
+    nivelActual = cerrar_nivel(nivelActual);
 }
 
 void procesar_declaracion_variable(Arbol *arbol, Nivel *nivelActual)
@@ -66,18 +71,23 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
     if (arbol->izq->info->id.tipo == VACIO)
     {
         reportarError(VAR_VACIO, arbol->linea, arbol->colum, nombre);
-        // printf("Variable declarada VACIO.\n");
-        // return;
     }
 
     if (buscar_simbolo_en_nivel(nivelActual, nombre, arbol->izq->tipo_info))
     {
         reportarError(VAR_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
-        // printf("Variable %s ya declarada.\n", nombre);
-        return;
     }
 
     Arbol *expr = arbol->der;
+
+    if (CANT_NIVELES == 0) // Variable global
+    {
+        arbol->izq->info->id.global = 1;
+        if (procesar_declaracion_variable_global(expr))
+        {
+            reportarError(VAR_GLOBAL_NO_CONST, arbol->linea, arbol->colum, nombre);
+        }
+    }
 
     if (procesar_expresion(expr, nivelActual))
     {
@@ -86,14 +96,27 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
         if (tId != tExpr)
         {
             reportarError(TIPO_INCOMPATIBLE, arbol->linea, arbol->colum, tId, tExpr);
-            // printf("Los tipos NO coinciden en la declaracion.\n");
         }
     }
-    else
-    {
-        // return;
-    }
+
     agregar_simbolo(nivelActual, arbol->izq->info, arbol->izq->tipo_info);
+}
+
+int procesar_declaracion_variable_global(Arbol *arbol)
+{
+    if (arbol == NULL)
+    {
+        return 0;
+    }
+
+    Tipo_Info t_info = arbol->tipo_info;
+
+    if (t_info == LITERAL)
+    {
+        return 0;
+    }
+
+    return 1;
 }
 
 void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
@@ -111,6 +134,7 @@ void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
         {
             nivelActual = procesar_bloque(arbol->izq, nivelActual, params);
             char *nombre = arbol->info->funcion_decl.nombre;
+            arbol->info->funcion_decl.esExterna = 0;
             if (buscar_return(arbol->izq) == 0 && arbol->info->funcion_decl.tipo != VACIO)
             {
                 reportarError(FUN_SIN_RETURN, arbol->linea, arbol->colum, nombre);
@@ -126,6 +150,7 @@ void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
                 procesar_params(params, temp);
                 cerrar_nivel(temp);
             }
+            arbol->info->funcion_decl.esExterna = 1;
         }
 
         return;
@@ -149,6 +174,11 @@ void declarar_metodo(Arbol *arbol, Nivel *nivelActual)
 
     procesar_main(nombre, arbol->info->funcion_decl.params);
 
+    if (strcmp(nombre, "main") == 0)
+    {
+        arbol->info->funcion_decl.usos++;
+    }
+
     if (buscar_simbolo_en_nivel(nivelActual, nombre, arbol->tipo_info))
     {
         reportarError(FUN_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
@@ -157,6 +187,7 @@ void declarar_metodo(Arbol *arbol, Nivel *nivelActual)
     else
     {
         agregar_simbolo(nivelActual, arbol->info, arbol->tipo_info);
+        ult_metodo = arbol->info;
     }
 }
 
@@ -181,6 +212,7 @@ void procesar_params(Parametro_Decl *params, Nivel *nivelActual)
 
         agregar_simbolo(nivelActual, params->info, ID);
 
+        params->info->id.usos++;
         params = params->next;
     }
 }
@@ -345,7 +377,7 @@ int procesar_asignacion(Arbol *arbol, Nivel *nivelActual)
     }
 
     arbol->izq->info = simbolo; // Vincular nodo del arbol
-
+    simbolo->id.usos++;
     return 1;
 }
 
@@ -368,6 +400,7 @@ int procesar_expresion(Arbol *arbol, Nivel *nivelActual)
             return 0;
         }
         arbol->info = simbolo;
+        arbol->info->id.usos++;
         return 1;
         break;
     case OPERADOR_BINARIO:
@@ -510,7 +543,7 @@ void procesar_return(Arbol *arbol, Nivel *nivelActual)
     if (!arbol)
         return;
 
-    Info_Union *metodo = buscar_ultimo_metodo(tabla);
+    Info_Union *metodo = ult_metodo;
 
     if (!metodo)
         return;
@@ -558,6 +591,7 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
 
     if (!params_decl && !params_call)
     {
+        metodo->funcion_decl.usos++;
         return 1;
     }
 
@@ -596,7 +630,9 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
         // printf("Cantidad de parámetros no coincide\n");
         return 0;
     }
-
+    arbol->info->funcion_call.cantVariables = metodo->funcion_decl.cantVariables;
+    arbol->info->funcion_call.esExterna = metodo->funcion_decl.esExterna;
+    metodo->funcion_decl.usos++;
     return 1;
 }
 

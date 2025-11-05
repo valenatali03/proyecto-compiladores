@@ -7,7 +7,6 @@
     extern FILE *yyin;
     extern int yylineno;
     extern int yycolumn;
-    extern FILE *out_sint;
 %}
 
 %code requires {
@@ -167,5 +166,5 @@
 %%
 
 void yyerror(const char *s) {
-    fprintf(out_sint,"Linea %d Col %d\n└──Error de sintaxis.\n", yylineno, yycolumn);
+    printf("Linea %d Col %d\n└──Error de sintaxis.\n", yylineno, yycolumn);
 }

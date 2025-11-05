@@ -7,6 +7,10 @@
 Error errores[MAX_ERRORES];
 int cantErrores = 0;
 
+// Arreglo de warnings
+Warning warnings[MAX_WARNINGS];
+int cantWarnings = 0;
+
 void reportarError(CodigoError codigo, int linea, int colum, ...)
 {
     if (cantErrores >= MAX_ERRORES)
@@ -40,6 +44,14 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
         const char *nombre = va_arg(args, const char *);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
                  "Linea %d Col %d\n└── Error: variable '%s' declarada VOID",
+                 linea, colum, nombre);
+        break;
+    }
+    case VAR_GLOBAL_NO_CONST:
+    {
+        const char *nombre = va_arg(args, const char *);
+        snprintf(errores[cantErrores].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Error: Variable global %s no inicializada con un literal",
                  linea, colum, nombre);
         break;
     }
@@ -155,15 +167,73 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
     cantErrores++;
 }
 
-int reportar_resultado_semantico(FILE *out_sem) {
-    if (cantErrores == 0) {
-        fprintf(out_sem, "Análisis semántico exitoso\n");
-        return 0;
-    } else {
+void reportarWarning(CodigoWarning codigo, int linea, int colum, ...)
+{
+    if (cantWarnings >= MAX_WARNINGS)
+        return;
+
+    warnings[cantWarnings].codigo = codigo;
+
+    va_list args;
+    va_start(args, colum);
+
+    switch (codigo)
+    {
+    case VAR_NO_USADA:
+    {
+        const char *nombre = va_arg(args, const char *);
+        snprintf(warnings[cantWarnings].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Warning: variable '%s' declarada pero no utilizada",
+                 linea, colum, nombre);
+        break;
+    }
+    case FUN_NO_USADA:
+    {
+        const char *nombre = va_arg(args, const char *);
+        snprintf(warnings[cantWarnings].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Warning: función '%s' declarada pero no utilizada",
+                 linea, colum, nombre);
+        break;
+    }    
+    case DIV_POR_CERO:
+    {
+        snprintf(warnings[cantWarnings].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Warning: posible división por cero",
+                 linea, colum);
+        break;
+    }
+    case CONDICION_TRUE:
+    {
+        snprintf(warnings[cantWarnings].mensaje, MAX_MSG,
+             "Linea %d Col %d\n└── Warning: condición de while siempre verdadera",
+             linea, colum);
+        break;
+    }
+    default:
+        snprintf(warnings[cantWarnings].mensaje, MAX_MSG,
+                 "Linea %d Col %d\n└── Warning semántico desconocido",
+                 linea, colum);
+        break;
+    }
+
+    va_end(args);
+    cantWarnings++;
+}
+
+int reportar_resultado_semantico() 
+{
+    if (cantErrores > 0) {
         for (int i = 0; i < cantErrores; i++) {
-            fprintf(out_sem, "Error: %s\n", tipo_err_str[errores[i].codigo]);
-            fprintf(out_sem, "%s\n", errores[i].mensaje);
+            printf("\033[31mError:\033[0m %s\n", errores[i].mensaje);
         }
         return 1;
+    }
+    return 0;
+}
+
+void reportar_warnings()
+{
+    for (int i = 0; i < cantWarnings; i++) {
+        printf("\033[33mWarning:\033[0m %s\n", warnings[i].mensaje);
     }
 }

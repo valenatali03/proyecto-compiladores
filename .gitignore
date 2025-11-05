@@ -9,3 +9,6 @@ build/*
 *.dot
 *.sem
 *.ci
+*.s
+test_asm.c
+*.json

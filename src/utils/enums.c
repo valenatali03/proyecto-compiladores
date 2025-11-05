@@ -64,4 +64,25 @@ const char *tipo_op_str[] = {
     [PARAM] = "PARAM",
     [TAG] = "TAG",
     [JMPC] = "JMPC",
+    [EXTERN] = "EXTERN",
     [NOP] = "NOP"};
+
+const char *tipo_op_asm[] = {
+    [MOV] = "movl",
+    [ADD] = "addl",
+    [MINUS] = "subl",
+    [MULT] = "imull",
+    [AND] = "andl",
+    [OR] = "orl",
+    [COMP] = "sete",
+    [GT] = "setg",
+    [LT] = "setl"};
+
+const char *reg_str[] = {
+    [EDI] = "%edi",
+    [ESI] = "%esi",
+    [EDX] = "%edx",
+    [ECX] = "%ecx",
+    [R8D] = "%r8d",
+    [R9D] = "%r9d",
+    [EAX] = "%eax"};

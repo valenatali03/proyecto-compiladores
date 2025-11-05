@@ -31,6 +31,7 @@ typedef enum
     ETIQUETA,
 } Tipo_Info;
 
+//Tipos de operadores posibles para los cuádruplos del código intermedio.
 typedef enum
 {
     ADD,
@@ -56,8 +57,20 @@ typedef enum
     PARAM,
     TAG,
     JMPC,
+    EXTERN,
     NOP,
 } Tipo_Operador;
+
+typedef enum
+{
+    EDI,
+    ESI,
+    EDX,
+    ECX,
+    R8D,
+    R9D,
+    EAX
+} Registro;
 
 // Tipos de errores
 typedef enum
@@ -65,6 +78,7 @@ typedef enum
     VAR_NO_DECLARADA,
     VAR_YA_DECLARADA,
     VAR_VACIO,
+    VAR_GLOBAL_NO_CONST,
     FUN_NO_DECLARADA,
     FUN_YA_DECLARADA,
     TIPO_INCOMPATIBLE,
@@ -79,9 +93,20 @@ typedef enum
     NUM_FUERA_RANGO
 } CodigoError;
 
+// Tipos de warnings
+typedef enum
+{
+    VAR_NO_USADA,
+    FUN_NO_USADA,
+    DIV_POR_CERO,
+    CONDICION_TRUE
+} CodigoWarning;
+
 extern const char *tipo_str[];
 extern const char *tipo_info_str[];
 extern const char *tipo_err_str[];
 extern const char *tipo_op_str[];
+extern const char *tipo_op_asm[];
+extern const char *reg_str[];
 
 #endif

@@ -1,0 +1,14 @@
+program 
+    {
+		void main() {
+
+			integer x = 5;
+
+			while (x < 5)
+			{
+				return;
+			}
+
+			x = 2;
+		}
+    }
