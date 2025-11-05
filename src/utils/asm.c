@@ -1,37 +1,6 @@
 #include "../includes/asm.h"
 #include <string.h>
 
-void cargar_a_registro(FILE *out_s, Simbolo *sym, const char *reg)
-{
-    if (!sym)
-        return;
-
-    if (sym->flag == LITERAL)
-        fprintf(out_s, "\tmovl\t$%d, %s\n", *(int *)sym->info->literal.valor, reg);
-    else if (sym->flag == ID && sym->info->id.global)
-        fprintf(out_s, "\tmovl\t%s(%%rip), %s\n", sym->info->id.nombre, reg);
-    else if (sym->flag == ID)
-        fprintf(out_s, "\tmovl\t%d(%%rbp), %s\n", sym->info->id.offset, reg);
-    else if (sym->flag == ETIQUETA)
-        fprintf(out_s, "\tmovl\t%s, %s\n", sym->info->etiqueta.nombre, reg);
-}
-
-void guardar_desde_registro(FILE *out_s, const char *reg, Simbolo *dest)
-{
-    if (dest->info->id.global)
-        fprintf(out_s, "\tmovl\t%s, %s(%%rip)\n", reg, dest->info->id.nombre);
-    else
-        fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", reg, dest->info->id.offset);
-}
-
-void aplicar_operacion_binaria(FILE *out_s, Simbolo *arg2, const char *instruccion)
-{
-    char op_str[128];
-    obtener_representacion_operando(arg2, op_str, sizeof(op_str));
-
-    fprintf(out_s, "\t%s\t%s, %%eax\n", instruccion, op_str);
-}
-
 void generar_asm(FILE *out_s, Instrucciones *instrucciones)
 {
     Instrucciones *aux = instrucciones;
@@ -349,6 +318,55 @@ void mov(FILE *out_s, Simbolo *arg1, Simbolo *res, bool inicio_fun)
     }
 }
 
+void cargar_a_registro(FILE *out_s, Simbolo *sym, const char *reg)
+{
+    if (!sym)
+        return;
+
+    if (sym->flag == LITERAL)
+        fprintf(out_s, "\tmovl\t$%d, %s\n", *(int *)sym->info->literal.valor, reg);
+    else if (sym->flag == ID && sym->info->id.global)
+        fprintf(out_s, "\tmovl\t%s(%%rip), %s\n", sym->info->id.nombre, reg);
+    else if (sym->flag == ID)
+        fprintf(out_s, "\tmovl\t%d(%%rbp), %s\n", sym->info->id.offset, reg);
+    else if (sym->flag == ETIQUETA)
+        fprintf(out_s, "\tmovl\t%s, %s\n", sym->info->etiqueta.nombre, reg);
+}
+
+void guardar_desde_registro(FILE *out_s, const char *reg, Simbolo *dest)
+{
+    if (dest->info->id.global)
+        fprintf(out_s, "\tmovl\t%s, %s(%%rip)\n", reg, dest->info->id.nombre);
+    else
+        fprintf(out_s, "\tmovl\t%s, %d(%%rbp)\n", reg, dest->info->id.offset);
+}
+
+void aplicar_operacion_binaria(FILE *out_s, Simbolo *arg2, const char *instruccion)
+{
+    char op_str[128];
+    obtener_representacion_operando(arg2, op_str, sizeof(op_str));
+
+    fprintf(out_s, "\t%s\t%s, %%eax\n", instruccion, op_str);
+}
+
+void obtener_representacion_operando(Simbolo *sym, char *buffer, size_t size)
+{
+    if (!sym)
+    {
+        buffer[0] = '\0';
+        return;
+    }
+
+    if (sym->flag == LITERAL)
+        snprintf(buffer, size, "$%d", *(int *)sym->info->literal.valor);
+    else if (sym->flag == ID && sym->info->id.global)
+        snprintf(buffer, size, "%s(%%rip)", sym->info->id.nombre);
+    else if (sym->flag == ID)
+        snprintf(buffer, size, "%d(%%rbp)", sym->info->id.offset);
+    else if (sym->flag == ETIQUETA)
+        snprintf(buffer, size, "%s", sym->info->etiqueta.nombre);
+}
+
 void params_decl(Parametro_Decl *params, FILE *out_s, int cant_var, int cant_params)
 {
     if (cant_params == 0)
@@ -395,22 +413,4 @@ void calcular_offset_var(Simbolo *var)
 
     var->info->id.offset = -OFFSET;
     OFFSET -= OFFSET_INC;
-}
-
-void obtener_representacion_operando(Simbolo *sym, char *buffer, size_t size)
-{
-    if (!sym)
-    {
-        buffer[0] = '\0';
-        return;
-    }
-
-    if (sym->flag == LITERAL)
-        snprintf(buffer, size, "$%d", *(int *)sym->info->literal.valor);
-    else if (sym->flag == ID && sym->info->id.global)
-        snprintf(buffer, size, "%s(%%rip)", sym->info->id.nombre);
-    else if (sym->flag == ID)
-        snprintf(buffer, size, "%d(%%rbp)", sym->info->id.offset);
-    else if (sym->flag == ETIQUETA)
-        snprintf(buffer, size, "%s", sym->info->etiqueta.nombre);
 }

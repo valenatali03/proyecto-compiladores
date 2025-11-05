@@ -4,6 +4,32 @@
 #include "pre_asm.h"
 
 /**
+ * Genera el código assembly a partir de una lista de instrucciones intermedias.
+ *
+ * @param out_s        Archivo de salida donde se escriben las instrucciones assembly.
+ * @param instrucciones Lista de instrucciones intermedias a convertir.
+ */
+void generar_asm(FILE *out_s, Instrucciones *instrucciones);
+
+/**
+ * Genera instrucciones assembly para operaciones aritméticas y lógicas.
+ *
+ * @param out_s        Archivo de salida donde se escriben las instrucciones assembly.
+ * @param instrucciones Instrucciones que contienen la operación a procesar.
+ */
+void operadores(FILE *out_s, Instrucciones *instrucciones);
+
+/**
+ * Mueve el valor de un símbolo a otro, generando la instrucción assembly correspondiente.
+ *
+ * @param out_s     Archivo de salida donde se escriben las instrucciones assembly.
+ * @param arg1      Símbolo origen del valor.
+ * @param res       Símbolo destino donde se almacenará el valor.
+ * @param inicio_fun Indica si la instrucción se encuentra al inicio de una función.
+ */
+void mov(FILE *out_s, Simbolo *arg1, Simbolo *res, bool inicio_fun);
+
+/**
  * Carga el valor de un símbolo en un registro específico.
  *
  * @param out_s  Archivo de salida donde se escriben las instrucciones assembly.
@@ -31,32 +57,14 @@ void guardar_desde_registro(FILE *out_s, const char *reg, Simbolo *dest);
 void aplicar_operacion_binaria(FILE *out_s, Simbolo *arg2, const char *instruccion);
 
 /**
- * Genera el código assembly a partir de una lista de instrucciones intermedias.
+ * Devuelve la representación correcta del operando
  *
- * @param out_s        Archivo de salida donde se escriben las instrucciones assembly.
- * @param instrucciones Lista de instrucciones intermedias a convertir.
+ * @param sym Argumento de la operación.
+ * @param buffer String con la representación del operador. Se le debe pasar un arreglo
+ * de tamaño fijo.
+ * @param size Tamaño del string.
  */
-void generar_asm(FILE *out_s, Instrucciones *instrucciones);
-
-void directivas(FILE *out_s);
-
-/**
- * Genera instrucciones assembly para operaciones aritméticas y lógicas.
- *
- * @param out_s        Archivo de salida donde se escriben las instrucciones assembly.
- * @param instrucciones Instrucciones que contienen la operación a procesar.
- */
-void operadores(FILE *out_s, Instrucciones *instrucciones);
-
-/**
- * Mueve el valor de un símbolo a otro, generando la instrucción assembly correspondiente.
- *
- * @param out_s     Archivo de salida donde se escriben las instrucciones assembly.
- * @param arg1      Símbolo origen del valor.
- * @param res       Símbolo destino donde se almacenará el valor.
- * @param inicio_fun Indica si la instrucción se encuentra al inicio de una función.
- */
-void mov(FILE *out_s, Simbolo *arg1, Simbolo *res, bool inicio_fun);
+void obtener_representacion_operando(Simbolo *sym, char *buffer, size_t size);
 
 /**
  * Declara los parámetros de una función en su stack frame correspondiente.
@@ -74,5 +82,3 @@ void params_decl(Parametro_Decl *params, FILE *out_s, int cant_var, int cant_par
  * @param var Símbolo que representa la variable a calcular su offset.
  */
 void calcular_offset_var(Simbolo *var);
-
-void obtener_representacion_operando(Simbolo *sym, char *buffer, size_t size);
