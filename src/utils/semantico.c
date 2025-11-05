@@ -186,6 +186,11 @@ void declarar_metodo(Arbol *arbol, Nivel *nivelActual)
 
     procesar_main(nombre, arbol->info->funcion_decl.params);
 
+    if (strcmp(nombre, "main") == 0)
+    {
+        arbol->info->funcion_decl.usos++;
+    }
+
     if (buscar_simbolo_en_nivel(nivelActual, nombre, arbol->tipo_info))
     {
         reportarError(FUN_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
@@ -219,6 +224,7 @@ void procesar_params(Parametro_Decl *params, Nivel *nivelActual)
 
         agregar_simbolo(nivelActual, params->info, ID);
 
+        params->info->id.usos++;
         params = params->next;
     }
 }
@@ -383,7 +389,7 @@ int procesar_asignacion(Arbol *arbol, Nivel *nivelActual)
     }
 
     arbol->izq->info = simbolo; // Vincular nodo del arbol
-
+    simbolo->id.usos++;
     return 1;
 }
 
@@ -406,6 +412,7 @@ int procesar_expresion(Arbol *arbol, Nivel *nivelActual)
             return 0;
         }
         arbol->info = simbolo;
+        arbol->info->id.usos++;
         return 1;
         break;
     case OPERADOR_BINARIO:
@@ -596,6 +603,7 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
 
     if (!params_decl && !params_call)
     {
+        metodo->funcion_decl.usos++;
         return 1;
     }
 
@@ -636,7 +644,7 @@ int procesar_metodo(Arbol *arbol, Nivel *nivelActual)
     }
     arbol->info->funcion_call.cantVariables = metodo->funcion_decl.cantVariables;
     arbol->info->funcion_call.esExterna = metodo->funcion_decl.esExterna;
-
+    metodo->funcion_decl.usos++;
     return 1;
 }
 

@@ -2,10 +2,67 @@
 
 void opt_codigo_muerto(Arbol *arbol)
 {
+  arbol = opt_declaraciones(arbol);
+
   opt_flujo_control(arbol);
 
   opt_post_return(arbol);
 }
+
+Arbol *opt_declaraciones(Arbol *arbol)
+{
+  if (!arbol)
+    return NULL;
+
+  arbol->izq = opt_declaraciones(arbol->izq);
+  arbol->der = opt_declaraciones(arbol->der);
+
+  switch (arbol->tipo_info)
+  {
+  case DECLARACION_VARIABLE:
+    {
+      if (!arbol->izq->info->id.usos)
+      {
+        reportarWarning(VAR_NO_USADA, arbol->linea, arbol->colum, arbol->izq->info->id.nombre);
+        liberar_nodo(arbol);
+        return NULL;
+      }
+      break;
+    }
+  case DECL_FUNCION:
+    {
+      if (!arbol->info->funcion_decl.usos)
+      {
+        reportarWarning(FUN_NO_USADA, arbol->linea, arbol->colum, arbol->info->funcion_decl.nombre);
+        liberar_nodo(arbol);
+        return NULL;
+      }
+      break;
+    }
+  case DECLARACIONES_VARIABLES:
+  case DECLARACIONES_FUNCIONES:
+    {
+      if (arbol->izq == NULL && arbol->der == NULL)
+      {
+        liberar_nodo(arbol);
+        return NULL;
+      }
+      if (arbol->izq && !arbol->der && arbol->izq->tipo_info == arbol->tipo_info)
+      {
+        Arbol *tmp = arbol->izq; 
+        arbol->izq = NULL;         
+        liberar_nodo(arbol);     
+        arbol = tmp;
+      }
+      break;
+    }
+  default:
+    break;
+  }
+
+  return arbol;
+}
+
 
 void opt_post_return(Arbol *arbol)
 {
@@ -106,6 +163,7 @@ Arbol *optimizar_while(Arbol *arbol)
 
     if (valor)
     {
+      reportarWarning(CONDICION_TRUE, arbol->linea, arbol->colum);
       return arbol;
     }
     else

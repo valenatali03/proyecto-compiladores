@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "errores.h"
 
 /**
  * Aplica optimizaciones de código muerto sobre el AST completo.
@@ -56,6 +57,18 @@ Arbol *optimizar_if(Arbol *arbol);
  * @return Nodo optimizado, que puede ser NULL si el bucle se elimina
  */
 Arbol *optimizar_while(Arbol *arbol);
+
+/**
+ * Optimiza las declaraciones del AST eliminando variables y funciones no usadas.
+ * 
+ * - Si una variable o función nunca se usa, se libera y se reporta un warning.
+ * - Si un nodo agrupa declaraciones y queda vacío, se elimina.
+ * - Si solo tiene un hijo útil del mismo tipo, se reemplaza por el hijo.
+ *
+ * @param arbol Nodo raíz del subárbol de declaraciones
+ * @return Nodo optimizado, o NULL si fue eliminado
+ */
+Arbol *opt_declaraciones(Arbol *arbol);
 
 /**
  * Libera recursivamente un nodo del AST y todos sus hijos.

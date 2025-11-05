@@ -22,6 +22,7 @@ typedef struct Info_ID
     void *valor;
     Tipo tipo;
     int global;
+    int usos;
     int offset;
     int temp;
 } Info_ID;
@@ -56,6 +57,7 @@ typedef struct Info_FuncionDecl
     Parametro_Decl *params;
     int offset;
     int esExterna;
+    int usos;
     int cantVariables;
     int cant_params;
 } Info_FuncionDecl;
