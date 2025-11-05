@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     {
         optimizar_operaciones(arbol);
         opt_codigo_muerto(arbol);
-
+        reportar_warnings();
         if (debug_info)
         {
             exportar_ast_a_dot(arbol, "arbol_opt.dot");

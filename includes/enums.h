@@ -90,9 +90,17 @@ typedef enum
     MAIN_CON_PARAMS,
     OP_BINARIO,
     OP_UNARIO,
-    NUM_FUERA_RANGO,
-    DIV_POR_CERO
+    NUM_FUERA_RANGO
 } CodigoError;
+
+// Tipos de warnings
+typedef enum
+{
+    VAR_NO_USADA,
+    FUN_NO_USADA,
+    DIV_POR_CERO,
+    CONDICION_TRUE
+} CodigoWarning;
 
 extern const char *tipo_str[];
 extern const char *tipo_info_str[];

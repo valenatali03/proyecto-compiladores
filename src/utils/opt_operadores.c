@@ -142,11 +142,13 @@ void *realizar_operacion_binaria(Info_Literal *a, Info_Literal *b, Arbol *nodo_o
         {
             if (val_b == 0)
             {
-                printf("Linea %d Col %d └── Error: Se encontró una división por cero.\n", nodo_operador->linea, nodo_operador->colum);
-                exit(1);
+                reportarWarning(DIV_POR_CERO, nodo_operador->linea, nodo_operador->colum);
             }
-            resultado = malloc(sizeof(int));
-            *(int *)resultado = val_a / val_b;
+            else
+            {
+                resultado = malloc(sizeof(int));
+                *(int *)resultado = val_a / val_b;
+            }
         }
         else if (strcmp(op_info.nombre, "%") == 0)
         {
