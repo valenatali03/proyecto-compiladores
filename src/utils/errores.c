@@ -51,7 +51,7 @@ void reportarError(CodigoError codigo, int linea, int colum, ...)
     {
         const char *nombre = va_arg(args, const char *);
         snprintf(errores[cantErrores].mensaje, MAX_MSG,
-                 "Linea %d Col %d\n└── Error: Variable global %s no inicializada con valor constante",
+                 "Linea %d Col %d\n└── Error: Variable global %s no inicializada con un literal",
                  linea, colum, nombre);
         break;
     }

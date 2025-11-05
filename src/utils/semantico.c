@@ -8,7 +8,7 @@ int is_main = 0;
 int main_has_params = 0;
 int main_params_line = 0;
 int main_params_colum = 0;
-Simbolo *ult_metodo = NULL;
+Info_Union *ult_metodo = NULL;
 
 extern int CANT_NIVELES;
 
@@ -76,7 +76,6 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
     if (buscar_simbolo_en_nivel(nivelActual, nombre, arbol->izq->tipo_info))
     {
         reportarError(VAR_YA_DECLARADA, arbol->linea, arbol->colum, nombre);
-        return;
     }
 
     Arbol *expr = arbol->der;
@@ -87,7 +86,6 @@ void declarar_variable(Arbol *arbol, Nivel *nivelActual)
         if (procesar_declaracion_variable_global(expr))
         {
             reportarError(VAR_GLOBAL_NO_CONST, arbol->linea, arbol->colum, nombre);
-            return;
         }
     }
 
@@ -113,22 +111,12 @@ int procesar_declaracion_variable_global(Arbol *arbol)
 
     Tipo_Info t_info = arbol->tipo_info;
 
-    if (t_info == CALL_FUNCION || t_info == ID)
+    if (t_info == LITERAL)
     {
-        return 1;
+        return 0;
     }
 
-    if (procesar_declaracion_variable_global(arbol->izq))
-    {
-        return 1;
-    }
-
-    if (procesar_declaracion_variable_global(arbol->der))
-    {
-        return 1;
-    }
-
-    return 0;
+    return 1;
 }
 
 void procesar_declaracion_metodo(Arbol *arbol, Nivel *nivelActual)
