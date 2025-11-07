@@ -56,28 +56,26 @@ run_assembler() {
             base="${f%.ctds}"
             nombre=$(basename "$base")
             
-            # Genera código assembler (archivo .s)
+            # Genera código assembler
             ./c-tds -target s $modo "$f"
             
-            # Compila funciones externas y archivo generado
+            # Compila funciones externas y el assembler generado
             gcc -c tests/assembler/externas.c -o externas.o
             gcc -c "$base.s" -o "$base.o"
             gcc "$base.o" externas.o -o "$base.out" 2>/dev/null
             
-            # Ejecuta y compara con salida esperada
-            salida=$("$base.out")
-            esperado=$(cat "$base.cmp")
+            # Ejecutar programa
+            "$base.out"
+            resultado=$?
             
-            if [ "$salida" = "$esperado" ]; then
+            if [ $resultado -eq 0 ]; then
                 ((ok++))
             else
                 echo "FAIL: $nombre${modo:+ (opt)}"
-                echo "  Esperado: $esperado"
-                echo "  Obtenido: $salida"
                 ((fail++))
             fi
             
-            # Limpiar archivos temporales
+            # Limpiar temporales
             rm -f "$base.s" "$base.o" externas.o "$base.out"
         done
         

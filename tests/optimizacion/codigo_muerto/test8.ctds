@@ -1,0 +1,12 @@
+program 
+    {
+		void main() {
+			integer a = 2;
+
+			integer b = 3;
+
+			integer c = 4;
+
+			a = c;
+		}
+    }

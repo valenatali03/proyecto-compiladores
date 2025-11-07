@@ -1,7 +1,7 @@
 program {
     integer x = 5;
 
-    integer print_int(integer x) extern;
+    integer assert_equals(integer obtained, integer expected) extern;
 
     integer fact(integer x)
     {
@@ -14,6 +14,6 @@ program {
     }
 
     void main() {
-        print_int(fact(x));
+        assert_equals(fact(x), 120);
     }
 }

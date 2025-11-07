@@ -1,19 +1,19 @@
 program {
 	integer x = 5;
 
-	integer print_int(integer x) extern;
+	integer assert_equals(integer obtained, integer expected) extern;
 
 	integer inc(integer x)
     {
         return x + 1;
     }
 
-	void f(integer x)
+	integer f(integer x)
     {
-    	print_int(x);
+    	return x;
     }
 
     void main() {
-        f(inc(x) + 1);
+        assert_equals(f(inc(x) + 1), 7);
     }
 }

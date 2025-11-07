@@ -1,6 +1,6 @@
 program {
     
-    integer print_int(integer x) extern;
+    integer assert_equals(integer obtained, integer expected) extern;
 
     integer inc(integer x)
     {
@@ -32,13 +32,17 @@ program {
     void main() {
        integer x = 5;
 
+       integer res = 0;
+
        if (es_primo(x)) then
        {
-            print_int(x);
+            res = x;
        }
        else
        {
-            print_int(0);
+            res = 0;
        }
+
+       assert_equals(res, 5);
     }
 }

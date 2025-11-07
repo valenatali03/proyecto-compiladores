@@ -1,6 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-void print_int(int x){
-    printf("%d\n", x);
-    return;
+int assert_equals(int obtained, int expected) {
+    if (obtained == expected) {
+        return 0;
+    } else {
+        printf("Test failed: obtained %d != expected %d\n", obtained, expected);
+        return 1;
+    }
 }

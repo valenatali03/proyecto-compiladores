@@ -1,5 +1,5 @@
 program {
-    integer print_int(integer x) extern;
+    integer assert_equals(integer obtained, integer expected) extern;
 
     integer inc(integer x)
     {
@@ -9,19 +9,23 @@ program {
     void main() {
         integer i = 0;
 
+        integer res = 0;
+
         while (i < 1) {
             if (i % 2 == 0) then 
             {
                 if (i == 2) then 
                 {
-                    print_int(100);
+                    res = 100;
                 } 
                 else 
                 {
-                    print_int(i);
+                    res = i;
                 }
             }
             i = inc(i);
         }
+
+        assert_equals(res, 0);
     }
 }

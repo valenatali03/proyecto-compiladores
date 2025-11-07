@@ -1,0 +1,21 @@
+program 
+    {
+    	integer double(integer x)
+    	{
+    		return x * 2;
+    	}
+
+    	integer inc(integer x)
+    	{
+    		return x + 1;
+    	}
+
+    	integer f(integer x)
+    	{
+    		return x;
+    	}
+
+		void main() {
+			inc(f(1));
+		}
+    }

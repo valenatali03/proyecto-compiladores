@@ -1,5 +1,5 @@
 program {
-	integer print_int(integer x) extern;
+	integer assert_equals(integer obtained, integer expected) extern;
 
     void main() {
         integer a = 17;
@@ -10,6 +10,6 @@ program {
 
         integer d = a % b;
 
-        print_int(c + d); // 5
+        assert_equals(c + d, 5);
     }
 }
