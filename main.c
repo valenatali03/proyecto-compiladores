@@ -192,6 +192,7 @@ int main(int argc, char *argv[])
 
         if (error_semantico)
         {
+            liberar_arbol(arbol);
             cerrar_archivos();
             return 1; // Error semántico
         }
@@ -223,6 +224,7 @@ int main(int argc, char *argv[])
 
         if (!instrucciones)
         {
+            liberar_arbol(arbol);
             cerrar_archivos();
             return 1;
         }
@@ -236,6 +238,7 @@ int main(int argc, char *argv[])
 
             if (!out_ci)
             {
+                liberar_arbol(arbol);
                 cerrar_archivos();
                 return 1;
             }
@@ -252,12 +255,15 @@ int main(int argc, char *argv[])
 
         if (!out_s)
         {
+            liberar_arbol(arbol);
             cerrar_archivos();
             return 1;
         }
 
         generar_asm(out_s, instrucciones);
     }
+
+    liberar_arbol(arbol);
 
     cerrar_archivos();
 

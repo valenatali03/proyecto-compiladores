@@ -24,7 +24,7 @@ Arbol *opt_declaraciones(Arbol *arbol)
       if (!arbol->izq->info->id.usos)
       {
         reportarWarning(VAR_NO_USADA, arbol->linea, arbol->colum, arbol->izq->info->id.nombre);
-        liberar_nodo(arbol);
+        liberar_arbol(arbol);
         return NULL;
       }
       break;
@@ -34,7 +34,7 @@ Arbol *opt_declaraciones(Arbol *arbol)
       if (!arbol->info->funcion_decl.usos)
       {
         reportarWarning(FUN_NO_USADA, arbol->linea, arbol->colum, arbol->info->funcion_decl.nombre);
-        liberar_nodo(arbol);
+        liberar_arbol(arbol);
         return NULL;
       }
       break;
@@ -44,14 +44,14 @@ Arbol *opt_declaraciones(Arbol *arbol)
     {
       if (arbol->izq == NULL && arbol->der == NULL)
       {
-        liberar_nodo(arbol);
+        liberar_arbol(arbol);
         return NULL;
       }
       if (arbol->izq && !arbol->der && arbol->izq->tipo_info == arbol->tipo_info)
       {
         Arbol *tmp = arbol->izq; 
         arbol->izq = NULL;         
-        liberar_nodo(arbol);     
+        liberar_arbol(arbol);     
         arbol = tmp;
       }
       break;
@@ -77,7 +77,7 @@ void opt_post_return(Arbol *arbol)
   {
     if (arbol->izq && existe_return(arbol->izq))
     {
-      liberar_nodo(arbol->der);
+      liberar_arbol(arbol->der);
       arbol->der = NULL;
     }
   }
@@ -137,7 +137,7 @@ Arbol *optimizar_if(Arbol *arbol)
 
     if (valor)
     {
-      liberar_nodo(arbol->der);
+      liberar_arbol(arbol->der);
       arbol->der = NULL;
       Arbol *tmp = arbol->izq;
       free(arbol);
@@ -145,7 +145,7 @@ Arbol *optimizar_if(Arbol *arbol)
     }
     else
     {
-      liberar_nodo(arbol->izq);
+      liberar_arbol(arbol->izq);
       arbol->izq = NULL;
       Arbol *tmp = arbol->der;
       free(arbol);
@@ -168,7 +168,7 @@ Arbol *optimizar_while(Arbol *arbol)
     }
     else
     {
-      liberar_nodo(arbol->izq);
+      liberar_arbol(arbol->izq);
       arbol->izq = NULL;
       free(arbol);
       return NULL;
@@ -176,16 +176,4 @@ Arbol *optimizar_while(Arbol *arbol)
   }
 
   return arbol;
-}
-
-void liberar_nodo(Arbol *arbol)
-{
-  if (!arbol)
-    return;
-
-  liberar_nodo(arbol->izq);
-  liberar_nodo(arbol->medio);
-  liberar_nodo(arbol->der);
-
-  free(arbol);
 }

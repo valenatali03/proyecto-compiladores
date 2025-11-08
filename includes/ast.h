@@ -110,6 +110,64 @@ Arbol *crear_arbol_if(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol *m
 Arbol *crear_arbol_nodo(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol *der);
 
 /**
+ * Libera recursivamente un AST completo, incluyendo todos los subárboles y la información interna de cada nodo.
+ * Llama a funciones específicas según el tipo de nodo para liberar correctamente literales, operadores y funciones.
+ *
+ * @param nodo Nodo raíz del AST que se desea liberar
+ */
+void liberar_arbol(Arbol *nodo);
+
+/**
+ * Libera la información interna de un literal
+ *
+ * @param info Puntero a la información del literal
+ */
+void liberar_literal(Info_Union *info);
+
+
+/**
+ * Libera un nodo identificador (ID) y su información interna
+ *
+ * @param nodo Nodo a liberar
+ */
+void liberar_nodo_id(Arbol *nodo);
+
+/**
+ * Libera la información interna de un operador (unario o binario)
+ *
+ * @param info Puntero a la información del operador
+ */
+void liberar_operador(Info_Union *info);
+
+/**
+ * Libera los parámetros de declaración de función
+ *
+ * @param params Lista de parámetros a liberar
+ */
+void liberar_parametros_decl(Parametro_Decl *params);
+
+/**
+ * Libera los parámetros de llamada de función
+ *
+ * @param params Lista de parámetros a liberar
+ */
+void liberar_parametros_call(Parametro_Call *params);
+
+/**
+ * Libera la información de una función declarada
+ *
+ * @param info Información de la función a liberar
+ */
+void liberar_funcion_decl(Info_Union *info);
+
+/**
+ * Libera la información de una función llamada
+ *
+ * @param info Información de la función a liberar
+ */
+void liberar_funcion_call(Info_Union *info);
+
+/**
  * Función recursiva que imprime un nodo del AST en formato DOT
  *
  * @param arbol Puntero al nodo del AST a imprimir

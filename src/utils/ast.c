@@ -101,6 +101,90 @@ Arbol *crear_arbol_nodo(Tipo_Info tipo, int linea, int colum, Arbol *izq, Arbol 
     return arbol;
 }
 
+void liberar_arbol(Arbol *nodo) {
+    if (!nodo) return;
+
+    liberar_arbol(nodo->izq);
+    liberar_arbol(nodo->medio);
+    liberar_arbol(nodo->der);
+
+    switch (nodo->tipo_info) {
+        case LITERAL: liberar_literal(nodo->info); break;
+        case DECLARACION_VARIABLE: liberar_nodo_id(nodo->izq); break;
+        case ID: return; break;
+        case OPERADOR_BINARIO:
+        case OPERADOR_UNARIO: liberar_operador(nodo->info); break;
+        case DECL_FUNCION: liberar_funcion_decl(nodo->info); break;
+        case CALL_FUNCION: liberar_funcion_call(nodo->info); break;
+        default: free(nodo->info); break;
+    }
+
+    free(nodo);
+}
+
+// Libera un literal
+void liberar_literal(Info_Union *info) {
+    if (!info) return;
+    if (info->literal.valor) free(info->literal.valor);
+    free(info);
+}
+
+// Libera un nodo ID
+void liberar_nodo_id(Arbol *nodo) {
+    if (!nodo) return;
+    if (nodo->info->id.nombre) free(nodo->info->id.nombre);
+    if (nodo->info->id.valor) free(nodo->info->id.valor);
+    free(nodo->info);
+    free(nodo);
+}
+
+// Libera un operador
+void liberar_operador(Info_Union *info) {
+    if (!info) return;
+    if (info->operador.nombre) free(info->operador.nombre);
+    if (info->operador.valor) free(info->operador.valor);
+    free(info);
+}
+
+// Libera parámetros de función
+void liberar_parametros_decl(Parametro_Decl *params) {
+    while (params) {
+        Parametro_Decl *sig = params->next;
+        if (params->info->id.nombre) free(params->info->id.nombre);
+        if (params->info->id.valor) free(params->info->id.valor);
+        free(params->info);
+        free(params);
+        params = sig;
+    }
+}
+
+// Libera parámetros de llamada de función
+void liberar_parametros_call(Parametro_Call *params) {
+    while (params) {
+        Parametro_Call *sig = params->next;
+        liberar_arbol(params->expr);
+        free(params);
+        params = sig;
+    }
+}
+
+// Libera una función declarada
+void liberar_funcion_decl(Info_Union *info) {
+    if (!info) return;
+    if (info->funcion_decl.nombre) free(info->funcion_decl.nombre);
+    if (info->funcion_decl.valor) free(info->funcion_decl.valor);
+    liberar_parametros_decl(info->funcion_decl.params);
+    free(info);
+}
+
+// Libera una función llamada
+void liberar_funcion_call(Info_Union *info) {
+    if (!info) return;
+    if (info->funcion_call.nombre) free(info->funcion_call.nombre);
+    liberar_parametros_call(info->funcion_call.params);
+    free(info);
+}
+
 void imprimir_nodo_dot(Arbol *arbol, FILE *f)
 {
     if (!arbol)
