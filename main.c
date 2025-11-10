@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     if (t >= TARGET_CI)
     {
         lista_inst = crear_lista_instrucciones();
-        instrucciones = crear_instrucciones();
+        Instrucciones *instrucciones = crear_instrucciones();
         lista_inst->head = instrucciones;
         lista_inst->tail = instrucciones;
 
@@ -229,8 +229,8 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        generar_codigo(arbol, instrucciones);
-        instrucciones_to_str(instrucciones);
+        generar_codigo(arbol, lista_inst);
+        instrucciones_to_str(lista_inst->head);
 
         if (debug_info)
         {
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        generar_asm(out_s, instrucciones);
+        generar_asm(out_s, lista_inst->head);
     }
 
     liberar_arbol(arbol);

@@ -29,7 +29,6 @@ typedef struct Instrucciones
     struct Instrucciones *next;
 } Instrucciones;
 
-
 /**
  * Estructura contenedora para la lista de instrucciones
  * - head: Puntero al primer nodo de la lista
@@ -63,7 +62,6 @@ extern int CANT_VAR;
 
 extern char **codigo;
 extern Lista_Inst *lista_inst;
-extern Instrucciones *instrucciones;
 extern Temporales *temporales_libres;
 
 /**
@@ -71,54 +69,54 @@ extern Temporales *temporales_libres;
  * Procesa declaraciones de variables (hijo izq) y declaraciones de métodos (hijo der).
  *
  * @param nodo          Nodo raíz del AST
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void generar_codigo(Arbol *nodo, Instrucciones *instrucciones);
+void generar_codigo(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Recorre el subárbol de declaraciones de variables.
  * Genera código de asignación (para inicializaciones) y cuenta las variables locales (CANT_VAR).
  *
  * @param nodo          Nodo del AST
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_declaracion_variables(Arbol *nodo, Instrucciones *instrucciones);
+void construir_declaracion_variables(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Recorre el subárbol de declaraciones de métodos.
  * Llama a 'construir_funcion_decl' para cada método (nodo DECL_FUNCION) que encuentra.
  *
  * @param nodo          Nodo del AST
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_declaracion_metodos(Arbol *nodo, Instrucciones *instrucciones);
+void construir_declaracion_metodos(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Recorre una lista enlazada de sentencias (hijo izq, hijo der)
  * y llama a 'construir_sentencia' para cada una.
  *
  * @param nodo          Nodo del AST
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_sentencias(Arbol *nodo, Instrucciones *instrucciones);
+void construir_sentencias(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Procesa un único nodo de sentencia.
  * Llama a la función constructora específica según el tipo de sentencia.
  *
  * @param nodo          Nodo del AST
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_sentencia(Arbol *nodo, Instrucciones *instrucciones);
+void construir_sentencia(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Genera una cuádrupla 'RET'. Si hay valor de retorno (nodo->izq),
  * genera el código para esa expresión y lo asigna a 'arg1'.
  *
  * @param nodo          Nodo del AST (tipo RETURN)
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_return(Arbol *nodo, Instrucciones *instrucciones);
+void construir_return(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Obtiene el Símbolo para un argumento de una expresión.
@@ -126,19 +124,19 @@ void construir_return(Arbol *nodo, Instrucciones *instrucciones);
  * Si es simple (ID, LITERAL), crea un símbolo.
  *
  * @param nodo          Nodo del AST
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  * @return              Puntero al Símbolo (temporal o variable) con el resultado
  */
-Simbolo *obtener_arg(Arbol *nodo, Instrucciones *instrucciones);
+Simbolo *obtener_arg(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Genera código para una operación (binaria o unaria).
  *
  * @param nodo          Nodo del AST
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  * @return              Puntero al Símbolo (temporal) que almacena el resultado
  */
-Simbolo *construir_op(Arbol *nodo, Instrucciones *instrucciones);
+Simbolo *construir_op(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Convierte un operador en formato string (del AST, ej. "+")
@@ -153,27 +151,27 @@ Tipo_Operador traducir_op(char *op);
  * Genera código para una sentencia condicional.
  *
  * @param nodo          Nodo del AST (tipo IF)
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_condicional(Arbol *nodo, Instrucciones *instrucciones);
+void construir_condicional(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Genera código para una sentencia de asignación.
  * Evalúa la expresión (nodo->der) y crea una cuádrupla 'MOV' hacia el símbolo (nodo->izq).
  *
  * @param nodo          Nodo del AST (tipo ASIGNACION)
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_asignacion(Arbol *nodo, Instrucciones *instrucciones);
+void construir_asignacion(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Genera código para una iteración.
  * Crea etiquetas 'TAG' de inicio/fin y saltos 'JMPC', 'JMP'.
  *
  * @param nodo          Nodo del AST (tipo WHILE)
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones);
+void construir_iteracion(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Genera código para la declaración de una función.
@@ -182,18 +180,18 @@ void construir_iteracion(Arbol *nodo, Instrucciones *instrucciones);
  * Calcula y almacena el offset total de variables locales.
  *
  * @param nodo          Nodo del AST (tipo DECL_FUNCION)
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_funcion_decl(Arbol *nodo, Instrucciones *instrucciones);
+void construir_funcion_decl(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Procesa un bloque de código.
  * Genera código para declaraciones locales (nodo->izq) y luego sentencias (nodo->der).
  *
  * @param nodo          Nodo del AST (tipo BLOQUE)
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  */
-void construir_bloque(Arbol *nodo, Instrucciones *instrucciones);
+void construir_bloque(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Genera cuádruplos 'PARAM' para una llamada a función.
@@ -203,7 +201,7 @@ void construir_bloque(Arbol *nodo, Instrucciones *instrucciones);
  * @param instrucciones Lista de instrucciones de la función invocadora (para evaluar expresiones)
  * @param parametros    Lista de instrucciones (de salida) donde se generan los 'PARAM'
  */
-void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones, Instrucciones *parametros);
+void construir_params(Parametro_Call *params_call, Lista_Inst *instrucciones, Lista_Inst *parametros);
 
 /**
  * Genera código para una llamada a función.
@@ -212,38 +210,38 @@ void construir_params(Parametro_Call *params_call, Instrucciones *instrucciones,
  * Inserta el cuádruplo 'CALL' y crea un temporal para el resultado.
  *
  * @param nodo          Nodo del AST (tipo CALL_FUNCION)
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  * @return              Puntero al Símbolo (temporal) que almacena el valor de retorno
  */
-Simbolo *construir_funcion_call(Arbol *nodo, Instrucciones *instrucciones);
+Simbolo *construir_funcion_call(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Función para procesar cualquier nodo de expresión.
  * Llama a 'construir_op', 'crear_simbolo' o 'construir_funcion_call'.
  *
  * @param nodo          Nodo del AST
- * @param instrucciones Puntero al 'head' de la lista de instrucciones
+ * @param instrucciones Puntero a la lista de instrucciones
  * @return              Puntero al Símbolo (temporal o variable) con el resultado
  */
-Simbolo *construir_expresion(Arbol *nodo, Instrucciones *instrucciones);
+Simbolo *construir_expresion(Arbol *nodo, Lista_Inst *instrucciones);
 
 /**
  * Inserta una cuádruplo al final de la lista global de instrucciones.
  * Utiliza el puntero 'lista_inst->tail' para enlazar el nuevo nodo.
  *
- * @param c    Cuádruplo a insertar
- * @param inst Puntero al 'head' de la lista de instrucciones
+ * @param c    Cuádruplo a insertar.
+ * @param inst Puntero a la lista de instrucciones.
  */
-void insertar_cuadruplo(Cuadruplo *c, Instrucciones *inst);
+void insertar_lista(Cuadruplo *c, Lista_Inst *lista_inst);
 
 /**
- * Inserta todos los cuádruplos de una lista 'p' al final de la lista 'q',
- * llamando a 'insertar_cuadruplo' para cada una.
+ * Inserta el inicio de la lista 'p' como el siguiente del último de la lista 'q'
+ * y asigna como nueva cola de la lista 'q' al último elemento de la lista 'p'
  *
  * @param p Lista origen (a ser agregada)
  * @param q Lista destino
  */
-void insertar_cuadruplos(Instrucciones *p, Instrucciones *q);
+void insertar_listas(Lista_Inst *p, Lista_Inst *lista_inst);
 
 /**
  * Libera un símbolo temporal (si tiene el flag 'temp' activado)
@@ -306,10 +304,10 @@ Instrucciones *crear_instrucciones();
 void simbolo_a_str(Simbolo *s, char buffer[64]);
 
 /**
- * Itera sobre la lista de cuádruplos, convierte cada uno a texto usando 'simbolo_a_str', 
+ * Itera sobre la lista de cuádruplos, convierte cada uno a texto usando 'simbolo_a_str',
  * y almacena todas las líneas en el array global 'codigo'.
  *
- * @param instrucciones Puntero al 'head' de la lista de instrucciones a procesar
+ * @param instrucciones Puntero a la lista de instrucciones a procesar
  */
 void instrucciones_to_str(Instrucciones *instrucciones);
 
