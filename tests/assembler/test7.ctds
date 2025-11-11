@@ -1,0 +1,14 @@
+program {
+
+    integer assert_equals(integer obtained, integer expected) extern;
+
+    integer f(integer a, integer b, integer c, integer d, integer e, integer f, integer g)
+    {
+        return f + g;
+    }
+
+    void main() {
+
+        assert_equals(f(1, 2, 3, 4, 5, 6, 7), 13);
+    }
+}
